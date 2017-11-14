@@ -48,19 +48,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.HomeActivity" />
         <activity
-            android:name=".FanTransServerActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
+            android:name=".ui.socket.ClientScanQRActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".TransferActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:name=".ui.socket.ServerCreateQRActivity"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name="com.zxing.android.CaptureActivity"
@@ -69,7 +63,7 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
-        <service android:name=".socket.ServerService" />
+        <service android:name=".socket.ServerSocketService" />
 
 
     </application>

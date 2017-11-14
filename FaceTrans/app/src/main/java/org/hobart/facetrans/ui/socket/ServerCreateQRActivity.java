@@ -1,4 +1,4 @@
-package org.hobart.facetrans;
+package org.hobart.facetrans.ui.socket;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -18,25 +18,25 @@ import com.zxing.android.qrcode.QRCodeUtil;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.ApCreateEvent;
 import org.hobart.facetrans.event.SocketStatusEvent;
-import org.hobart.facetrans.socket.ServerService;
 import org.hobart.facetrans.util.AndroidUtils;
+import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ToastUtils;
 import org.hobart.facetrans.util.WifiTools;
 import org.hobart.facetrans.wifi.CreateWifiAPThread;
 import org.hobart.facetrans.wifi.FanTransWifiManager;
 
-
 /**
- * 创建二维码界面
- * Created by huzeyin on 2017/10/30.
+ * 服务端创建二维码界面
+ * Created by huzeyin on 2017/11/14.
  */
 
-public class FanTransServerActivity extends Activity {
+public class ServerCreateQRActivity extends Activity {
 
-    private static final String TAG = "BuildQRCodeActivity";
+    private static final String LOG_PREFIX = "ServerCreateQRActivity->";
 
     private FanTransWifiManager mFanTransWifiManager;
     private CreateWifiAPThread mCreateWifiAPThread;
@@ -44,7 +44,7 @@ public class FanTransServerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_build_qr_code);
+        setContentView(R.layout.activity_server_create_qr_code);
         init();
         createWifiAp();
     }
@@ -80,7 +80,7 @@ public class FanTransServerActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mFanTransWifiManager.closeWifiAp();
+        mFanTransWifiManager.closeWifiApAndOpenWifi();
         EventBus.getDefault().unregister(this);
         if (null != mCreateWifiAPThread) mCreateWifiAPThread.cancelDownTimer();
         if (mWifiAPConnectedReceiver != null) {
@@ -88,23 +88,14 @@ public class FanTransServerActivity extends Activity {
         }
     }
 
-    //创建二维码
     private void buildQrCode() {
         View qrView = mViewStub.inflate();
         mQrImg = (ImageView) qrView.findViewById(R.id.qr_code_img);
         String rQContent = "SSID:" + mSSID + ":Pwd:" + mPWD;
         Bitmap bitmap = QRCodeUtil.createQRImage(rQContent);
         mQrImg.setImageBitmap(bitmap);
-        startServerService();
+        IntentUtils.startServerSocketService(this);
         registerApWifiStatus();
-    }
-
-    private void startServerService() {
-        startService(new Intent(this, ServerService.class));
-    }
-
-    private void stopServerService() {
-        stopService(new Intent(this, ServerService.class));
     }
 
     private boolean connectedSuccess = false;
@@ -116,14 +107,14 @@ public class FanTransServerActivity extends Activity {
         }
         switch (event.status) {
             case ApCreateEvent.SUCCESS:
-                LogcatUtils.d(TAG, "onSuccess: 热点创建成功");
+                LogcatUtils.d(LOG_PREFIX + "onWifiAPCreateCallBack onSuccess: 热点创建成功");
                 if (!connectedSuccess) {
                     buildQrCode();
                 }
                 connectedSuccess = true;
                 break;
             case ApCreateEvent.FAILED:
-                LogcatUtils.d(TAG, "onFailed: 热点创建失败");
+                LogcatUtils.d(LOG_PREFIX + "onWifiAPCreateCallBack onFailed: 热点创建失败");
                 ToastUtils.showLongToast("Wi-Fi热点创建失败！");
                 finish();
                 break;
@@ -159,19 +150,19 @@ public class FanTransServerActivity extends Activity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketStatusEvent(SocketStatusEvent bean) {
-        LogcatUtils.d(TAG, "----onSocketStatusEvent---");
         if (bean == null) {
             return;
         }
         switch (bean.status) {
             case SocketStatusEvent.CONNECTED_SUCCESS:
-                LogcatUtils.d(TAG, "----onSocketStatusEvent 创建成功---");
-                startActivity(new Intent(this, TransferActivity.class));
+                LogcatUtils.d(LOG_PREFIX + "----onSocketStatusEvent 创建成功---");
+                //TODO:
+//                startActivity(new Intent(this, Clie.class));
                 finish();
                 break;
             case SocketStatusEvent.CONNECTED_FAILED:
                 ToastUtils.showLongToast("创建服务端失败！");
-                stopServerService();
+                IntentUtils.stopServerSocketService(this);
                 finish();
                 break;
         }
@@ -180,7 +171,7 @@ public class FanTransServerActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            stopServerService();
+            IntentUtils.stopServerSocketService(this);
             finish();
         }
         return super.onKeyDown(keyCode, event);

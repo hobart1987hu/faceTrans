@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
 import org.hobart.facetrans.FaceTransApplication;
@@ -19,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class WifiHelper {
 
-    private static final String TAG = "WifiHelper";
+    private static final String LOG_PREFIX = "WifiHelper-->";
 
     private static WifiHelper mInstance = null;
 
@@ -42,10 +43,12 @@ public class WifiHelper {
     }
 
     private WifiManager mWifiManager;
+    private ConnectivityManager mConnectivityManager;
     private NetworkInfo mNetworkInfo;
 
     private WifiHelper() {
         mWifiManager = (WifiManager) FaceTransApplication.getFaceTransApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        mConnectivityManager = (ConnectivityManager) FaceTransApplication.getFaceTransApplicationContext().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     /**
@@ -56,7 +59,6 @@ public class WifiHelper {
     }
 
     /**
-     * s
      * 打开手机Wi-Fi
      */
     public void openWifi() {
@@ -70,7 +72,7 @@ public class WifiHelper {
      *
      * @return
      */
-    private boolean isWifiEnable() {
+    public boolean isWifiEnable() {
         return mWifiManager.isWifiEnabled();
     }
 
@@ -89,7 +91,7 @@ public class WifiHelper {
             if (!localIterator.hasNext())
                 return null;
             localWifiConfiguration = localIterator.next();
-            LogcatUtils.d(TAG, "isExists: " + localWifiConfiguration.SSID);
+            LogcatUtils.d(LOG_PREFIX + " wifi isExists: " + localWifiConfiguration.SSID);
         }
         while (!localWifiConfiguration.SSID.equals("\"" + paramString + "\""));
         return localWifiConfiguration;
@@ -108,4 +110,39 @@ public class WifiHelper {
         f = mNetworkInfo.isAvailable();
         return f;
     }
+
+    public void disableCurrentNetWork() {
+        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+        WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+        if (mNetworkInfo != null) {
+            if (mNetworkInfo.isConnected()) {//判断wifi 是否连接
+                int networkId = wifiInfo.getNetworkId();
+                mWifiManager.disableNetwork(networkId);
+                mWifiManager.saveConfiguration();
+            }
+        }
+    }
+
+    public String getSSID() {
+        if (mWifiManager.getConnectionInfo() == null)
+            return "NULL";
+        String ssid = mWifiManager.getConnectionInfo().getSSID();
+        if (ssid == null || ssid.trim().equals("")) {
+            return "";
+        }
+        ssid = ssid.replaceAll("\"", "");
+        return ssid;
+    }
+
+    public String getLocalIPAddress() {
+        if (mWifiManager.getConnectionInfo() == null)
+            return "NULL";
+        return intToIp(mWifiManager.getConnectionInfo().getIpAddress());
+    }
+
+    private String intToIp(int paramIntip) {
+        return (paramIntip & 0xFF) + "." + ((paramIntip >> 8) & 0xFF) + "."
+                + ((paramIntip >> 16) & 0xFF) + "." + ((paramIntip >> 24) & 0xFF);
+    }
+
 }

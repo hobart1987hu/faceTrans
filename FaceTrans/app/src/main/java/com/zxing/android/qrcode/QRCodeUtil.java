@@ -1,7 +1,6 @@
 package com.zxing.android.qrcode;
 
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 

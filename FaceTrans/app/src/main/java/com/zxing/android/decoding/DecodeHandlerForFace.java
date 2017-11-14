@@ -35,80 +35,76 @@ import java.util.Hashtable;
 
 final class DecodeHandlerForFace extends Handler {
 
-//	private static final String TAG = DecodeHandlerForFace.class.getSimpleName();
-//
-//	private final FaceTransferScanQrCodeActivity activity;
-//	private final MultiFormatReader multiFormatReader;
-//
-//	DecodeHandlerForFace(FaceTransferScanQrCodeActivity activity, Hashtable<DecodeHintType, Object> hints) {
-//		multiFormatReader = new MultiFormatReader();
-//		multiFormatReader.setHints(hints);
-//		this.activity = activity;
-//	}
-//
-//	@Override
-//	public void handleMessage(Message message) {
-//		switch (message.what) {
-//		case MessageIDs.decode:
-//			// Log.d(TAG, "Got decode message");
-//			decode((byte[]) message.obj, message.arg1, message.arg2);
-//			break;
-//		case MessageIDs.quit:
-//			Looper.myLooper().quit();
-//			break;
-//		}
-//	}
-//
-//	/**
-//	 * Decode the data within the viewfinder rectangle, and time how long it
-//	 * took. For efficiency, reuse the same reader objects from one decode to
-//	 * the next.
-//	 *
-//	 * @param data
-//	 *            The YUV preview frame.
-//	 * @param width
-//	 *            The width of the preview frame.
-//	 * @param height
-//	 *            The height of the preview frame.
-//	 */
-//	private void decode(byte[] data, int width, int height) {
-//		long start = System.currentTimeMillis();
-//		Result rawResult = null;
-//
-//		/** 竖屏显示开始 **/
-//		byte[] rotatedData = new byte[data.length];
-//		for (int y = 0; y < height; y++) {
-//			for (int x = 0; x < width; x++)
-//				rotatedData[x * height + height - y - 1] = data[x + y * width];
-//		}
-//		int tmp = width; // Here we are swapping, that's the difference to #11
-//		width = height;
-//		height = tmp;
-//		data = rotatedData;
-//		/** 竖屏显示结束 **/
-//		PlanarYUVLuminanceSource source = activity.getCameraManager().buildLuminanceSource(data, width, height);
-//		BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-//		try {
-//			rawResult = multiFormatReader.decodeWithState(bitmap);
-//		} catch (ReaderException re) {
-//			// continue
-//		} finally {
-//			multiFormatReader.reset();
-//		}
-//
-//		if (rawResult != null) {
-//			long end = System.currentTimeMillis();
-//			Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n" + rawResult.toString());
-//			Message message = Message.obtain(activity.getHandler(), MessageIDs.decode_succeeded, rawResult);
-//			Bundle bundle = new Bundle();
-//			bundle.putParcelable(DecodeThread.BARCODE_BITMAP, source.renderCroppedGreyscaleBitmap());
-//			message.setData(bundle);
-//			// Log.d(TAG, "Sending decode succeeded message...");
-//			message.sendToTarget();
-//		} else {
-//			Message message = Message.obtain(activity.getHandler(), MessageIDs.decode_failed);
-//			message.sendToTarget();
-//		}
-//	}
+    private static final String TAG = DecodeHandlerForFace.class.getSimpleName();
+
+    private final CameraDecodeProvider mProvider;
+    private final MultiFormatReader multiFormatReader;
+
+    DecodeHandlerForFace(CameraDecodeProvider provider, Hashtable<DecodeHintType, Object> hints) {
+        multiFormatReader = new MultiFormatReader();
+        multiFormatReader.setHints(hints);
+        mProvider = provider;
+    }
+
+    @Override
+    public void handleMessage(Message message) {
+        switch (message.what) {
+            case MessageIDs.decode:
+                // Log.d(TAG, "Got decode message");
+                decode((byte[]) message.obj, message.arg1, message.arg2);
+                break;
+            case MessageIDs.quit:
+                Looper.myLooper().quit();
+                break;
+        }
+    }
+
+    /**
+     * Decode the data within the viewfinder rectangle, and time how long it
+     * took. For efficiency, reuse the same reader objects from one decode to
+     * the next.
+     *
+     * @param data   The YUV preview frame.
+     * @param width  The width of the preview frame.
+     * @param height The height of the preview frame.
+     */
+    private void decode(byte[] data, int width, int height) {
+        long start = System.currentTimeMillis();
+        Result rawResult = null;
+
+        byte[] rotatedData = new byte[data.length];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++)
+                rotatedData[x * height + height - y - 1] = data[x + y * width];
+        }
+        int tmp = width; // Here we are swapping, that's the difference to #11
+        width = height;
+        height = tmp;
+        data = rotatedData;
+        PlanarYUVLuminanceSource source = mProvider.getCameraManager().buildLuminanceSource(data, width, height);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        try {
+            rawResult = multiFormatReader.decodeWithState(bitmap);
+        } catch (ReaderException re) {
+            // continue
+        } finally {
+            multiFormatReader.reset();
+        }
+
+        if (rawResult != null) {
+            long end = System.currentTimeMillis();
+            Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n" + rawResult.toString());
+            Message message = Message.obtain(mProvider.getHandler(), MessageIDs.decode_succeeded, rawResult);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(DecodeThread.BARCODE_BITMAP, source.renderCroppedGreyscaleBitmap());
+            message.setData(bundle);
+            // Log.d(TAG, "Sending decode succeeded message...");
+            message.sendToTarget();
+        } else {
+            Message message = Message.obtain(mProvider.getHandler(), MessageIDs.decode_failed);
+            message.sendToTarget();
+        }
+    }
+
 
 }

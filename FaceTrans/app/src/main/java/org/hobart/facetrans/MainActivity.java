@@ -3,13 +3,15 @@ package org.hobart.facetrans;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 
 import com.tbruyelle.rxpermissions.RxPermissions;
 
+import org.hobart.facetrans.ui.socket.ClientScanQRActivity;
+import org.hobart.facetrans.ui.socket.ServerCreateQRActivity;
 import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 
@@ -17,7 +19,7 @@ import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String LOG_PREFIX = "MainActivity->";
 
     private boolean isWriteSettingsGranted = true;
 
@@ -33,10 +35,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void call(Boolean aBoolean) {
                         if (!aBoolean) {
-                            LogcatUtils.d(TAG, "permissions 拒绝!");
+                            LogcatUtils.d(LOG_PREFIX + "permissions 拒绝!");
                         } else {
                             //
-                            LogcatUtils.d(TAG, "permissions 允许!");
+                            LogcatUtils.d(LOG_PREFIX + "permissions 允许!");
                         }
                     }
                 });
@@ -45,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (isWriteSettingsGranted) {
-                    //TODO:
+                    startActivity(new Intent(MainActivity.this, ClientScanQRActivity.class));
+                    finish();
                 }
             }
         });
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (isWriteSettingsGranted) {
-                    startActivity(new Intent(MainActivity.this, FanTransServerActivity.class));
+                    startActivity(new Intent(MainActivity.this, ServerCreateQRActivity.class));
                     finish();
                 }
             }

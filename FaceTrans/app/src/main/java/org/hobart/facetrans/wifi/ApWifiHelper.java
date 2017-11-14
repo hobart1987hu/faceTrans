@@ -3,12 +3,14 @@ package org.hobart.facetrans.wifi;
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.util.LogcatUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -17,8 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 public class ApWifiHelper {
-
-    private static final String TAG = "ApWifiHelper";
 
     private static ApWifiHelper mInstance = null;
 
@@ -142,10 +142,41 @@ public class ApWifiHelper {
             Method method2 = mWifiManager.getClass().getMethod("getWifiApState");
             state = (Integer) method2.invoke(mWifiManager);
         } catch (Exception e) {
-            LogcatUtils.e(TAG, "getWifiAPState exception ->" + e.getMessage());
+            LogcatUtils.e("ApWifiHelper->getWifiAPState exception ->" + e.getMessage());
         }
         return state;
     }
+
+    //连接Wpa wifi
+    public boolean connectApWifi(String networkSSID, String password) {
+        try {
+            WifiConfiguration conf = new WifiConfiguration();
+            conf.SSID = "\"" + networkSSID + "\"";
+            conf.preSharedKey = "\"" + password + "\"";
+            conf.status = WifiConfiguration.Status.ENABLED;
+            conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            int netWorkId = mWifiManager.addNetwork(conf);
+            List<WifiConfiguration> list = mWifiManager.getConfiguredNetworks();
+            for (WifiConfiguration i : list) {
+                if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    mWifiManager.disconnect();
+                    mWifiManager.enableNetwork(i.networkId, true);
+                    mWifiManager.reconnect();
+                    break;
+                }
+            }
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
 
     private static int WIFI_AP_STATE_DISABLING = 10;
     private static int WIFI_AP_STATE_DISABLED = 11;

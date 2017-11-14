@@ -4,6 +4,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.event.SocketStatusEvent;
 import org.hobart.facetrans.util.LogcatUtils;
@@ -18,10 +20,9 @@ import java.net.Socket;
  * Created by huzeyin on 2017/11/7.
  */
 
-public class ServerService extends Service {
+public class ServerSocketService extends Service {
 
-    private static final String TAG = ServerService.class.getSimpleName();
-
+    private static final String LOG_PREFIX = "ServerSocketService->";
     private ServerSocket mSocketService;
     private volatile boolean monitor = true;
     private Socket mSocket = null;
@@ -29,24 +30,25 @@ public class ServerService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        LogcatUtils.d(TAG, "----onBind----");
+        LogcatUtils.d(LOG_PREFIX + "----onBind----");
         return null;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        createServerSocket();
+        LogcatUtils.d(LOG_PREFIX + "----onCreate----");
     }
 
     private void createServerSocket() {
         releaseSocket();
         try {
-            LogcatUtils.d(TAG, "--createServerSocket--");
+            LogcatUtils.d(LOG_PREFIX + "--createServerSocket--");
             mSocketService = new ServerSocket();
-            mSocketService.setReceiveBufferSize(SocketConfig.TCP_BUFFER_SIZE);
-            mSocketService.bind(new InetSocketAddress(SocketConfig.SERVER_PORT));
+            mSocketService.setReceiveBufferSize(SocketConstants.TCP_BUFFER_SIZE);
+            mSocketService.bind(new InetSocketAddress(SocketConstants.SERVER_PORT));
             monitor = true;
+            //一直等待客户端
             acceptClient();
         } catch (IOException e) {
             postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
@@ -58,13 +60,14 @@ public class ServerService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                LogcatUtils.d(TAG, "--acceptClient run--");
+                LogcatUtils.d(LOG_PREFIX + "--acceptClient run--");
                 while (monitor) {
                     try {
                         mSocket = mSocketService.accept();
+                        //一直阻塞在这里
                         monitor = false;
                         postSocketConnectedStatus(SocketStatusEvent.CONNECTED_SUCCESS);
-                        LogcatUtils.d(TAG, "--客户端接收成功--");
+                        LogcatUtils.d(LOG_PREFIX + "--客户端接收成功--");
                     } catch (IOException e) {
                         postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
                         monitor = false;
@@ -77,18 +80,25 @@ public class ServerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LogcatUtils.d(TAG, "----onStartCommand----");
+        LogcatUtils.d(LOG_PREFIX + "----onStartCommand----");
+        if (null == intent) return START_STICKY;
+        final String action = intent.getAction();
+        if (!TextUtils.isEmpty(action)) {
+            if (action.equals(SocketConstants.ACTION_CREATE_SERVER_SOCKET)) {
+                createServerSocket();
+            } else if (action.equals(SocketConstants.ACTION_STOP_SERVER_SOCKET)) {
+                releaseSocket();
+            }
+        }
         return START_STICKY;
     }
-
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        LogcatUtils.d(TAG, "----onDestroy----");
+        LogcatUtils.d(LOG_PREFIX + "----onDestroy----");
         releaseSocket();
     }
-
 
     void releaseSocket() {
         monitor = false;
