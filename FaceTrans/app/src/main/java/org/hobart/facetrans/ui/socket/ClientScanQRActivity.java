@@ -18,7 +18,6 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -72,20 +71,18 @@ public class ClientScanQRActivity extends Activity implements SurfaceHolder.Call
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client_scan_qr);
-
         initView();
-
-        new RxPermissions(this).request(Manifest.permission.CAMERA).subscribe(new Action1<Boolean>() {
-            @Override
-            public void call(Boolean aBoolean) {
-                if (!aBoolean) {
-                    initCamera();
-                } else {
-                    finish();
-                }
-            }
-        });
         EventBus.getDefault().register(this);
+        new RxPermissions(this).request(Manifest.permission.CAMERA)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (!aBoolean) {
+                            ToastUtils.showLongToast("用户拒绝照相机");
+                            finish();
+                        }
+                    }
+                });
     }
 
     private void initView() {
@@ -119,10 +116,11 @@ public class ClientScanQRActivity extends Activity implements SurfaceHolder.Call
         if (playBeep && mediaPlayer == null) {
             setVolumeControlStream(AudioManager.STREAM_MUSIC);
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setLooping(false);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    mediaPlayer.seekTo(0);
+                    mediaPlayer.stop();
                 }
             });
             AssetFileDescriptor file = getResources().openRawResourceFd(
@@ -137,6 +135,22 @@ public class ClientScanQRActivity extends Activity implements SurfaceHolder.Call
                 mediaPlayer = null;
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initCamera();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (null != mHandler) {
+            mHandler.quitSynchronously();
+            mHandler = null;
+        }
+        mCameraManager.closeDriver();
     }
 
     @Override
@@ -189,7 +203,6 @@ public class ClientScanQRActivity extends Activity implements SurfaceHolder.Call
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         hasSurface = false;
-
     }
 
     private void playBeepSoundAndVibrate() {

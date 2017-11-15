@@ -1,6 +1,5 @@
 package org.hobart.facetrans;
 
-import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,14 +7,23 @@ import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.tbruyelle.rxpermissions.RxPermissions;
-
 import org.hobart.facetrans.ui.socket.ClientScanQRActivity;
 import org.hobart.facetrans.ui.socket.ServerCreateQRActivity;
 import org.hobart.facetrans.util.AndroidUtils;
-import org.hobart.facetrans.util.LogcatUtils;
 
-import rx.functions.Action1;
+/***
+ *
+ * 业务逻辑：
+ *
+ * 1、首页显示文件列表
+ *
+ * 2、点击需要发送的文件
+ *
+ * 3、选择好文件之后，跳转到网络创建界面，如果网络创建成功，进行显示，失败，就不要显示
+ *
+ *
+ * */
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,18 +38,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        new RxPermissions(this).request(Manifest.permission.WRITE_SETTINGS, Manifest.permission.CAMERA)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
-                        if (!aBoolean) {
-                            LogcatUtils.d(LOG_PREFIX + "permissions 拒绝!");
-                        } else {
-                            //
-                            LogcatUtils.d(LOG_PREFIX + "permissions 允许!");
-                        }
-                    }
-                });
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.System.canWrite(MainActivity.this)) {
+            isWriteSettingsGranted = false;
+            AndroidUtils.requestWriteSettings(MainActivity.this, REQUEST_CODE_WRITE_SETTINGS);
+        }
 
         findViewById(R.id.btnReceive).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,10 +61,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        if (Build.VERSION.SDK_INT >= 23 && !Settings.System.canWrite(this)) {
-            isWriteSettingsGranted = false;
-            AndroidUtils.requestWriteSettings(this, REQUEST_CODE_WRITE_SETTINGS);
-        }
     }
 
     @Override

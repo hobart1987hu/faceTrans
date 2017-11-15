@@ -26,8 +26,9 @@ import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ToastUtils;
 import org.hobart.facetrans.util.WifiTools;
+import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.CreateWifiAPThread;
-import org.hobart.facetrans.wifi.FanTransWifiManager;
+import org.hobart.facetrans.wifi.WifiHelper;
 
 /**
  * 服务端创建二维码界面
@@ -38,7 +39,6 @@ public class ServerCreateQRActivity extends Activity {
 
     private static final String LOG_PREFIX = "ServerCreateQRActivity->";
 
-    private FanTransWifiManager mFanTransWifiManager;
     private CreateWifiAPThread mCreateWifiAPThread;
 
     @Override
@@ -54,7 +54,6 @@ public class ServerCreateQRActivity extends Activity {
 
     private void init() {
         mViewStub = (ViewStub) findViewById(R.id.mViewStub);
-        mFanTransWifiManager = new FanTransWifiManager();
         EventBus.getDefault().register(this);
     }
 
@@ -67,7 +66,8 @@ public class ServerCreateQRActivity extends Activity {
     private void createWifiAp() {
         mSSID = AndroidUtils.getDeviceModel();
         mPWD = WifiTools.getRandomPwd();
-        mFanTransWifiManager.createWifiAP(mSSID, mPWD);
+        WifiHelper.getInstance().closeWifi();
+        ApWifiHelper.getInstance().createWifiAP(mSSID, mPWD);
         mCreateWifiAPThread = new CreateWifiAPThread();
         new Thread(mCreateWifiAPThread).start();
     }
@@ -80,7 +80,6 @@ public class ServerCreateQRActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mFanTransWifiManager.closeWifiApAndOpenWifi();
         EventBus.getDefault().unregister(this);
         if (null != mCreateWifiAPThread) mCreateWifiAPThread.cancelDownTimer();
         if (mWifiAPConnectedReceiver != null) {
@@ -155,8 +154,8 @@ public class ServerCreateQRActivity extends Activity {
         }
         switch (bean.status) {
             case SocketStatusEvent.CONNECTED_SUCCESS:
+                ToastUtils.showLongToast("与服务器端连接成功!");
                 LogcatUtils.d(LOG_PREFIX + "----onSocketStatusEvent 创建成功---");
-                //TODO:
 //                startActivity(new Intent(this, Clie.class));
                 finish();
                 break;
