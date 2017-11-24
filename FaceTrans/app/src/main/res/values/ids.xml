@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="titlebar_back" type="id" />
+    <item name="titlebar_title" type="id" />
+    <item name="titlebar_btnRight" type="id" />
+</resources>

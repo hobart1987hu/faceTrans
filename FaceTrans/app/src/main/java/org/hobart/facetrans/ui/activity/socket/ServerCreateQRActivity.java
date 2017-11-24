@@ -1,4 +1,4 @@
-package org.hobart.facetrans.ui.socket;
+package org.hobart.facetrans.ui.activity.socket;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

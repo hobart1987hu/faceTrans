@@ -1,4 +1,4 @@
-package org.hobart.facetrans.ui.socket;
+package org.hobart.facetrans.ui.activity.socket;
 
 import android.Manifest;
 import android.app.Activity;
@@ -86,7 +86,7 @@ public class ClientScanQRActivity extends Activity implements SurfaceHolder.Call
     }
 
     private void initView() {
-        mViewFindView = (com.zxing.android.view.ViewfinderView) findViewById(R.id.viewfinder_view);
+        mViewFindView = (ViewfinderView) findViewById(R.id.viewfinder_view);
         mSurfaceView = (SurfaceView) findViewById(R.id.surface_view);
         hasSurface = false;
         mCameraManager = new CameraManager(getApplication());

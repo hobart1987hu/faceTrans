@@ -6,13 +6,19 @@ import android.content.Intent;
 import org.hobart.facetrans.socket.ServerSocketService;
 import org.hobart.facetrans.socket.SocketClientService;
 import org.hobart.facetrans.socket.SocketConstants;
-import org.hobart.facetrans.ui.HomeActivity;
+import org.hobart.facetrans.ui.activity.HomeActivity;
+import org.hobart.facetrans.ui.activity.MusicListActivity;
 
 /**
  * Created by huzeyin on 2017/11/14.
  */
 
 public class IntentUtils {
+
+    public static void intentMusicListActivity(Activity activity) {
+        Intent intent = new Intent(activity, MusicListActivity.class);
+        activity.startActivity(intent);
+    }
 
     public static void intentToHomeActivity(Activity activity) {
         Intent intent = new Intent(activity, HomeActivity.class);

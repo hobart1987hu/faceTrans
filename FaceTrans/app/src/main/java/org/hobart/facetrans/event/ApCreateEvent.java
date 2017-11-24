@@ -6,7 +6,6 @@ package org.hobart.facetrans.event;
  */
 
 public class ApCreateEvent {
-
     public static final int SUCCESS = 1;
     public static final int FAILED = 0;
     public int status;
