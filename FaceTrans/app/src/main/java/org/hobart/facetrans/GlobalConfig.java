@@ -31,9 +31,13 @@ public class GlobalConfig {
     public static final boolean DEBUG = true;
 
     /**
-     * 默认的Wifi SSID
+     * AP 密码
      */
-    public static final String DEFAULT_SSID = "FT_HOTSPOT";
+    public static final String AP_PWD = "FT_HOTSPOT_1234567890";
+    /**
+     * AP SSID
+     */
+    public static final String AP_SSID = "FT_HOTSPOT";
 
 
     public static final Comparator<Map.Entry<String, FTFile>> DEFAULT_COMPARATOR = new Comparator<Map.Entry<String, FTFile>>() {

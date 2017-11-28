@@ -64,6 +64,25 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activity.ScanReceiverActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".ui.activity.ScanSenderActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activity.SendFileActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activity.ReceiveFileActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
+
+        <activity
             android:name=".ui.activity.socket.ServerCreateQRActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullScreen.AppTheme" />
@@ -72,6 +91,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/FullScreen.AppTheme" />
 
+
         <activity
             android:name="com.zxing.android.CaptureActivity"
             android:configChanges="orientation|keyboardHidden"
@@ -79,8 +99,8 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
-        <service android:name=".socket.service.ServerSocketService" />
-        <service android:name=".socket.service.SocketClientService" />
+        <service android:name=".socket.service.ServerReceiverService" />
+        <service android:name=".socket.service.SocketSenderService" />
 
     </application>
 

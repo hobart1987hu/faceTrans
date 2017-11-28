@@ -160,7 +160,7 @@ public class ServerCreateQRActivity extends Activity {
                 break;
             case SocketStatusEvent.CONNECTED_FAILED:
                 ToastUtils.showLongToast("创建服务端失败！");
-                IntentUtils.stopServerSocketService(this);
+                IntentUtils.stopServerReceiverService(this);
                 finish();
                 break;
         }
@@ -169,7 +169,7 @@ public class ServerCreateQRActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            IntentUtils.stopServerSocketService(this);
+            IntentUtils.stopServerReceiverService(this);
             finish();
         }
         return super.onKeyDown(keyCode, event);

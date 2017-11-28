@@ -25,6 +25,7 @@ import org.hobart.facetrans.ui.fragment.ApkListFragment;
 import org.hobart.facetrans.ui.fragment.ImageListFragment;
 import org.hobart.facetrans.ui.fragment.MusicListFragment;
 import org.hobart.facetrans.ui.fragment.VideoListFragment;
+import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
 import butterknife.Bind;
@@ -162,6 +163,7 @@ public class ChooseFileActivity extends BaseActivity {
                     ToastUtils.showLongToast("请选择你要传输的文件");
                     return;
                 }
+                IntentUtils.intentToScanReceiverActivity(this);
                 break;
             }
 

@@ -55,16 +55,16 @@ public class WifiHelper {
      * 关闭手机Wi-Fi
      */
     public void closeWifi() {
-        mWifiManager.setWifiEnabled(false);
+        if (isWifiEnable())
+            mWifiManager.setWifiEnabled(false);
     }
 
     /**
      * 打开手机Wi-Fi
      */
     public void openWifi() {
-        if (!isWifiEnable()) {
+        if (!isWifiEnable())
             mWifiManager.setWifiEnabled(true);
-        }
     }
 
     /**

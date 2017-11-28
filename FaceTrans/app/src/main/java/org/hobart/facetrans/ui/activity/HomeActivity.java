@@ -105,7 +105,7 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        String device = TextUtils.isEmpty(android.os.Build.DEVICE) ? GlobalConfig.DEFAULT_SSID : android.os.Build.DEVICE;
+        String device = TextUtils.isEmpty(android.os.Build.DEVICE) ? GlobalConfig.AP_SSID : android.os.Build.DEVICE;
         try {
             tv_name = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.tv_name);
             tv_name.setText(device);
@@ -157,12 +157,12 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
         switch (view.getId()) {
             case R.id.btn_send:
             case R.id.btn_send_big: {
-                IntentUtils.intentToChooseFilectivity(this);
+                IntentUtils.intentToChooseFileActivity(this);
                 break;
             }
             case R.id.btn_receive:
             case R.id.btn_receive_big: {
-                //    NavigatorUtils.toReceiverWaitingUI(getContext());
+                IntentUtils.intentToScanSenderActivity(this);
                 break;
             }
             case R.id.iv_mini_avator: {

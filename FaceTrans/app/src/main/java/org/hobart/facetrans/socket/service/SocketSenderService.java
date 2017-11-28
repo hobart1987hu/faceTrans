@@ -2,6 +2,7 @@ package org.hobart.facetrans.socket.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -16,14 +17,15 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
+ * Socket 发送端服务
  * Created by huzeyin on 2017/11/7.
  */
 
-public class SocketClientService extends Service {
+public class SocketSenderService extends Service {
 
     private static final String LOGINFO_PREFIX = "SocketClientService->";
-    private String host;
-    private Socket socket = null;
+    private String mHost;
+    private Socket mSocket = null;
     private int retryCount = 3;
 
     @Override
@@ -37,7 +39,7 @@ public class SocketClientService extends Service {
 
         if (!TextUtils.isEmpty(action)) {
             if (action.equals(SocketConstants.ACTION_CREATE_CLIENT_SOCKET)) {
-                host = intent.getStringExtra("host");
+                mHost = intent.getStringExtra("mHost");
                 releaseSocket();
                 newSocket();
             } else if (action.equals(SocketConstants.ACTION_STOP_CLIENT_SOCKET)) {
@@ -50,9 +52,8 @@ public class SocketClientService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new MyBinder();
     }
-
 
     @Override
     public void onDestroy() {
@@ -63,15 +64,18 @@ public class SocketClientService extends Service {
 
 
     void releaseSocket() {
-        if (socket != null && !socket.isClosed()) {
+        if (mSocket != null && !mSocket.isClosed()) {
             try {
-                socket.close();
+                mSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public Socket getSenderSocket() {
+        return mSocket;
+    }
 
     private void newSocket() {
         new Thread(new Runnable() {
@@ -83,22 +87,20 @@ public class SocketClientService extends Service {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                         }
-                        socket = new Socket();
-                        socket.setKeepAlive(true);
-                        //socket 及时发送不会缓冲
-                        socket.setTcpNoDelay(true);
-                        //socket立即关闭
-                        socket.setSoLinger(true, 0);
-                        socket.setSendBufferSize(SocketConstants.TCP_BUFFER_SIZE);
-                        socket.setReceiveBufferSize(SocketConstants.TCP_BUFFER_SIZE);
-                        socket.connect(new InetSocketAddress(host, SocketConstants.SERVER_PORT), SocketConstants.SOCKET_CONNECTED_TIME_OUT);
+                        mSocket = new Socket();
+                        mSocket.setKeepAlive(true);
+                        mSocket.setTcpNoDelay(true);
+                        mSocket.setSoLinger(true, 0);
+                        mSocket.setSendBufferSize(SocketConstants.TCP_BUFFER_SIZE);
+                        mSocket.setReceiveBufferSize(SocketConstants.TCP_BUFFER_SIZE);
+                        mSocket.connect(new InetSocketAddress(mHost, SocketConstants.SERVER_PORT), SocketConstants.SOCKET_CONNECTED_TIME_OUT);
                         postSocketConnectedStatus(SocketStatusEvent.CONNECTED_SUCCESS);
-                        LogcatUtils.d(LOGINFO_PREFIX + "客户端socket 创建成功");
+                        LogcatUtils.d(LOGINFO_PREFIX + "mSocket 发送端 创建成功");
                         retryCount = 0;
                     } catch (Exception e) {
                         retryCount--;
                         if (retryCount <= 0) {
-                            LogcatUtils.d(LOGINFO_PREFIX + " 客户端socket 创建失败 ");
+                            LogcatUtils.d(LOGINFO_PREFIX + " mSocket 发送端 创建失败 ");
                             postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
                         }
                         e.printStackTrace();
@@ -112,5 +114,12 @@ public class SocketClientService extends Service {
         SocketStatusEvent statusBean = new SocketStatusEvent();
         statusBean.status = status;
         EventBus.getDefault().post(statusBean);
+    }
+
+    private class MyBinder extends Binder {
+
+        public SocketSenderService getService() {
+            return SocketSenderService.this;
+        }
     }
 }

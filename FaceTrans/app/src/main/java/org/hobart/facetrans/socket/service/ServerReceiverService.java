@@ -2,6 +2,7 @@ package org.hobart.facetrans.socket.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -17,11 +18,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * server端服务开启
+ * server  接收端服务
  * Created by huzeyin on 2017/11/7.
  */
 
-public class ServerSocketService extends Service {
+public class ServerReceiverService extends Service {
 
     private static final String LOG_PREFIX = "ServerSocketService->";
     private ServerSocket mSocketService;
@@ -32,7 +33,7 @@ public class ServerSocketService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         LogcatUtils.d(LOG_PREFIX + "----onBind----");
-        return null;
+        return new MyBinder();
     }
 
     @Override
@@ -41,34 +42,33 @@ public class ServerSocketService extends Service {
         LogcatUtils.d(LOG_PREFIX + "----onCreate----");
     }
 
-    private void createServerSocket() {
+    private void createReceiverSocket() {
         releaseSocket();
         try {
-            LogcatUtils.d(LOG_PREFIX + "--createServerSocket--");
+            LogcatUtils.d(LOG_PREFIX + "--createReceiverSocket--");
             mSocketService = new ServerSocket();
             mSocketService.setReceiveBufferSize(SocketConstants.TCP_BUFFER_SIZE);
             mSocketService.bind(new InetSocketAddress(SocketConstants.SERVER_PORT));
             monitor = true;
-            //一直等待客户端
-            acceptClient();
+            acceptSenderClient();
         } catch (IOException e) {
             postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
             e.printStackTrace();
         }
     }
 
-    private void acceptClient() {
+    private void acceptSenderClient() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                LogcatUtils.d(LOG_PREFIX + "--acceptClient run--");
+                LogcatUtils.d(LOG_PREFIX + "--acceptSenderClient run--");
                 while (monitor) {
                     try {
                         mSocket = mSocketService.accept();
                         //一直阻塞在这里
                         monitor = false;
                         postSocketConnectedStatus(SocketStatusEvent.CONNECTED_SUCCESS);
-                        LogcatUtils.d(LOG_PREFIX + "--客户端接收成功--");
+                        LogcatUtils.d(LOG_PREFIX + "--发送端连接成功--");
                     } catch (IOException e) {
                         postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
                         monitor = false;
@@ -86,7 +86,7 @@ public class ServerSocketService extends Service {
         final String action = intent.getAction();
         if (!TextUtils.isEmpty(action)) {
             if (action.equals(SocketConstants.ACTION_CREATE_SERVER_SOCKET)) {
-                createServerSocket();
+                createReceiverSocket();
             } else if (action.equals(SocketConstants.ACTION_STOP_SERVER_SOCKET)) {
                 releaseSocket();
             }
@@ -123,5 +123,16 @@ public class ServerSocketService extends Service {
         SocketStatusEvent statusBean = new SocketStatusEvent();
         statusBean.status = status;
         EventBus.getDefault().post(statusBean);
+    }
+
+    public Socket getReceiverSocket() {
+        return mSocket;
+    }
+
+    private class MyBinder extends Binder {
+
+        public ServerReceiverService getService() {
+            return ServerReceiverService.this;
+        }
     }
 }
