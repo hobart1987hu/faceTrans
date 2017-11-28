@@ -8,8 +8,6 @@ public interface FTTaskCallback<Result> {
 
     void onPreExecute();
 
-    void onExecute();
-
     void onCancelled();
 
     void onFinished(Result result);

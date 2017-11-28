@@ -19,8 +19,6 @@ public class TransferStatus {
     public static final int ZIP = 5;
     //解压中
     public static final int UNZIP = 6;
-    //安装
-    public static final int INSTALL = 7;
     //失败
     public static final int FAILED = 8;
     //完成

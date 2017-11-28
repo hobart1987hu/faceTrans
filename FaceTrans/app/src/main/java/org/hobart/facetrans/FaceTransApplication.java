@@ -16,6 +16,10 @@ public class FaceTransApplication extends Application {
         return instance.getApplicationContext();
     }
 
+    public static FaceTransApplication getApp() {
+        return instance;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

@@ -2,16 +2,19 @@ package org.hobart.facetrans.ui.activity.base;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+
+import org.hobart.facetrans.util.AndroidUtils;
 
 /**
  * Created by huzeyin on 2017/11/15.
  */
 
-public class BaseActivity extends FragmentActivity {
+public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        AndroidUtils.setStatusBarAndBottomBarTranslucent(this);
         super.onCreate(savedInstanceState);
     }
 

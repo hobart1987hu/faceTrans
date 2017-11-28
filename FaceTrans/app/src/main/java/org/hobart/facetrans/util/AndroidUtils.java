@@ -1,10 +1,13 @@
 package org.hobart.facetrans.util;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.view.Window;
+import android.view.WindowManager;
 
 import org.hobart.facetrans.FaceTransApplication;
 
@@ -37,5 +40,20 @@ public class AndroidUtils {
     public static int dip2px(float dpValue) {
         final float scale = FaceTransApplication.getFaceTransApplicationContext().getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public static void setStatusBarAndBottomBarTranslucent(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window window = activity.getWindow();
+            // Translucent status bar
+            window.setFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            // Translucent navigation bar
+            window.setFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
     }
 }

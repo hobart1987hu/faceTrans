@@ -1,13 +1,14 @@
 package org.hobart.facetrans.socket.transfer;
 
 import org.greenrobot.eventbus.EventBus;
+import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.event.BaseSocketEvent;
 import org.hobart.facetrans.event.SocketFileEvent;
 import org.hobart.facetrans.event.SocketTextEvent;
 import org.hobart.facetrans.socket.SocketConstants;
-import org.hobart.facetrans.socket.transfer.bean.SocketTransferBean;
+import org.hobart.facetrans.socket.transfer.model.TransModel;
+import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.LogcatUtils;
-import org.hobart.facetrans.util.SDCardPathUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -62,9 +63,9 @@ public class ReceiveRunnable implements Runnable {
 
                 LogcatUtils.d(LOG_PREFIX + "接收类型 " + type);
 
-                if (type == SocketTransferBean.TYPE_TEXT) {
+                if (type == TransModel.TYPE_TEXT) {
                     receiveText(mInputStream);
-                } else if (type == SocketTransferBean.TYPE_TEXT) {
+                } else if (type == TransModel.TYPE_FILE) {
                     receiveFile(mInputStream);
                 }
                 try {
@@ -115,9 +116,9 @@ public class ReceiveRunnable implements Runnable {
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件编号 " + id);
 
-            savePath = SDCardPathUtil.getTransferDirectory() + File.separator + fileName;
-            if (!SDCardPathUtil.isFolderExist(savePath)) {
-                SDCardPathUtil.makeDirs(savePath);
+            savePath = GlobalConfig.getTransferDirectory() + File.separator + fileName;
+            if (!FileUtils.isFolderExist(savePath)) {
+                FileUtils.makeDirs(savePath);
             }
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件保存路径 " + savePath);
@@ -181,7 +182,7 @@ public class ReceiveRunnable implements Runnable {
             mOutputStream.flush();
 
         } catch (IOException e) {
-            SDCardPathUtil.deleteFile(savePath);
+            FileUtils.deleteFile(savePath);
             postFileFinishEvent(TransferStatus.TRANSFER_FAILED);
         } finally {
             if (null != mReceiveThread)

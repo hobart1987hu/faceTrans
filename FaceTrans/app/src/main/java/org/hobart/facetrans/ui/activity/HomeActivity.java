@@ -1,84 +1,202 @@
 package org.hobart.facetrans.ui.activity;
 
+import android.Manifest;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.os.Handler;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.tbruyelle.rxpermissions.RxPermissions;
+
+import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
-import org.hobart.facetrans.entity.HomeInfo;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
-import org.hobart.facetrans.ui.adapter.BaseRecycleViewAdapter;
-import org.hobart.facetrans.ui.adapter.MyHomeAdapter;
-import org.hobart.facetrans.ui.widget.HomeSlideView;
-import org.hobart.facetrans.ui.widget.TitleBar;
+import org.hobart.facetrans.ui.widget.MyScrollView;
 import org.hobart.facetrans.util.IntentUtils;
+import org.hobart.facetrans.util.ToastUtils;
 
-import java.util.ArrayList;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import rx.functions.Action1;
 
 /**
  * Created by huzeyin on 2017/11/14.
  */
 
-public class HomeActivity extends BaseActivity {
+public class HomeActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, MyScrollView.OnScrollListener {
 
-    private HomeSlideView mHomeSlideView;
-    private DrawerLayout mDrawerLayout;
-    private RecyclerView mRecycleView;
-    private TitleBar mTitleBar;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
+    @Bind(R.id.nav_view)
+    NavigationView mNavigationView;
 
-    private ArrayList<HomeInfo> mDatas = new ArrayList<>();
+    TextView tv_name;
 
+    @Bind(R.id.ll_mini_main)
+    LinearLayout ll_mini_main;
+    @Bind(R.id.tv_title)
+    TextView tv_title;
+    @Bind(R.id.iv_mini_avator)
+    ImageView iv_mini_avator;
+    @Bind(R.id.btn_send)
+    Button btn_send;
+    @Bind(R.id.btn_receive)
+    Button btn_receive;
+
+    @Bind(R.id.msv_content)
+    MyScrollView mScrollView;
+    @Bind(R.id.ll_main)
+    LinearLayout ll_main;
+    @Bind(R.id.btn_send_big)
+    Button btn_send_big;
+    @Bind(R.id.btn_receive_big)
+    Button btn_receive_big;
+
+    @Bind(R.id.rl_device)
+    RelativeLayout rl_device;
+    @Bind(R.id.tv_device_desc)
+    TextView tv_device_desc;
+    @Bind(R.id.rl_file)
+    RelativeLayout rl_file;
+    @Bind(R.id.tv_file_desc)
+    TextView tv_file_desc;
+    @Bind(R.id.rl_storage)
+    RelativeLayout rl_storage;
+    @Bind(R.id.tv_storage_desc)
+    TextView tv_storage_desc;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        mHomeSlideView = (HomeSlideView) findViewById(R.id.homeSlideView);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
-        mRecycleView = (RecyclerView) findViewById(R.id.recycleView);
-        mTitleBar = (TitleBar) findViewById(R.id.title_bar);
-
-        initTitleBar();
-
-        mDatas = new ArrayList<>();
-        mDatas.add(new HomeInfo("我的音乐列表", HomeInfo.MUSIC_LIST));
-        mDatas.add(new HomeInfo("我的视频列表", HomeInfo.VIDEO_LIST));
-        mDatas.add(new HomeInfo("我的图片集", HomeInfo.IMAGE_LIST));
-        mDatas.add(new HomeInfo("我的应用列表", HomeInfo.APP_LIST));
-
-        MyHomeAdapter adapter = new MyHomeAdapter();
-        adapter.setDatas(mDatas, false);
-        adapter.setItemListener(new BaseRecycleViewAdapter.RecycleViewItemListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                HomeInfo info = mDatas.get(position);
-                if (info.getPointer() == HomeInfo.MUSIC_LIST) {
-                    IntentUtils.intentMusicListActivity(HomeActivity.this);
-                }
-            }
-
-            @Override
-            public void OnItemLongClickListener(View view, int position) {
-
-            }
-        });
-
-        mRecycleView.setLayoutManager(new LinearLayoutManager(this));
-
-        mRecycleView.setAdapter(adapter);
+        ButterKnife.bind(this);
+        new RxPermissions(this)
+                .request(Manifest.permission.READ_EXTERNAL_STORAGE
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        if (!aBoolean) {
+                            finish();
+                            return;
+                        }
+                        init();
+                    }
+                });
     }
 
-    void initTitleBar() {
-        mTitleBar.setTitle("首页");
-        mTitleBar.setViewOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
+    private void init() {
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.setDrawerListener(toggle);
+        toggle.syncState();
+
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+
+        String device = TextUtils.isEmpty(android.os.Build.DEVICE) ? GlobalConfig.DEFAULT_SSID : android.os.Build.DEVICE;
+        try {
+            tv_name = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.tv_name);
+            tv_name.setText(device);
+        } catch (Exception e) {
+            //maybe occur some exception
+        }
+        mScrollView.setOnScrollListener(this);
+        ll_mini_main.setClickable(false);
+        ll_mini_main.setVisibility(View.GONE);
+
+    }
+
+    private boolean mIsExist = false;
+    private Handler mHandler = new Handler();
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout != null) {
+            if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                if (mIsExist) {
+                    this.finish();
+                } else {
+                    ToastUtils.showLongToast("再按一次就退出面传App");
+                    mIsExist = true;
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mIsExist = false;
+                        }
+                    }, 2 * 1000);
+                }
             }
-        });
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        //TODO:
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @OnClick({R.id.btn_send, R.id.btn_receive, R.id.btn_send_big, R.id.btn_receive_big, R.id.iv_mini_avator,
+            R.id.rl_device, R.id.rl_file, R.id.rl_storage})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_send:
+            case R.id.btn_send_big: {
+                IntentUtils.intentToChooseFilectivity(this);
+                break;
+            }
+            case R.id.btn_receive:
+            case R.id.btn_receive_big: {
+                //    NavigatorUtils.toReceiverWaitingUI(getContext());
+                break;
+            }
+            case R.id.iv_mini_avator: {
+                if (mDrawerLayout != null) {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+                break;
+            }
+            case R.id.rl_file:
+            case R.id.rl_storage: {
+                // NavigatorUtils.toSystemFileChooser(getContext());
+                break;
+            }
+
+        }
+    }
+
+    private int mContentHeight = 0;
+
+    @Override
+    public void onScrollChanged(int l, int t, int oldl, int oldt) {
+        mContentHeight = ll_main.getMeasuredHeight();
+        if (t > mContentHeight / 2) {
+            float sAlpha = (t - mContentHeight / 2) / (float) (mContentHeight / 2);
+            ll_mini_main.setVisibility(View.VISIBLE);
+            ll_main.setAlpha(1 - sAlpha);
+            ll_mini_main.setAlpha(sAlpha);
+            tv_title.setAlpha(0);
+        } else {
+            float tAlpha = t / (float) mContentHeight / 2;
+            tv_title.setAlpha(1 - tAlpha);
+            ll_mini_main.setVisibility(View.INVISIBLE);
+            ll_mini_main.setAlpha(0);
+        }
     }
 }
 

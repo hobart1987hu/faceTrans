@@ -6,11 +6,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.event.BaseSocketEvent;
 import org.hobart.facetrans.event.SocketFileEvent;
 import org.hobart.facetrans.socket.SocketConstants;
-import org.hobart.facetrans.socket.transfer.bean.SocketFileTransferBean;
-import org.hobart.facetrans.socket.transfer.bean.SocketTextTransferBean;
-import org.hobart.facetrans.socket.transfer.bean.SocketTransferBean;
+import org.hobart.facetrans.socket.transfer.model.FileTransModel;
+import org.hobart.facetrans.socket.transfer.model.TextTransModel;
+import org.hobart.facetrans.socket.transfer.model.TransModel;
+import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.LogcatUtils;
-import org.hobart.facetrans.util.SDCardPathUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -70,17 +70,17 @@ public class SendRunnable implements Runnable {
                     continue;
                 }
 
-                SocketTransferBean transferBean = SocketTransferQueue.getInstance().poll();
+                TransModel transferBean = SocketTransferQueue.getInstance().poll();
 
                 if (null == transferBean) {
                     continue;
                 }
-                if (transferBean instanceof SocketTextTransferBean) {
+                if (transferBean instanceof TextTransModel) {
 
-                    sendText((SocketTextTransferBean) transferBean);
+                    sendText((TextTransModel) transferBean);
 
-                } else if (transferBean instanceof SocketFileTransferBean) {
-                    sendFile((SocketFileTransferBean) transferBean);
+                } else if (transferBean instanceof FileTransModel) {
+                    sendFile((FileTransModel) transferBean);
                 }
                 try {
                     Thread.sleep(1000);
@@ -94,7 +94,7 @@ public class SendRunnable implements Runnable {
         }
     }
 
-    private void sendText(SocketTextTransferBean textTransferBean) {
+    private void sendText(TextTransModel textTransferBean) {
 
         if (null == mOutputStream || null == textTransferBean || TextUtils.isEmpty(textTransferBean.getContent()))
             return;
@@ -108,7 +108,7 @@ public class SendRunnable implements Runnable {
             if (!content.equals(BaseSocketEvent.SOCKET_HEART_BEAT) && !content.equals(BaseSocketEvent.SOCKET_DEVICE_MODEL_HEAD)) {
 //                LogcatUtils.d(LOG_PREFIX + " 开始发送文本信息");
             }
-            mOutputStream.write(SocketTransferBean.TYPE_TEXT);
+            mOutputStream.write(TransModel.TYPE_TEXT);
             mOutputStream.flush();
             mOutputStream.writeUTF(content);
             mOutputStream.flush();
@@ -120,7 +120,7 @@ public class SendRunnable implements Runnable {
         }
     }
 
-    private void sendFile(SocketFileTransferBean fileTransferBean) {
+    private void sendFile(FileTransModel fileTransferBean) {
 
         if (null == mOutputStream || null == fileTransferBean)
             return;
@@ -128,11 +128,11 @@ public class SendRunnable implements Runnable {
         byte[] buffer = null;
         reset();
         filePath = fileTransferBean.getFilePath();
-        if (SDCardPathUtil.isFileExist(filePath)) {
+        if (FileUtils.isFileExist(filePath)) {
             file = new File(filePath);
             try {
                 mInputStream = new BufferedInputStream(new FileInputStream(file));
-                mOutputStream.write(SocketTransferBean.TYPE_FILE);
+                mOutputStream.write(TransModel.TYPE_FILE);
                 mOutputStream.flush();
 
                 fileSize = fileTransferBean.getFileSize();

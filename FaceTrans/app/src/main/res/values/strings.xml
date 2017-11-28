@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">FaceTrans</string>
+
+    <string name="str_name">名称</string>
+    <string name="str_has_selected">已选（0）</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string-array name="array_res">
+        <item>应用</item>
+        <item>图片</item>
+        <item>音乐</item>
+        <item>视频</item>
+    </string-array>
+    <string name="str_has_selected_detail">已选（%d）</string>
+    <string name="str_selected_file_info_detail">{count}个文件共{size}</string>
 </resources>

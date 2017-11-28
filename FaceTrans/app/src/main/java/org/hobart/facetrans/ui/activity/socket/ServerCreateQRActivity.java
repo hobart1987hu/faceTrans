@@ -25,7 +25,6 @@ import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ToastUtils;
-import org.hobart.facetrans.util.WifiTools;
 import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.CreateWifiAPThread;
 import org.hobart.facetrans.wifi.WifiHelper;
@@ -65,7 +64,7 @@ public class ServerCreateQRActivity extends Activity {
      */
     private void createWifiAp() {
         mSSID = AndroidUtils.getDeviceModel();
-        mPWD = WifiTools.getRandomPwd();
+        mPWD ="123456";// WifiTools.getRandomPwd();
         WifiHelper.getInstance().closeWifi();
         ApWifiHelper.getInstance().createWifiAP(mSSID, mPWD);
         mCreateWifiAPThread = new CreateWifiAPThread();

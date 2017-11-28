@@ -1,12 +1,11 @@
 package org.hobart.facetrans.util;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.hobart.facetrans.GlobalConfig;
 
 /**
- * Created by huzeyin on 2017/11/7.
+ * Created by huzeyin on 2017/11/7.ßß
  */
 
 public class LogcatUtils {

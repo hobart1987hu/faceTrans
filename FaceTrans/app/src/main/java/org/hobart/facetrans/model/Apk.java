@@ -1,10 +1,8 @@
 package org.hobart.facetrans.model;
 
 /**
- * 手机中的apk
- * Created by huzeyin on 2017/11/20.
+ * Created by huzeyin on 2017/11/27.
  */
 
-public class Apk extends FTModel {
-
+public class Apk extends FTFile {
 }

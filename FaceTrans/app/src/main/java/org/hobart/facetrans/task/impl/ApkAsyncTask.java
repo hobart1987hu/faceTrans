@@ -1,8 +1,11 @@
 package org.hobart.facetrans.task.impl;
 
+import org.hobart.facetrans.FTType;
+import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.model.Apk;
 import org.hobart.facetrans.task.FTTask;
 import org.hobart.facetrans.task.FTTaskCallback;
+import org.hobart.facetrans.util.FileUtils;
 
 import java.util.List;
 
@@ -18,6 +21,8 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
 
     @Override
     protected List<Apk> execute() {
-        return null;
+        List<Apk> apks = FileUtils.getSpecificTypeFiles(new String[]{GlobalConfig.EXTEND_APK});
+        apks = FileUtils.getDetailFTFiles(apks, FTType.APK);
+        return apks;
     }
 }
