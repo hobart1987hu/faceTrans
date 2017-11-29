@@ -25,10 +25,9 @@ public class TransferSender {
     public TransferSender(Socket socket) {
         mSocket = socket;
         mExecute = Executors.newCachedThreadPool();
-        startSend();
     }
 
-    private void startSend() {
+    public void startSend() {
         if (mSocket != null && mSocket.isConnected()) {
             mSendThread = new SendRunnable(mSocket);
             mReceiveThread = new ReceiveRunnable(mSocket);
@@ -47,13 +46,13 @@ public class TransferSender {
         @Override
         public void run() {
             while (monitor) {
-                try {
-                    SocketTransferQueue.getInstance().sendHeartMsg();
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    e.printStackTrace();
-                }
+//                try {
+//                    SocketTransferQueue.getInstance().sendHeartMsg();
+////                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                    e.printStackTrace();
+//                }
             }
         }
 
@@ -83,7 +82,7 @@ public class TransferSender {
     private void releaseService() {
         if (mSendThread != null) {
             mSendThread.setIsContinue(false);
-            mSendThread.closeStreame();
+            mSendThread.closeStream();
         }
 
         if (mReceiveThread != null) {

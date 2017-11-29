@@ -45,5 +45,5 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
     compile files('libs/zxing.jar')
-
+    compile files('libs/gson-2.8.2.jar')
 }

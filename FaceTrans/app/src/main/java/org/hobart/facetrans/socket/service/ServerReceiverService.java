@@ -84,6 +84,9 @@ public class ServerReceiverService extends Service {
         LogcatUtils.d(LOG_PREFIX + "----onStartCommand----");
         if (null == intent) return START_STICKY;
         final String action = intent.getAction();
+
+        LogcatUtils.d(LOG_PREFIX + "----action :" + action);
+
         if (!TextUtils.isEmpty(action)) {
             if (action.equals(SocketConstants.ACTION_CREATE_SERVER_SOCKET)) {
                 createReceiverSocket();
@@ -129,7 +132,7 @@ public class ServerReceiverService extends Service {
         return mSocket;
     }
 
-    private class MyBinder extends Binder {
+    public class MyBinder extends Binder {
 
         public ServerReceiverService getService() {
             return ServerReceiverService.this;

@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 public class FTFile implements Serializable {
 
-    //必要属性
     /**
      * 文件路径
      */
@@ -42,7 +41,6 @@ public class FTFile implements Serializable {
      * 文件缩略图 (mp4与apk可能需要)
      */
     private Bitmap bitmap;
-
 
     public FTFile() {
 

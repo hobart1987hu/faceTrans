@@ -99,7 +99,13 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
-        <service android:name=".socket.service.ServerReceiverService" />
+        <service android:name=".socket.service.ServerReceiverService">
+            <intent-filter >
+                <action android:name="org.hobart.create.server_socket"/>
+                <action android:name="org.hobart.stop.server_socket"/>
+            </intent-filter>
+
+        </service>
         <service android:name=".socket.service.SocketSenderService" />
 
     </application>

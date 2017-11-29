@@ -1,11 +1,13 @@
 package org.hobart.facetrans.socket.transfer;
 
-import org.hobart.facetrans.event.BaseSocketEvent;
+import com.google.gson.Gson;
+
+import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.transfer.model.FileTransModel;
 import org.hobart.facetrans.socket.transfer.model.TextTransModel;
 import org.hobart.facetrans.socket.transfer.model.TransModel;
-import org.hobart.facetrans.util.AndroidUtils;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -18,7 +20,6 @@ public class SocketTransferQueue {
     private static SocketTransferQueue sInstance = null;
 
     private LinkedBlockingDeque<TransModel> mTransferQueue = new LinkedBlockingDeque();
-
 
     private static ReentrantLock LOCK = new ReentrantLock();
 
@@ -41,58 +42,50 @@ public class SocketTransferQueue {
     }
 
     /**
-     * 发送手机设备
+     * 发送传输文件列表
      */
-    public void sendDeviceModel() {
-        String content = BaseSocketEvent.SOCKET_DEVICE_MODEL_HEAD + AndroidUtils.getDeviceModel();
-        TextTransModel bean = new TextTransModel(content);
-        put(bean);
+    public void sendFTFileList(List<TransferModel> transferModels) {
+        Gson gson = new Gson();
+        String ftFileLists = gson.toJson(transferModels);
+        TextTransModel ftFileListModel = new TextTransModel(TransModel.TYPE_LIST, ftFileLists);
+        ftFileListModel.mode = TransModel.OPERATION_MODE_SEND;
+        put(ftFileListModel);
     }
 
     /**
-     * 发送文件
-     */
-    public void sendFile(FileTransModel bean) {
-        if (bean != null) {
-            put(bean);
-        }
-    }
-
-    /**
-     * 文件文件压缩中
-     */
-    public void sendFileZip() {
-        TextTransModel bean = new TextTransModel(BaseSocketEvent.SOCKET_SEND_ZIP);
-        put(bean);
-    }
-
-    /**
-     * 所有文件发送完成
-     */
-    public void sendFileFinish() {
-        TextTransModel bean = new TextTransModel(BaseSocketEvent.SOCKET_SERVICE_SEND_FINISH);
-        put(bean);
-    }
-
-    /**
-     * 发送心跳检测数据
+     * 发送心跳包
      */
     public void sendHeartMsg() {
-        TextTransModel hearBeatBean = new TextTransModel(BaseSocketEvent.SOCKET_HEART_BEAT);
-        put(hearBeatBean);
+//        TextTransModel heartBeatModel = new TextTransModel(TransModel.TYPE_HEART_BEAT, TransModel.CONTENT_HEART_BEAT);
+//        heartBeatModel.mode = TransModel.OPERATION_MODE_SEND;
+//        put(heartBeatModel);
     }
 
-    public void put(TransModel bean) {
+    public void sendSingleFTFile(TransferModel transferModel, String filePath, boolean isZipFile) {
+        FileTransModel fileTransModel = new FileTransModel();
+        fileTransModel.mode = FileTransModel.OPERATION_MODE_SEND;
+        fileTransModel.type = FileTransModel.TYPE_FILE;
+        fileTransModel.status = TransferStatus.TRANSFERING;
+        fileTransModel.setZipFile(isZipFile);
+        fileTransModel.setFilePath(filePath);
+        fileTransModel.setFileSize(Long.parseLong(transferModel.getSize()));
+        fileTransModel.setId(transferModel.getId());
+        fileTransModel.setFileName(transferModel.getFileName());
+        put(fileTransModel);
+    }
+
+
+    public void put(TransModel transModel) {
 
         try {
-            mTransferQueue.put(bean);
+            mTransferQueue.put(transModel);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public TransModel poll() {
-        return mTransferQueue.poll();
+    public TransModel take() throws InterruptedException {
+        return mTransferQueue.take();
     }
 
     public void clear() {

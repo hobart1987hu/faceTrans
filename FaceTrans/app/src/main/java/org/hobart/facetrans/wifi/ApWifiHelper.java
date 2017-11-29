@@ -1,7 +1,10 @@
 package org.hobart.facetrans.wifi;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
@@ -40,11 +43,12 @@ public class ApWifiHelper {
     }
 
     private WifiManager mWifiManager;
+    private ConnectivityManager mConnectivityManager;
 
     private ApWifiHelper() {
         mWifiManager = (WifiManager) FaceTransApplication.getFaceTransApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        mConnectivityManager = (ConnectivityManager) FaceTransApplication.getFaceTransApplicationContext().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
-
 
     /**
      * 检查Wi-Fi热点是否已经打开
@@ -177,6 +181,17 @@ public class ApWifiHelper {
         }
     }
 
+    public void disableCurrentNetWork() {
+        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+        WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+        if (mNetworkInfo != null) {
+            if (mNetworkInfo.isConnected()) {//判断wifi 是否连接
+                int networkId = wifiInfo.getNetworkId();
+                mWifiManager.disableNetwork(networkId);
+                mWifiManager.saveConfiguration();
+            }
+        }
+    }
 
     private static int WIFI_AP_STATE_DISABLING = 10;
     private static int WIFI_AP_STATE_DISABLED = 11;

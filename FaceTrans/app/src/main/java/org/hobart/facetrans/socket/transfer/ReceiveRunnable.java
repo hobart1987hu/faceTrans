@@ -2,7 +2,7 @@ package org.hobart.facetrans.socket.transfer;
 
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.GlobalConfig;
-import org.hobart.facetrans.event.BaseSocketEvent;
+import org.hobart.facetrans.event.SocketEvent;
 import org.hobart.facetrans.event.SocketFileEvent;
 import org.hobart.facetrans.event.SocketTextEvent;
 import org.hobart.facetrans.socket.SocketConstants;
@@ -35,6 +35,7 @@ public class ReceiveRunnable implements Runnable {
     private int mCurrentTransferStatus = TransferStatus.WAITING;
     private long totalSize = 0;
     private long fileSize = 0;
+    private boolean isZipFile;
     private String savePath = null;
     private String fileName;
     private String id;
@@ -63,9 +64,16 @@ public class ReceiveRunnable implements Runnable {
 
                 LogcatUtils.d(LOG_PREFIX + "接收类型 " + type);
 
-                if (type == TransModel.TYPE_TEXT) {
-                    receiveText(mInputStream);
+                if (type == TransModel.TYPE_LIST || type == TransModel.TYPE_HEART_BEAT) {
+
+                    LogcatUtils.d(LOG_PREFIX + "接收文本 ");
+
+                    receiveText(type, mInputStream);
+
                 } else if (type == TransModel.TYPE_FILE) {
+
+                    LogcatUtils.d(LOG_PREFIX + "接收文件 ");
+
                     receiveFile(mInputStream);
                 }
                 try {
@@ -75,11 +83,11 @@ public class ReceiveRunnable implements Runnable {
                 }
             }
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
     }
 
-    private void receiveText(DataInputStream inputStream) {
+    private void receiveText(int type, DataInputStream inputStream) {
 
         if (null == inputStream) return;
         try {
@@ -87,7 +95,8 @@ public class ReceiveRunnable implements Runnable {
 
             LogcatUtils.d(LOG_PREFIX + "接收的文本内容是 " + content);
 
-            postReceiveText(content);
+            if (type == TransModel.TYPE_LIST)
+                postReceiveText(content);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,6 +113,11 @@ public class ReceiveRunnable implements Runnable {
         reset();
 
         try {
+
+            isZipFile = inputStream.readInt() == 1 ? true : false;
+
+            LogcatUtils.d(LOG_PREFIX + "接收的文件是否是压缩形式 " + isZipFile);
+
             fileSize = inputStream.readLong();
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件大小 " + fileSize);
@@ -225,14 +239,12 @@ public class ReceiveRunnable implements Runnable {
 
     private void postReceiverFileInfo() {
         int progress = getReceiveProgress(fileSize, totalSize);
-        SocketFileEvent event = new SocketFileEvent();
+        SocketFileEvent event = new SocketFileEvent(TransModel.TYPE_FILE, mCurrentTransferStatus, SocketEvent.OPERATION_MODE_RECEIVER);
         event.progress = progress;
         event.fileName = fileName;
-        event.status = mCurrentTransferStatus;
         event.id = id;
         event.fileSavePath = savePath;
-        event.type = BaseSocketEvent.TYPE_FILE;
-        event.mode = BaseSocketEvent.OPERATION_MODE_RECEIVER;
+        event.isZipFile = isZipFile;
         if (mCurrentTransferStatus == TransferStatus.TRANSFER_SUCCESS
                 || mCurrentTransferStatus == TransferStatus.TRANSFER_FAILED) {
             if (mReceiveThread != null) {
@@ -252,16 +264,15 @@ public class ReceiveRunnable implements Runnable {
     }
 
     private void postReceiveText(String content) {
-        SocketTextEvent event = new SocketTextEvent();
+        SocketTextEvent event = new SocketTextEvent(TransModel.TYPE_LIST, TransferStatus.TRANSFER_SUCCESS, TransModel.OPERATION_MODE_RECEIVER);
         event.content = content;
-        event.type = BaseSocketEvent.TYPE_TEXT;
         EventBus.getDefault().post(event);
     }
-
 
     private void reset() {
         totalSize = 0;
         fileSize = 0;
+        isZipFile = false;
         savePath = null;
         fileName = null;
         id = null;

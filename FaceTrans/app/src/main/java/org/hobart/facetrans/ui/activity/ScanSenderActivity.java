@@ -17,7 +17,6 @@ import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.ApCreateEvent;
 import org.hobart.facetrans.event.SocketStatusEvent;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
-import org.hobart.facetrans.ui.widget.RadarView;
 import org.hobart.facetrans.ui.widget.RippleImageView;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
@@ -76,10 +75,10 @@ public class ScanSenderActivity extends BaseActivity {
             if ("android.net.wifi.WIFI_AP_STATE_CHANGED".equals(action)) {
                 //便携式热点的状态为：10---正在关闭；11---已关闭；12---正在开启；13---已开启
                 int state = intent.getIntExtra("wifi_state", 0);
-                if (state == 11) {
-                    ToastUtils.showLongToast("热点已关闭");
-                    finish();
-                }
+//                if (state == 10) {
+//                    ToastUtils.showLongToast("热点关闭");
+//                    finish();
+//                }
             }
         }
     }
@@ -93,6 +92,7 @@ public class ScanSenderActivity extends BaseActivity {
         }
         switch (event.status) {
             case ApCreateEvent.SUCCESS:
+                ToastUtils.showLongToast("Wi-Fi热点创建成功");
                 LogcatUtils.d(LOG_PREFIX + "onWifiAPCreateCallBack onSuccess: 热点创建成功");
                 if (!connectedSuccess) {
                     IntentUtils.startServerSocketService(this);
@@ -118,12 +118,12 @@ public class ScanSenderActivity extends BaseActivity {
         }
         switch (bean.status) {
             case SocketStatusEvent.CONNECTED_SUCCESS:
-                ToastUtils.showLongToast("创建发送端成功失败！");
+//                ToastUtils.showLongToast("创建发送端成功！");
                 IntentUtils.intentToReceiveFileActivity(this);
                 finish();
                 break;
             case SocketStatusEvent.CONNECTED_FAILED:
-                ToastUtils.showLongToast("创建发送端失败！");
+//                ToastUtils.showLongToast("创建发送端失败！");
                 IntentUtils.stopServerReceiverService(this);
                 finish();
                 break;
@@ -147,9 +147,8 @@ public class ScanSenderActivity extends BaseActivity {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         if (null != mCreateWifiAPThread) mCreateWifiAPThread.cancelDownTimer();
-        if (mWifiAPConnectedReceiver != null) {
+        if (null != mWifiAPConnectedReceiver)
             unregisterReceiver(mWifiAPConnectedReceiver);
-        }
     }
 
     @Override

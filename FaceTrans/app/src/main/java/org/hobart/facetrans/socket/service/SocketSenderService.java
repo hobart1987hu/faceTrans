@@ -37,9 +37,11 @@ public class SocketSenderService extends Service {
 
         final String action = intent.getAction();
 
+        LogcatUtils.d(LOGINFO_PREFIX + "action -> " + action);
+
         if (!TextUtils.isEmpty(action)) {
             if (action.equals(SocketConstants.ACTION_CREATE_CLIENT_SOCKET)) {
-                mHost = intent.getStringExtra("mHost");
+                mHost = intent.getStringExtra("host");
                 releaseSocket();
                 newSocket();
             } else if (action.equals(SocketConstants.ACTION_STOP_CLIENT_SOCKET)) {
@@ -78,6 +80,7 @@ public class SocketSenderService extends Service {
     }
 
     private void newSocket() {
+        retryCount = 3;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -116,7 +119,7 @@ public class SocketSenderService extends Service {
         EventBus.getDefault().post(statusBean);
     }
 
-    private class MyBinder extends Binder {
+    public class MyBinder extends Binder {
 
         public SocketSenderService getService() {
             return SocketSenderService.this;

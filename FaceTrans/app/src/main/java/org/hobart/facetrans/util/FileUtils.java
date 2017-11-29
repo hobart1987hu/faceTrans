@@ -19,12 +19,24 @@ import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.FTFile;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 public class FileUtils {
 
@@ -161,6 +173,11 @@ public class FileUtils {
             value = (size * 100l / (1024l * 1024l * 1024l)) / 100f;
             return FORMAT.format(value) + "GB";
         }
+    }
+
+    public static long getFileSize(String filePath) {
+        File file = new File(filePath);
+        return file.length();
     }
 
     private static Bitmap getScreenshotBitmap(String filePath, FTType type) {
@@ -332,5 +349,84 @@ public class FileUtils {
         }
         return false;
 
+    }
+
+    private static final int BUFF_SIZE = 1024 * 10; // 10K
+
+    public static void zipFiles(Collection<File> resFileList, File zipFile) throws IOException {
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile), BUFF_SIZE * 100));
+        for (File resFile : resFileList) {
+            zipFile(resFile, zipOutputStream, "");
+        }
+        zipOutputStream.close();
+    }
+
+    private static void zipFile(File resFile, ZipOutputStream zipOutputStream, String rootPath)
+            throws IOException {
+        rootPath = rootPath + (rootPath.trim().length() == 0 ? "" : File.separator) + resFile.getName();
+        rootPath = new String(rootPath.getBytes("8859_1"), "utf-8");
+        if (resFile.isDirectory()) {
+            File[] fileList = resFile.listFiles();
+            for (File file : fileList) {
+                zipFile(file, zipOutputStream, rootPath);
+            }
+        } else {
+            byte buffer[] = new byte[BUFF_SIZE];
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(resFile),
+                    BUFF_SIZE * 100);
+            zipOutputStream.putNextEntry(new ZipEntry(rootPath));
+            int realLength;
+            while ((realLength = in.read(buffer)) != -1) {
+                zipOutputStream.write(buffer, 0, realLength);
+            }
+            in.close();
+            zipOutputStream.flush();
+            zipOutputStream.closeEntry();
+        }
+    }
+
+    public static void upZipFile(File zipFile, String folderPath) throws IOException {
+        File desDir = new File(folderPath);
+        if (!desDir.exists()) {
+            desDir.mkdirs();
+        }
+        ZipFile zf = new ZipFile(zipFile);
+        for (Enumeration<?> entries = zf.entries(); entries.hasMoreElements(); ) {
+            ZipEntry entry = ((ZipEntry) entries.nextElement());
+            if (entry.isDirectory()) {
+                String tmpStr = folderPath + File.separator + entry.getName();
+                tmpStr = new String(tmpStr.getBytes("8859_1"), "UTF-8");
+                File folder = new File(tmpStr);
+                folder.mkdirs();
+            } else {
+                InputStream is = zf.getInputStream(entry);
+                String str = folderPath + File.separator + entry.getName();
+                str = new String(str.getBytes("8859_1"), "UTF-8");
+                File desFile = new File(str);
+                if (desFile.exists()) {
+                    File f = new File(desFile.getParent() + "/" + System.currentTimeMillis());
+                    desFile.renameTo(f);
+                    f.delete();
+                }
+                if (!desFile.exists()) {
+                    File fileParentDir = desFile.getParentFile();
+                    if (!fileParentDir.exists()) {
+                        fileParentDir.mkdirs();
+                    }
+                    desFile.createNewFile();
+                }
+                OutputStream os = new FileOutputStream(desFile);
+                byte[] buffer = new byte[BUFF_SIZE];
+                int realLength;
+
+                while ((realLength = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, realLength);
+                    os.flush();
+                }
+                is.close();
+                os.close();
+            }
+        }
+        zf.close();
     }
 }

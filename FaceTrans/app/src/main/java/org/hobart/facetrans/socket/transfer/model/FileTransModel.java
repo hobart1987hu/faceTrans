@@ -4,7 +4,7 @@ package org.hobart.facetrans.socket.transfer.model;
  * Created by huzeyin on 2017/11/27.
  */
 
-public class FileTransModel implements TransModel {
+public class FileTransModel extends TransModel {
 
     private String fileName;
 
@@ -12,7 +12,10 @@ public class FileTransModel implements TransModel {
 
     private String filePath;
 
-    private String savePath;
+    private boolean isZipFile;
+
+
+    //    private String savePath;
 
     private String id;
 
@@ -40,12 +43,21 @@ public class FileTransModel implements TransModel {
         this.filePath = filePath;
     }
 
-    public String getSavePath() {
-        return savePath;
+//    public String getSavePath() {
+//        return savePath;
+//    }
+//
+//    public void setSavePath(String savePath) {
+//        this.savePath = savePath;
+//    }
+
+
+    public boolean isZipFile() {
+        return isZipFile;
     }
 
-    public void setSavePath(String savePath) {
-        this.savePath = savePath;
+    public void setZipFile(boolean zipFile) {
+        isZipFile = zipFile;
     }
 
     public String getId() {

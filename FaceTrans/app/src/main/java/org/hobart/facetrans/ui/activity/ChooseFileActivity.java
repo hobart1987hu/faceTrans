@@ -17,7 +17,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
-import org.hobart.facetrans.event.FileInfoEvent;
+import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.dialog.ShowSelectedFileInfoDialog;
@@ -133,7 +133,7 @@ public class ChooseFileActivity extends BaseActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onFileInfoChanged(FileInfoEvent event) {
+    public void onFTFilesChanged(FTFilesChangedEvent event) {
         update();
     }
 

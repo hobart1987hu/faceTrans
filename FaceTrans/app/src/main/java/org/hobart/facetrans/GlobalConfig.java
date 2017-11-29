@@ -28,6 +28,24 @@ public class GlobalConfig {
         return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "facetrans";
     }
 
+    /**
+     * 存放压缩文件
+     *
+     * @return
+     */
+    public static String getTransferZipDirectory() {
+        return getTransferDirectory() + File.separator + "transZipDir" + File.separator;
+    }
+
+    /**
+     * 存放解压后的文件
+     *
+     * @return
+     */
+    public static String getTransferUnZipDirectory() {
+        return getTransferDirectory() + File.separator + "transUnSZipDir" + File.separator;
+    }
+
     public static final boolean DEBUG = true;
 
     /**

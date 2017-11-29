@@ -62,7 +62,7 @@ public class TransferReceiver {
         }
         if (mSendThread != null) {
             mSendThread.setIsContinue(false);
-            mSendThread.closeStreame();
+            mSendThread.closeStream();
         }
         if (mExecute != null) {
             if (!mExecute.isShutdown()) {

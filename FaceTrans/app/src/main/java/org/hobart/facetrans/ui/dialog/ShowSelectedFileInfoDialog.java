@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.R;
-import org.hobart.facetrans.event.FileInfoEvent;
+import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.ui.adapter.FileInfoSelectedAdapter;
@@ -58,7 +58,7 @@ public class ShowSelectedFileInfoDialog {
                     hide();
                 }
                 tv_title.setText(getAllSelectedFilesDes());
-                EventBus.getDefault().post(new FileInfoEvent());
+                EventBus.getDefault().post(new FTFilesChangedEvent());
             }
         });
 
@@ -74,7 +74,7 @@ public class ShowSelectedFileInfoDialog {
         switch (view.getId()) {
             case R.id.btn_operation: {
                 clearAllSelectedFiles();
-                EventBus.getDefault().post(new FileInfoEvent());
+                EventBus.getDefault().post(new FTFilesChangedEvent());
                 break;
             }
         }

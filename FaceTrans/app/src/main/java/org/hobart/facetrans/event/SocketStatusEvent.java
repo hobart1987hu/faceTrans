@@ -11,5 +11,6 @@ public class SocketStatusEvent {
     public static final int CONNECTED_FAILED = 2;
     //断开连接
     public static final int DIS_CONNECTED = 3;
+    
     public int status;
 }

@@ -57,9 +57,6 @@ public class ScanReceiverActivity extends BaseActivity {
 
     private boolean openWifi = false;
 
-    /**
-     * 加入热点
-     */
     private void joinAp() {
         if (!WifiHelper.getInstance().isWifiEnable()) {
             openWifi = true;
@@ -151,10 +148,9 @@ public class ScanReceiverActivity extends BaseActivity {
         }
     }
 
-
     private void startCountDownTimer() {
         if (null != mCountDownTimer) mCountDownTimer.cancel();
-        mCountDownTimer = new CountDownTimer(10 * 1000, 1 * 1000) {
+        mCountDownTimer = new CountDownTimer(60 * 1000, 1 * 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
 
