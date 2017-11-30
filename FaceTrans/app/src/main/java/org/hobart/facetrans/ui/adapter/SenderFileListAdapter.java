@@ -40,8 +40,7 @@ public class SenderFileListAdapter extends RecyclerView.Adapter<SenderFileListAd
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        ViewHolder viewHolder = (ViewHolder) holder;
+    public void onBindViewHolder(ViewHolder viewHolder, int position) {
         TransferModel model = mSendLists.get(position);
         setTransferStatus(viewHolder.tv_transfer_status, model);
         viewHolder.tv_file_name.setText(model.getFileName());

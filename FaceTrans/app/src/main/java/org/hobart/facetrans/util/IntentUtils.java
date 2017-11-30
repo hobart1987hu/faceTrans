@@ -68,14 +68,14 @@ public class IntentUtils {
         activity.stopService(service);
     }
 
-    public static void startClientSocketService(Activity activity, String host) {
+    public static void startSocketSenderService(Activity activity, String host) {
         Intent service = new Intent(activity, SocketSenderService.class);
         service.setAction(SocketConstants.ACTION_CREATE_CLIENT_SOCKET);
         service.putExtra("host", host);
         activity.startService(service);
     }
 
-    public static void stopClientSocketService(Activity activity) {
+    public static void stopSocketSenderService(Activity activity) {
         Intent service = new Intent(activity, SocketSenderService.class);
         service.setAction(SocketConstants.ACTION_STOP_CLIENT_SOCKET);
         activity.stopService(service);

@@ -3,9 +3,6 @@
     package="org.hobart.facetrans">
 
 
-    <uses-feature android:glEsVersion="0x00020000" />
-
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -17,17 +14,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature android:name="android.hardware.screen.landscape" />
-
-
-    <!-- 二维码权限 -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.FLASHLIGHT" />
 
     <supports-screens
         android:anyDensity="true"
@@ -79,30 +65,12 @@
         <activity
             android:name=".ui.activity.ReceiveFileActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            />
-
-        <activity
-            android:name=".ui.activity.socket.ServerCreateQRActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/FullScreen.AppTheme" />
-        <activity
-            android:name=".ui.activity.socket.ClientScanQRActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/FullScreen.AppTheme" />
-
-
-        <activity
-            android:name="com.zxing.android.CaptureActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service android:name=".socket.service.ServerReceiverService">
-            <intent-filter >
-                <action android:name="org.hobart.create.server_socket"/>
-                <action android:name="org.hobart.stop.server_socket"/>
+            <intent-filter>
+                <action android:name="org.hobart.create.server_socket" />
+                <action android:name="org.hobart.stop.server_socket" />
             </intent-filter>
 
         </service>

@@ -40,8 +40,7 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        ViewHolder viewHolder = (ViewHolder) holder;
+    public void onBindViewHolder(ViewHolder viewHolder, int position) {
         TransferModel model = mReceiveLists.get(position);
         setTransferStatus(viewHolder.tv_transfer_status, model);
         viewHolder.tv_file_name.setText(model.getFileName());
@@ -82,9 +81,11 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
                 tv_transfer_status.setText("解压中");
                 break;
             case TransferStatus.FINISH:
+                //所有都完成
                 tv_transfer_status.setText("完成");
                 break;
             case TransferStatus.FAILED:
+                //最终失败了
                 tv_transfer_status.setText("失败");
                 break;
             default:

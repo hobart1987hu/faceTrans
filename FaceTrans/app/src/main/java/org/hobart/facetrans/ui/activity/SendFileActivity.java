@@ -15,6 +15,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
+import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.event.SocketEvent;
 import org.hobart.facetrans.event.SocketFileEvent;
 import org.hobart.facetrans.event.SocketTextEvent;
@@ -32,12 +33,14 @@ import org.hobart.facetrans.socket.transfer.thread.ZipFTFileRunnable;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.adapter.SenderFileListAdapter;
 import org.hobart.facetrans.util.FileUtils;
+import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.ToastUtils;
 import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.WifiHelper;
 
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +62,10 @@ public class SendFileActivity extends BaseActivity {
 
     private SenderFileListAdapter mAdapter;
 
-    private List<TransferModel> mSendFileLists;
+    private List<TransferModel> mSendFileLists = Collections.synchronizedList(new ArrayList<TransferModel>());
 
     @Bind(R.id.recycleView)
     RecyclerView recycleView;
-
-    //TODO:需要监听网络变化
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,7 +80,6 @@ public class SendFileActivity extends BaseActivity {
     }
 
     private void init() {
-        mSendFileLists = new ArrayList<>();
         mAutoCreateTransferId = new AtomicLong(2);
         Map<String, FTFile> map = FTFileManager.getInstance().getFTFiles();
         Iterator<FTFile> iterator = map.values().iterator();
@@ -106,7 +106,6 @@ public class SendFileActivity extends BaseActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mSocket = ((SocketSenderService.MyBinder) service).getService().getSenderSocket();
-            ToastUtils.showLongToast("发送文件Socket服务绑定成功");
             startSendFile();
         }
 
@@ -184,7 +183,7 @@ public class SendFileActivity extends BaseActivity {
         final int size = mSendFileLists.size();
 
         if (mSendPointer >= size) {
-            ToastUtils.showLongToast("所有文件全部传输完成，恭喜你 !");
+            ToastUtils.showLongToast("恭喜你，所有文件全部传输完成!");
             return;
         }
         TransferModel transferModel = mSendFileLists.get(mSendPointer);
@@ -223,11 +222,21 @@ public class SendFileActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        clearAll();
+    }
+
+    private void clearAll() {
+        //发送文件，我方是连接Wi-Fi热点的，
+        //断开当前的热点连接
         ApWifiHelper.getInstance().disableCurrentNetWork();
+        //打开Wi-Fi
         WifiHelper.getInstance().openWifi();
+        FTFileManager.getInstance().clear();
+        EventBus.getDefault().post(new FTFilesChangedEvent());
         SocketTransferQueue.getInstance().clear();
         EventBus.getDefault().unregister(this);
         unbindService(mConnection);
+        IntentUtils.stopSocketSenderService(this);
         if (null != mSender) mSender.release();
         new Thread(new Runnable() {
             @Override

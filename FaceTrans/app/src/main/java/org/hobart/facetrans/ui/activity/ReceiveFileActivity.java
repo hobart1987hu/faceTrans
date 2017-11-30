@@ -29,12 +29,13 @@ import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.socket.transfer.thread.UnZipFTFileRunnable;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.adapter.ReceiveFileListAdapter;
-import org.hobart.facetrans.util.ToastUtils;
+import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.WifiHelper;
 
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.Bind;
@@ -47,14 +48,11 @@ import butterknife.ButterKnife;
 
 public class ReceiveFileActivity extends BaseActivity {
 
-    //TODO:等解压缩结束了，回调给发送端，开始发送下一个文件了
-
     private Socket mSocket;
 
-    private List<TransferModel> mReceiveFileLists;
+    private List<TransferModel> mReceiveFileLists = Collections.synchronizedList(new ArrayList<TransferModel>());
 
     private ReceiveFileListAdapter mAdapter;
-
 
     @Bind(R.id.recycleView)
     RecyclerView recycleView;
@@ -67,7 +65,6 @@ public class ReceiveFileActivity extends BaseActivity {
         EventBus.getDefault().register(this);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
-        mReceiveFileLists = new ArrayList<>();
         mAdapter = new ReceiveFileListAdapter(this, mReceiveFileLists);
         recycleView.setAdapter(mAdapter);
 
@@ -82,7 +79,6 @@ public class ReceiveFileActivity extends BaseActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mSocket = ((ServerReceiverService.MyBinder) service).getService().getReceiverSocket();
-            ToastUtils.showLongToast("接收文件Socket服务绑定 成功");
             readyReceiveFile();
         }
 
@@ -112,24 +108,8 @@ public class ReceiveFileActivity extends BaseActivity {
                         if (fileEvent.isZipFile) {
                             unZipFTFile(fileEvent);
                         } else {
-                            int position = -1;
-                            synchronized (mReceiveFileLists) {
-                                final int size = mReceiveFileLists.size();
-                                for (int i = 0; i < size; i++) {
-                                    TransferModel model = mReceiveFileLists.get(i);
-                                    if (TextUtils.equals(model.getId(), fileEvent.id)) {
-                                        model.setTransferStatus(TransferStatus.UNZIP);
-                                        mReceiveFileLists.set(i, model);
-                                        position = i;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (position == -1) return;
-                            TransferModel model = mReceiveFileLists.get(position);
-                            model.setTransferStatus(TransferStatus.FINISH);
-                            mReceiveFileLists.set(position, model);
-                            mAdapter.notifyItemChanged(position);
+                            //直接更新完成
+                            updateAdapterByStatus(fileEvent, TransferStatus.FINISH);
                         }
                     }
                 }
@@ -168,33 +148,27 @@ public class ReceiveFileActivity extends BaseActivity {
     }
 
     private void unZipFTFile(SocketFileEvent event) {
-        int position = -1;
-        synchronized (mReceiveFileLists) {
-            final int size = mReceiveFileLists.size();
-            for (int i = 0; i < size; i++) {
-                TransferModel model = mReceiveFileLists.get(i);
-                if (TextUtils.equals(model.getId(), event.id)) {
-                    model.setTransferStatus(TransferStatus.UNZIP);
-                    mReceiveFileLists.set(i, model);
-                    position = i;
-                    break;
-                }
-            }
-        }
+
+        final int position = updateAdapterByStatus(event, TransferStatus.UNZIP);
+
         if (position == -1) return;
-        mAdapter.notifyItemChanged(position);
+
         SocketExecutorService.getExecute().execute(new UnZipFTFileRunnable(position, event.fileSavePath));
     }
 
     private void updateAdapter(SocketFileEvent event) {
+
+        updateAdapterByStatus(event, event.status);
+    }
+
+    private int updateAdapterByStatus(SocketFileEvent event, int status) {
         int position = -1;
         synchronized (mReceiveFileLists) {
             final int size = mReceiveFileLists.size();
             for (int i = 0; i < size; i++) {
                 TransferModel model = mReceiveFileLists.get(i);
                 if (TextUtils.equals(model.getId(), event.id)) {
-                    model.setTransferStatus(event.status);
-                    model.setProgress(event.progress);
+                    model.setTransferStatus(status);
                     mReceiveFileLists.set(i, model);
                     position = i;
                     break;
@@ -204,6 +178,7 @@ public class ReceiveFileActivity extends BaseActivity {
         if (position != -1) {
             mAdapter.notifyItemChanged(position);
         }
+        return position;
     }
 
     private void setAdapterData(String json) {
@@ -218,10 +193,17 @@ public class ReceiveFileActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        clearAll();
+    }
+
+    private void clearAll() {
+        //接收文件，我边是创建热点的，我要关闭热点，断开网络，打开Wi-Fi连接
         ApWifiHelper.getInstance().closeWifiAp();
+        ApWifiHelper.getInstance().disableCurrentNetWork();
         WifiHelper.getInstance().openWifi();
         EventBus.getDefault().unregister(this);
         unbindService(mConnection);
+        IntentUtils.stopServerReceiverService(this);
         if (null != mReceiver) mReceiver.release();
     }
 }

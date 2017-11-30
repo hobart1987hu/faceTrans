@@ -62,4 +62,8 @@ public class FTFileManager {
             mFTFiles.put(ftFile.getFilePath(), ftFile);
         }
     }
+
+    public void clear() {
+        mFTFiles.clear();
+    }
 }

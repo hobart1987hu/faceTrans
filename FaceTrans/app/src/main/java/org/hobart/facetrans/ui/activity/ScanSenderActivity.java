@@ -1,10 +1,5 @@
 package org.hobart.facetrans.ui.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
@@ -52,35 +47,11 @@ public class ScanSenderActivity extends BaseActivity {
     }
 
     private void createAp() {
+        // TODO: 如果有其他的热点，我们自己在创建热点是否有影响?
         WifiHelper.getInstance().closeWifi();
         ApWifiHelper.getInstance().createWifiAP(GlobalConfig.AP_SSID, GlobalConfig.AP_PWD);
         mCreateWifiAPThread = new CreateWifiAPThread();
         new Thread(mCreateWifiAPThread).start();
-    }
-
-    private ApWifiConnectedReceiver mWifiAPConnectedReceiver;
-
-    private void registerApWifiStatus() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.net.wifi.WIFI_AP_STATE_CHANGED");
-        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        mWifiAPConnectedReceiver = new ApWifiConnectedReceiver();
-        registerReceiver(mWifiAPConnectedReceiver, filter);
-    }
-
-    class ApWifiConnectedReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if ("android.net.wifi.WIFI_AP_STATE_CHANGED".equals(action)) {
-                //便携式热点的状态为：10---正在关闭；11---已关闭；12---正在开启；13---已开启
-                int state = intent.getIntExtra("wifi_state", 0);
-//                if (state == 10) {
-//                    ToastUtils.showLongToast("热点关闭");
-//                    finish();
-//                }
-            }
-        }
     }
 
     private boolean connectedSuccess = false;
@@ -94,10 +65,8 @@ public class ScanSenderActivity extends BaseActivity {
             case ApCreateEvent.SUCCESS:
                 ToastUtils.showLongToast("Wi-Fi热点创建成功");
                 LogcatUtils.d(LOG_PREFIX + "onWifiAPCreateCallBack onSuccess: 热点创建成功");
-                if (!connectedSuccess) {
+                if (!connectedSuccess)
                     IntentUtils.startServerSocketService(this);
-                    registerApWifiStatus();
-                }
                 connectedSuccess = true;
                 break;
             case ApCreateEvent.FAILED:
@@ -110,7 +79,6 @@ public class ScanSenderActivity extends BaseActivity {
         }
     }
 
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketStatusEvent(SocketStatusEvent bean) {
         if (bean == null) {
@@ -118,12 +86,11 @@ public class ScanSenderActivity extends BaseActivity {
         }
         switch (bean.status) {
             case SocketStatusEvent.CONNECTED_SUCCESS:
-//                ToastUtils.showLongToast("创建发送端成功！");
                 IntentUtils.intentToReceiveFileActivity(this);
                 finish();
                 break;
             case SocketStatusEvent.CONNECTED_FAILED:
-//                ToastUtils.showLongToast("创建发送端失败！");
+                ToastUtils.showLongToast("网络创建失败！");
                 IntentUtils.stopServerReceiverService(this);
                 finish();
                 break;
@@ -147,15 +114,17 @@ public class ScanSenderActivity extends BaseActivity {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         if (null != mCreateWifiAPThread) mCreateWifiAPThread.cancelDownTimer();
-        if (null != mWifiAPConnectedReceiver)
-            unregisterReceiver(mWifiAPConnectedReceiver);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             IntentUtils.stopServerReceiverService(this);
+            //关闭热点
             ApWifiHelper.getInstance().closeWifiAp();
+            //断开与当前的热点连接
+            ApWifiHelper.getInstance().disableCurrentNetWork();
+            //重新打开Wi-Fi
             WifiHelper.getInstance().openWifi();
             finish();
         }
