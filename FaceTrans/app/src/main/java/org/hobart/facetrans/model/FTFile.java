@@ -38,7 +38,7 @@ public class FTFile implements Serializable {
     private String sizeDesc;
 
     /**
-     * 文件缩略图 (mp4与apk可能需要)
+     * 文件缩略图 视频文件和apk文件需要的
      */
     private Bitmap bitmap;
 

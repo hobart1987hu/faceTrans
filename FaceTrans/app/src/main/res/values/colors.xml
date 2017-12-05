@@ -23,4 +23,6 @@
 
     <color name="half_trans_bg">#55000000</color>
 
+    <drawable name="recycle_view_divider">#aaa</drawable>
+
 </resources>

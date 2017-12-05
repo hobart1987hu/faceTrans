@@ -85,7 +85,7 @@ public class PerspectiveView extends GLSurfaceView implements GLSurfaceView.Rend
      */
     private boolean isReverse = false;
 
-    public void setTextures(Bitmap coverTexture, Bitmap contentTexture, float left, float right, float top, float bottom) {
+    public void setTextures(final Bitmap coverTexture, final Bitmap contentTexture, final float left, final float right, final float top, final float bottom) {
 
         this.isReverse = false;
         this.coverTexture = coverTexture;

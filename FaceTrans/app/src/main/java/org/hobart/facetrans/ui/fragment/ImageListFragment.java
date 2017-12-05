@@ -23,6 +23,7 @@ import org.hobart.facetrans.ui.activity.ChooseFileActivity;
 import org.hobart.facetrans.ui.adapter.ImageFileListAdapter;
 import org.hobart.facetrans.ui.adapter.ImageGridApter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.ui.view.RecyclerViewItemDecoration;
 import org.hobart.facetrans.util.AnimationUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
@@ -53,6 +54,7 @@ public class ImageListFragment extends Fragment {
         recycleView = (RecyclerView) rootView.findViewById(R.id.recycleView);
         recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
         recycleView.setHasFixedSize(true);
+        recycleView.addItemDecoration(new RecyclerViewItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
 
         progressBar = (ProgressBar) rootView.findViewById(R.id.pb);
 
@@ -145,7 +147,7 @@ public class ImageListFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(imageGridApter);
 
-        parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), folder.getFirstFilePath());
+        parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), folder.getFirstFilePath(), null);
     }
 
     @Override

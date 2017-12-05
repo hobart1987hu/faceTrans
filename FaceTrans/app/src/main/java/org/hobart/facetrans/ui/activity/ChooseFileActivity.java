@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -79,10 +80,6 @@ public class ChooseFileActivity extends BaseActivity {
         return fileListRecycleView;
     }
 
-    public LinearLayout getFileListContainer() {
-        return ll_fileList;
-    }
-
     @Bind(R.id.mFlipViewContainer)
     FlipViewContainer mFlipViewContainer;
     private PerspectiveView mPerspectiveView;
@@ -101,6 +98,7 @@ public class ChooseFileActivity extends BaseActivity {
     private final Handler mHandler = new Handler();
     private boolean isFlip = false;
     private String coverUrl;
+    private Bitmap bitmap;
 
 
     @Override
@@ -159,7 +157,14 @@ public class ChooseFileActivity extends BaseActivity {
      * 反转，回到原来的位置
      */
     private void startReverse() {
-        Bitmap coverBitmap = BitmapFactory.decodeFile(coverUrl);
+        Bitmap coverBitmap = null;
+        if (TextUtils.isEmpty(coverUrl)) {
+            coverBitmap = bitmap;
+        } else {
+            coverBitmap = BitmapFactory.decodeFile(coverUrl);
+        }
+        if (null == coverBitmap)
+            coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_default);
         mPerspectiveView.setReverse(true, coverBitmap, getContentBitmap());
         final ObjectAnimator animator = ObjectAnimator.ofFloat(mFlipViewContainer, "alpha", 0.7f, 0f);
         animator.setDuration(300);
@@ -170,7 +175,6 @@ public class ChooseFileActivity extends BaseActivity {
         animator.start();
     }
 
-
     public void setFlip(boolean isFlip) {
         this.isFlip = isFlip;
     }
@@ -179,19 +183,26 @@ public class ChooseFileActivity extends BaseActivity {
         return isFlip;
     }
 
-    public void delayFlipPerspectiveView(final View view, final float x, final float y, final int w, final int h, final String coverUrl) {
+    public void delayFlipPerspectiveView(final View view, final float x, final float y, final int w, final int h, final String coverUrl, final Bitmap bitmap) {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                flipPerspectiveView(view, x, y, w, h, coverUrl);
+                flipPerspectiveView(view, x, y, w, h, coverUrl, bitmap);
             }
         }, 200);
     }
 
-    private void flipPerspectiveView(final View view, float x, float y, int w, int h, String coverUrl) {
-
+    private void flipPerspectiveView(final View view, float x, float y, int w, int h, String coverUrl, Bitmap bitmap) {
         this.coverUrl = coverUrl;
-        Bitmap coverBitmap = BitmapFactory.decodeFile(coverUrl);
+        this.bitmap = bitmap;
+        Bitmap coverBitmap;
+        if (TextUtils.isEmpty(coverUrl)) {
+            coverBitmap = bitmap;
+        } else {
+            coverBitmap = BitmapFactory.decodeFile(coverUrl);
+        }
+        if (null == coverBitmap)
+            coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_default);
         float ratio = OpenGlUtils.VIEW_W_H;
         if (w / h > ratio) {
             w = (int) (h * ratio);
@@ -219,7 +230,7 @@ public class ChooseFileActivity extends BaseActivity {
 
     private Bitmap getContentBitmap() {
         int height = mScreenHeight - ll_bottom_bar.getLayoutParams().height;
-        return AndroidUtils.loadBitmapFromView(getFileListContainer(), mScreenWidth, height);
+        return AndroidUtils.loadBitmapFromView(ll_fileList, mScreenWidth, height);
     }
 
     private void initData() {
@@ -230,7 +241,7 @@ public class ChooseFileActivity extends BaseActivity {
         mApkListFragment = ApkListFragment.newInstance(FTType.APK);
         mImageListFragment = new ImageListFragment();
         mMusicListFragment = MusicListFragment.newInstance(FTType.MUSIC);
-        mVideoListFragment = VideoListFragment.newInstance(FTType.VIDEO);
+        mVideoListFragment = new VideoListFragment();
         mCurrentFragment = mApkListFragment;
 
         String[] titles = getResources().getStringArray(R.array.array_res);
