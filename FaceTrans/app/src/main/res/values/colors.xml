@@ -21,5 +21,6 @@
 
     <color name="color_yellow">#d5de85</color>
 
+    <color name="half_trans_bg">#55000000</color>
 
 </resources>

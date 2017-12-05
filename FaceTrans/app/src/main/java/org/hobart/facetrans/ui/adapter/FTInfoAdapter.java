@@ -103,7 +103,6 @@ public class FTInfoAdapter<T> extends FTAdapter {
                 viewHolder.tv_name.setText(ftFile.getName() == null ? "" : ftFile.getName());
                 viewHolder.tv_size.setText(ftFile.getSizeDesc() == null ? "" : ftFile.getSizeDesc());
 
-
                 if (FTFileManager.getInstance().isFTFileExist(ftFile)) {
                     viewHolder.iv_ok_tick.setVisibility(View.VISIBLE);
                 } else {

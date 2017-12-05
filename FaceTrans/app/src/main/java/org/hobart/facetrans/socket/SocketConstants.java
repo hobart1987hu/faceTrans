@@ -10,8 +10,6 @@ public class SocketConstants {
     public static final int SERVER_PORT = 6666;
     //Socket 连接超时
     public static final int SOCKET_CONNECTED_TIME_OUT = 10 * 1000;
-    //Socket 连接超时
-    public static final int SOCKETSERVER_CONNECTED_TIME_OUT = 15 * 1000;
     //Socket 缓存区大小
     public static final int TCP_BUFFER_SIZE = 1024 * 1024;
     //Socket 心跳检测超时时间

@@ -15,4 +15,5 @@
     </string-array>
     <string name="str_has_selected_detail">已选（%d）</string>
     <string name="str_selected_file_info_detail">{count}个文件共{size}</string>
+    <string name="photo_num">(%1$d)</string>
 </resources>

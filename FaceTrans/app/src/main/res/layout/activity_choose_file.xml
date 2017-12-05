@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
-    android:background="@color/colorPrimary"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:fitsSystemWindows="true">
+
     <include
         android:id="@+id/topbar"
         layout="@layout/layout_search_bar" />
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"
+        style="@style/CustomeTabIndicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/CustomeTabIndicator"
-        app:tabMode="fixed"
-        app:tabTextColor="@android:color/black"
-        app:tabSelectedTextColor="@color/colorPrimary"
         android:layout_below="@id/topbar"
-        android:background="@color/white"/>
+        android:background="@color/white"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/colorPrimary"
+        app:tabTextColor="@android:color/black" />
 
     <include
         android:id="@+id/bottombar"
@@ -28,7 +29,58 @@
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tab_layout"
         android:layout_above="@id/bottombar"
-        android:background="@color/white"/>
+        android:layout_below="@id/tab_layout"
+        android:background="@color/white" />
+
+    <org.hobart.facetrans.opengl.FlipViewContainer
+        android:id="@+id/mFlipViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottombar"
+        android:alpha="0"
+        android:background="@android:color/black" />
+
+    <LinearLayout
+        android:id="@+id/ll_fileList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottombar"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <RelativeLayout
+            android:id="@+id/rl_fileList_topBar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:actionBarSize"
+            android:background="@color/colorPrimary">
+
+            <TextView
+                android:id="@+id/tv_fileList_back"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_centerVertical="true"
+                android:layout_margin="4dp"
+                android:background="@drawable/ic_keyboard_arrow_left_24dp"
+                android:padding="4dp" />
+
+            <TextView
+                android:id="@+id/tv_fileList_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:text="标题"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none" />
+    </LinearLayout>
 </RelativeLayout>

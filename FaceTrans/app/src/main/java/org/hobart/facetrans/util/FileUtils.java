@@ -1,5 +1,7 @@
 package org.hobart.facetrans.util;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -10,14 +12,20 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.FTFile;
+import org.hobart.facetrans.model.Image;
+import org.hobart.facetrans.model.ImageFolder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -41,6 +49,101 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
 
     public static final DecimalFormat FORMAT = new DecimalFormat("####.##");
+
+    public static ArrayList<ImageFolder> loadLocalFolderContainsImage() {
+
+        ArrayList<ImageFolder> imageFolders = new ArrayList<>();
+
+        ContentResolver contentResolver = FaceTransApplication.getApp().getContentResolver();
+
+        String[] columns = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED, MediaStore.Images.Media.BUCKET_ID,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME, "COUNT(1) AS count"};
+        String selection = "0==0) GROUP BY (" + MediaStore.Images.Media.BUCKET_ID;
+        String sortOrder = MediaStore.Images.Media.DATE_MODIFIED;
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, selection, null, sortOrder);
+
+            if (cursor != null && cursor.moveToFirst()) {
+
+                int columnFilePath = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+
+                int columnDateAdd = cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED);
+
+                int columnFileName = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+
+                int columnCount = cursor.getColumnIndex("count");
+
+                do {
+                    ImageFolder folderBean = new ImageFolder();
+                    folderBean.setFirstFilePath(cursor.getString(columnFilePath));
+                    folderBean.setFolderFileNum(cursor.getInt(columnCount));
+                    folderBean.setFolderCreateDate(cursor.getString(columnDateAdd));
+                    String bucketName = cursor.getString(columnFileName);
+                    folderBean.setFolderName(bucketName);
+                    if (!Environment.getExternalStorageDirectory().getPath().contains(bucketName)) {
+                        imageFolders.add(0, folderBean);
+                    }
+
+                    Log.d("hulaoda", "ImageFolder folderBean:" + folderBean.toString());
+
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return imageFolders;
+    }
+
+    /**
+     * 获取指定文件夹下的所有图片
+     *
+     * @param folderPath
+     * @return
+     */
+    public static ArrayList<Image> queryFolderPictures(final String folderPath) {
+
+        ArrayList<Image> list = new ArrayList<>();
+
+        String[] columns = new String[]{MediaStore.Images.Media.DATA};
+
+        String whereclause = MediaStore.Images.ImageColumns.DATA + " like'" + folderPath + "/%'";
+
+        Cursor corsor = null;
+
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+        try {
+            corsor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, whereclause, null,
+                    null);
+            if (corsor != null && corsor.getCount() > 0 && corsor.moveToFirst()) {
+                do {
+                    String path = corsor.getString(corsor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+                    Image image = new Image();
+                    long size = 0;
+                    try {
+                        File file = new File(path);
+                        size = file.length();
+                        image.setSize(size);
+                    } catch (Exception e) {
+                    }
+                    image.setFilePath(path);
+                    image.setFileType(FTType.IMAGE);
+                    list.add(0, image);
+                } while (corsor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (corsor != null)
+                corsor.close();
+        }
+        return list;
+    }
+
 
     public static <T extends FTFile> List<T> getSpecificTypeFiles(String[] extension) {
 
