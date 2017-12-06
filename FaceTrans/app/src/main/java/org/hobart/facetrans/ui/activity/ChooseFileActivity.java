@@ -270,7 +270,7 @@ public class ChooseFileActivity extends BaseActivity {
 
             }
         });
-        view_pager.setOffscreenPageLimit(4);
+        view_pager.setOffscreenPageLimit(3);
 
         tab_layout.setTabMode(TabLayout.MODE_FIXED);
         tab_layout.setupWithViewPager(view_pager);
@@ -392,9 +392,11 @@ public class ChooseFileActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            if (null != mCurrentFragment && mCurrentFragment == mImageListFragment && isFlip) {
-                startReverse();
-                return true;
+            if (null != mCurrentFragment) {
+                if ((mCurrentFragment == mImageListFragment) || (mCurrentFragment == mVideoListFragment) && isFlip) {
+                    startReverse();
+                    return true;
+                }
             }
             return super.onKeyDown(keyCode, event);
         }

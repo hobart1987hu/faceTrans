@@ -1,7 +1,5 @@
 package org.hobart.facetrans.util;
 
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -12,7 +10,6 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
@@ -21,13 +18,10 @@ import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.FTFile;
-import org.hobart.facetrans.model.Image;
-import org.hobart.facetrans.model.ImageFolder;
-import org.hobart.facetrans.model.Video;
-import org.hobart.facetrans.model.VideoFolder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,7 +43,12 @@ public class FileUtils {
     public static final DecimalFormat FORMAT = new DecimalFormat("####.##");
 
 
-
+    public static byte[] convertBitmapToBytes(Bitmap bitmap) {
+        if (null == bitmap) return null;
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
 
 
     public static <T extends FTFile> List<T> getSpecificTypeFiles(String[] extension) {

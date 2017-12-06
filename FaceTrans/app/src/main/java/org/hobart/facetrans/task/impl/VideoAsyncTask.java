@@ -14,6 +14,7 @@ import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.model.VideoFolder;
 import org.hobart.facetrans.task.FTTask;
 import org.hobart.facetrans.task.FTTaskCallback;
+import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ScreenshotUtils;
 
 import java.io.File;
@@ -32,12 +33,15 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
 
     @Override
     protected List<VideoFolder> execute() {
+        long startTime = System.currentTimeMillis();
+        LogcatUtils.d("VideoAsyncTask query start time :" + startTime);
         List<VideoFolder> videoFolders = loadLocalFolderContainsVideo();
-        if (null != videoFolders && videoFolders.size() > 0) {
-            for (VideoFolder folder : videoFolders) {
-                folder.setVideos(queryFolderVideos(folder.getFolderPath()));
-            }
-        }
+//        if (null != videoFolders && videoFolders.size() > 0) {
+//            for (VideoFolder folder : videoFolders) {
+//                folder.setVideos(queryFolderVideos(folder.getFolderPath()));
+//            }
+//        }
+        LogcatUtils.d("VideoAsyncTask query cost time :" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
         return videoFolders;
     }
 
@@ -46,10 +50,9 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
      , ".flv", ".divx", ".divx", ".rm", ".asf", ".ram", ".mpg", ".v8", ".swf", ".m2v", ".asx", ".ra", ".ndivx", ".xvid"
      * */
 
-    private static final String[] EXTENSION = {".mp4", ".3gp", ".wmv", ".rmvb", ".avi", ".3gpp", ".3gpp2", ".mkv"
-            , ".flv", ".mpg"};
+    private static final String[] EXTENSION = {".mp4", ".rmvb", ".wmv", ".flv"};
 
-    static ArrayList<VideoFolder> loadLocalFolderContainsVideo() {
+    public static ArrayList<VideoFolder> loadLocalFolderContainsVideo() {
 
         String selection = "";
         for (int i = 0; i < EXTENSION.length; i++) {
@@ -98,28 +101,45 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
                 } catch (Exception e) {
                     bitmap = BitmapFactory.decodeResource(FaceTransApplication.getApp().getResources(), R.mipmap.icon_default);
                 }
-                bitmap = ScreenshotUtils.extractThumbnail(bitmap, 100, 100);
                 videoFolder.setFirstVideoBitmap(bitmap);
-
                 videoFolders.add(videoFolder);
+
             }
             cursor.close();
         }
         return videoFolders;
     }
 
-    static ArrayList<Video> queryFolderVideos(final String folderPath) {
+    /**
+     * 获取文件夹下所有的视频文件
+     *
+     * @param folderPath
+     * @return
+     */
+    public static ArrayList<Video> queryFolderVideos(final String folderPath) {
+
+        long startTime = System.currentTimeMillis();
+        LogcatUtils.d("VideoAsyncTask queryFolderVideos  query start time :" + startTime);
 
         ArrayList<Video> list = new ArrayList<>();
 
         Uri fileUri = MediaStore.Files.getContentUri("external");
         String[] projection = new String[]{
-                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Video.VideoColumns.DATA,
         };
 
-        String whereclause = MediaStore.Images.ImageColumns.DATA + " like'" + folderPath + "/%'";
+        String selection = "";
+        for (int i = 0; i < EXTENSION.length; i++) {
+            if (i != 0) {
+                selection = selection + " OR ";
+            }
+            selection = selection + MediaStore.Files.FileColumns.DATA + " LIKE '%" + EXTENSION[i] + "'";
+        }
 
-        String sortOrder = MediaStore.Files.FileColumns.DATE_MODIFIED;
+        String whereclause = MediaStore.Video.VideoColumns.DATA + " like'" + folderPath + "/%' and " + selection;
+
+
+        String sortOrder = MediaStore.Video.VideoColumns.DATE_MODIFIED;
 
         Cursor cursor = FaceTransApplication.getApp().getContentResolver().query(fileUri, projection, whereclause, null, sortOrder);
         if (cursor != null) {
@@ -137,19 +157,23 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
 
                     }
                     video.setFileType(FTType.VIDEO);
+
                     Bitmap bitmap = null;
                     try {
                         bitmap = ScreenshotUtils.createVideoThumbnail(path);
                     } catch (Exception e) {
                         bitmap = BitmapFactory.decodeResource(FaceTransApplication.getApp().getResources(), R.mipmap.icon_default);
                     }
-                    bitmap = ScreenshotUtils.extractThumbnail(bitmap, 100, 100);
                     video.setBitmap(bitmap);
                     list.add(0, video);
+
                 } catch (Exception e) {
                 }
             }
         }
+
+        LogcatUtils.d("VideoAsyncTask queryFolderVideos  query cost  time :" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
+
         return list;
     }
 }

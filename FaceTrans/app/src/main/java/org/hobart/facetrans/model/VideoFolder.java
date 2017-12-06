@@ -29,22 +29,27 @@ public class VideoFolder {
      * 当前文件夹下 图片列表
      */
     private List<Video> videos;
+
     /**
-     * 第一条视频的缩略图
+     * 第一个视频图片
      */
     private Bitmap firstVideoBitmap;
-
     /**
      * 文件夹的路径
      */
     private String folderPath;
 
-    public String getFolderPath() {
-        return folderPath;
+    /**
+     * 是否已经加载过当前文件夹下的所有视频
+     */
+    private boolean isLoadAllVideo = false;
+
+    public boolean isLoadAllVideo() {
+        return isLoadAllVideo;
     }
 
-    public void setFolderPath(String folderPath) {
-        this.folderPath = folderPath;
+    public void setLoadAllVideo(boolean loadAllVideo) {
+        isLoadAllVideo = loadAllVideo;
     }
 
     public Bitmap getFirstVideoBitmap() {
@@ -53,6 +58,14 @@ public class VideoFolder {
 
     public void setFirstVideoBitmap(Bitmap firstVideoBitmap) {
         this.firstVideoBitmap = firstVideoBitmap;
+    }
+
+    public String getFolderPath() {
+        return folderPath;
+    }
+
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
     }
 
     public List<Video> getVideos() {
@@ -94,7 +107,7 @@ public class VideoFolder {
                 ", folderCreateDate='" + folderCreateDate + '\'' +
                 ", folderFileNum=" + folderFileNum +
                 ", videos=" + videos +
-                ", firstVideoBitmap=" + firstVideoBitmap +
+                ", folderPath='" + folderPath + '\'' +
                 '}';
     }
 }

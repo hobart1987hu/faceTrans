@@ -99,4 +99,14 @@ public class FTFile implements Serializable {
         this.sizeDesc = sizeDesc;
     }
 
+    @Override
+    public String toString() {
+        return "FTFile{" +
+                "filePath='" + filePath + '\'' +
+                ", fileType=" + fileType +
+                ", size=" + size +
+                ", name='" + name + '\'' +
+                ", sizeDesc='" + sizeDesc + '\'' +
+                '}';
+    }
 }

@@ -1,16 +1,13 @@
 package org.hobart.facetrans.ui.activity;
 
 import android.Manifest;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -23,15 +20,10 @@ import com.tbruyelle.rxpermissions.RxPermissions;
 
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
-import org.hobart.facetrans.model.ImageFolder;
-import org.hobart.facetrans.task.impl.ImageAsyncTask;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.widget.MyScrollView;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.ToastUtils;
-
-import java.io.File;
-import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -103,6 +95,7 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
+
 
     private void init() {
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

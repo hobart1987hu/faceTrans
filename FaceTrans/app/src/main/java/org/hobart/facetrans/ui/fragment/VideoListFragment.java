@@ -7,7 +7,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,8 +101,12 @@ public class VideoListFragment extends Fragment {
     }
 
     private VideoGridApter videoGridApter;
+    private List<Video> videos;
 
     private void showVideoFileListView(final View container, final View view, int position) {
+
+        videos = null;
+        videoGridApter = null;
 
         final ChooseFileActivity parent = (ChooseFileActivity) getActivity();
 
@@ -112,10 +115,22 @@ public class VideoListFragment extends Fragment {
 
         final VideoFolder folder = mDataList.get(position);
 
-        final List<Video> videos = folder.getVideos();
+        videos = folder.getVideos();
         if (null == videos || videos.size() <= 0) {
-            parent.setFlip(false);
-            return;
+            if (folder.isLoadAllVideo()) {
+                parent.setFlip(false);
+                return;
+            }
+            ToastUtils.showLongToast("正在加载数据----");
+            List<Video> tempVideos = VideoAsyncTask.queryFolderVideos(folder.getFolderPath());
+            if (null == tempVideos || tempVideos.size() <= 0) {
+                folder.setLoadAllVideo(true);
+                hideProgressBar();
+                return;
+            }
+            folder.setVideos(tempVideos);
+            videos = tempVideos;
+            ToastUtils.showLongToast("数据加载完成----");
         }
 
         RecyclerView recyclerView = parent.getFileListRecycleView();

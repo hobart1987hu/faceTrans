@@ -1,6 +1,7 @@
 package org.hobart.facetrans.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,10 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.util.FileUtils;
+import org.hobart.facetrans.util.ScreenshotUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +62,13 @@ public class VideoGridApter extends RecyclerView.Adapter<VideoGridApter.GridView
         } else {
             holder.iv_mask.setVisibility(View.GONE);
         }
-        holder.iv_pic.setImageBitmap(video.getBitmap());
+        Glide
+                .with(mContext)
+                .load(FileUtils.convertBitmapToBytes(video.getBitmap()))
+                .centerCrop()
+                .placeholder(R.mipmap.icon_default)
+                .crossFade()
+                .into(holder.iv_pic);
     }
 
     @Override
