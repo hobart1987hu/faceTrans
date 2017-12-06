@@ -49,7 +49,7 @@ public class ImageListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_music_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_image_list, container, false);
 
         recycleView = (RecyclerView) rootView.findViewById(R.id.recycleView);
         recycleView.setLayoutManager(new LinearLayoutManager(getContext()));

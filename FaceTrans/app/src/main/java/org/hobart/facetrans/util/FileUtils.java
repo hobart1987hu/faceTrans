@@ -161,7 +161,7 @@ public class FileUtils {
         return false;
     }
 
-    private static String getFileName(String filePath) {
+    public static String getFileName(String filePath) {
         if (filePath == null || filePath.equals("")) return "";
         return filePath.substring(filePath.lastIndexOf("/") + 1);
     }

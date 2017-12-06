@@ -240,7 +240,7 @@ public class ChooseFileActivity extends BaseActivity {
 
         mApkListFragment = ApkListFragment.newInstance(FTType.APK);
         mImageListFragment = new ImageListFragment();
-        mMusicListFragment = MusicListFragment.newInstance(FTType.MUSIC);
+        mMusicListFragment = new MusicListFragment();
         mVideoListFragment = new VideoListFragment();
         mCurrentFragment = mApkListFragment;
 
