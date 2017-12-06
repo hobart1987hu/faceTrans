@@ -1,81 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/selector_recycle_view_item"
+    android:clickable="true">
 
-    <ImageView
-        android:id="@+id/iv_shortcut"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_gravity="center_horizontal"
-        android:padding="4dp"
-        android:src="@mipmap/ic_launcher" />
-
-    <Button
-        android:id="@+id/btn_operation"
-        style="@style/style_common_bottom_text_view"
-        android:layout_width="48dp"
-        android:layout_height="24dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="4dp"
-        android:background="@drawable/selector_bottom_text_common"
-        android:text="取消"
-        android:textColor="@color/colorPrimary" />
-
-    <ImageView
-        android:id="@+id/iv_tick"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="12dp"
-        android:src="@mipmap/ic_launcher"
-        android:visibility="gone" />
-
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/rl_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/btn_operation"
-        android:layout_toRightOf="@id/iv_shortcut"
-        android:orientation="vertical">
+        android:padding="6dp">
 
-        <TextView
-            android:id="@+id/tv_name"
-            style="@style/style_common_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="left"
-            android:padding="4dp" />
-
-        <TextView
-            android:id="@+id/tv_progress"
-            style="@style/style_common_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="left"
+        <ImageView
+            android:id="@+id/iv_shortcut"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
             android:padding="4dp"
-            android:text="传输过程"
-            android:textColor="@color/darker_gray"
-            android:textSize="10sp" />
+            android:src="@mipmap/ic_launcher" />
 
-        <ProgressBar
-            android:id="@+id/pb_file"
-            style="?android:attr/progressBarStyleHorizontal"
+        <Button
+            android:id="@+id/btn_operation"
+            style="@style/style_common_bottom_text_view"
+            android:layout_width="48dp"
+            android:layout_height="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/selector_bottom_text_common"
+            android:text="取消"
+            android:textColor="@color/colorPrimary" />
+
+        <ImageView
+            android:id="@+id/iv_tick"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:src="@mipmap/ic_launcher"
+            android:visibility="gone" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp" />
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/btn_operation"
+            android:layout_toRightOf="@id/iv_shortcut"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_name"
+                style="@style/style_common_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="4dp" />
 
+            <TextView
+                android:id="@+id/tv_progress"
+                style="@style/style_common_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="4dp"
+                android:text="传输过程"
+                android:textColor="@color/darker_gray"
+                android:textSize="10sp" />
+
+            <ProgressBar
+                android:id="@+id/pb_file"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp" />
+
+        </LinearLayout>
+    </RelativeLayout>
     <View
+        android:layout_marginRight="12dp"
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
-        android:layout_below="@id/iv_shortcut"
-        android:layout_marginLeft="5dp"
-        android:layout_toRightOf="@id/iv_shortcut"
-        android:background="@android:color/darker_gray" />
-
+        android:layout_below="@id/rl_top"
+        android:layout_marginLeft="73dp"
+        android:background="#cccccc" />
 </RelativeLayout>

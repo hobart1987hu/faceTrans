@@ -54,13 +54,14 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
                 apk.setVersionName(packageInfo.versionName);
                 apk.setSize(new File(path).length());
                 apk.setSizeDesc(FileUtils.getFileSize(apk.getSize()));
+                apk.setFileType(FTType.APK);
                 appList.add(apk);
             }
         }
         return appList;
     }
 
-    public static Bitmap drawableToBitmap(Drawable drawable) {
+    private static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = Bitmap.createBitmap(
                 drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(),

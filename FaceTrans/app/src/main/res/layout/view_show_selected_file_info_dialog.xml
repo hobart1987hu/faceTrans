@@ -32,6 +32,5 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/rl_top"
         android:divider="@null"
-        android:padding="@dimen/activity_horizontal_margin"
         android:background="@color/white"/>
 </RelativeLayout>

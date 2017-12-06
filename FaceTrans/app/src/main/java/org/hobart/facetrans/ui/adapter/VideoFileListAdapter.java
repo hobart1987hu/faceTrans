@@ -45,7 +45,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_video_list, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_file_list_2, parent, false);
 
         return new ViewHolder(view);
     }
@@ -63,10 +63,10 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
                 .crossFade()
                 .into(holder.iv_icon);
 
-        holder.mCardView.setOnClickListener(new View.OnClickListener() {
+        holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mListener.onItemClick(holder.mCardView, holder.iv_icon, holder.getAdapterPosition());
+                mListener.onItemClick(holder.rootView, holder.iv_icon, holder.getAdapterPosition());
             }
         });
     }
@@ -78,10 +78,10 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        public ImageView iv_icon;
-        public TextView tv_fileName;
-        public TextView tv_fileNums;
-        public CardView mCardView;
+        ImageView iv_icon;
+        TextView tv_fileName;
+        TextView tv_fileNums;
+        RelativeLayout rootView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -89,7 +89,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
             tv_fileNums = (TextView) itemView.findViewById(R.id.tv_pic_nums);
             iv_icon = (ImageView) itemView.findViewById(R.id.iv_icon);
             float ratio = OpenGlUtils.VIEW_W_H;
-            int w = AndroidUtils.dip2px(70);
+            int w = AndroidUtils.dip2px(120);
             int h = w;
             if (w / h > ratio) {
                 w = (int) (h * ratio);
@@ -99,7 +99,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(w, h);
             params.leftMargin = folderIconLeftMargin;
             iv_icon.setLayoutParams(params);
-            mCardView = (CardView) itemView.findViewById(R.id.card_view);
+            rootView = (RelativeLayout) itemView.findViewById(R.id.rootView);
         }
     }
 }
