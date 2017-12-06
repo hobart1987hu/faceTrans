@@ -188,15 +188,15 @@ public class SendFileActivity extends BaseActivity {
         }
         TransferModel transferModel = mSendFileLists.get(mSendPointer);
         //20M
-        if (Long.parseLong(transferModel.getSize()) > (1024 * 1024 * 20)) {
-            transferModel.setTransferStatus(TransferStatus.ZIP);
-            mAdapter.notifyItemChanged(mSendPointer);
-            SocketExecutorService.getExecute().execute(new ZipFTFileRunnable(mSendPointer, transferModel.getFilePath(), transferModel.getFileName()));
-        } else {
+//        if (Long.parseLong(transferModel.getSize()) > (1024 * 1024 * 20)) {
+//            transferModel.setTransferStatus(TransferStatus.ZIP);
+//            mAdapter.notifyItemChanged(mSendPointer);
+//            SocketExecutorService.getExecute().execute(new ZipFTFileRunnable(mSendPointer, transferModel.getFilePath(), transferModel.getFileName()));
+//        } else {
             transferModel.setTransferStatus(TransferStatus.TRANSFERING);
             mAdapter.notifyItemChanged(mSendPointer);
             SocketTransferQueue.getInstance().sendSingleFTFile(transferModel, transferModel.getFilePath(), false);
-        }
+//        }
     }
 
     private void updateAdapter(SocketFileEvent event) {
