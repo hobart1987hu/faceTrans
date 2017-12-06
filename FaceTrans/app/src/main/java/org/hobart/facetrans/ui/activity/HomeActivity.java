@@ -1,8 +1,11 @@
 package org.hobart.facetrans.ui.activity;
 
 import android.Manifest;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,6 +25,7 @@ import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.widget.MyScrollView;
+import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
@@ -76,6 +80,9 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
     @Bind(R.id.tv_storage_desc)
     TextView tv_storage_desc;
 
+    /**
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +101,17 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                         init();
                     }
                 });
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.System.canWrite(HomeActivity.this)) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        AndroidUtils.requestWriteSettings(HomeActivity.this, REQUEST_CODE_WRITE_SETTINGS);
+                    }
+                }, 1000);
+            }
+        }
     }
 
 
@@ -197,6 +215,22 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
             tv_title.setAlpha(1 - tAlpha);
             ll_mini_main.setVisibility(View.INVISIBLE);
             ll_mini_main.setAlpha(0);
+        }
+    }
+
+    private static final int REQUEST_CODE_WRITE_SETTINGS = 2;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_WRITE_SETTINGS) {
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (Settings.System.canWrite(this)) {
+                    ToastUtils.showLongToast("服务开启成功!");
+                } else {
+                    ToastUtils.showLongToast("服务未开启！");
+                }
+            }
         }
     }
 }

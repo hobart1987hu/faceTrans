@@ -1,5 +1,7 @@
 package org.hobart.facetrans.socket.transfer;
 
+import android.util.Log;
+
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.event.SocketEvent;
@@ -239,6 +241,7 @@ public class ReceiveRunnable implements Runnable {
 
     private void postReceiverFileInfo() {
         int progress = getReceiveProgress(fileSize, totalSize);
+        Log.d("hulaoda","progress:"+progress);
         SocketFileEvent event = new SocketFileEvent(TransModel.TYPE_FILE, mCurrentTransferStatus, SocketEvent.OPERATION_MODE_RECEIVER);
         event.progress = progress;
         event.fileName = fileName;

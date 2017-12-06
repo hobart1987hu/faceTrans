@@ -169,6 +169,7 @@ public class ReceiveFileActivity extends BaseActivity {
                 TransferModel model = mReceiveFileLists.get(i);
                 if (TextUtils.equals(model.getId(), event.id)) {
                     model.setTransferStatus(status);
+                    model.setProgress(event.progress);
                     mReceiveFileLists.set(i, model);
                     position = i;
                     break;
