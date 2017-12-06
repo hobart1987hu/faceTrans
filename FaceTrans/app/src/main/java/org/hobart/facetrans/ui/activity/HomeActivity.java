@@ -99,19 +99,21 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                             return;
                         }
                         init();
+                        if (Build.VERSION.SDK_INT >= 23) {
+                            if (!Settings.System.canWrite(HomeActivity.this)) {
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ToastUtils.showLongToast("检测到您未开启系统权限，请先开启!");
+                                        AndroidUtils.requestWriteSettings(HomeActivity.this, REQUEST_CODE_WRITE_SETTINGS);
+                                    }
+                                }, 1000);
+                            }
+                        }
                     }
                 });
 
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (!Settings.System.canWrite(HomeActivity.this)) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        AndroidUtils.requestWriteSettings(HomeActivity.this, REQUEST_CODE_WRITE_SETTINGS);
-                    }
-                }, 1000);
-            }
-        }
+
     }
 
 
@@ -228,7 +230,8 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                 if (Settings.System.canWrite(this)) {
                     ToastUtils.showLongToast("服务开启成功!");
                 } else {
-                    ToastUtils.showLongToast("服务未开启！");
+                    ToastUtils.showLongToast("服务未开启");
+                    finish();
                 }
             }
         }

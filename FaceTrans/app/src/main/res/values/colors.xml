@@ -25,4 +25,6 @@
 
     <drawable name="recycle_view_divider">#aaa</drawable>
 
+    <drawable name="color_state_pressed">#cccccc</drawable>
+
 </resources>

@@ -51,6 +51,7 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
                 apk.setBitmap(drawableToBitmap(packageInfo.applicationInfo.loadIcon(packageManager)));
                 String path = packageInfo.applicationInfo.sourceDir;
                 apk.setFilePath(path);
+                apk.setVersionName(packageInfo.versionName);
                 apk.setSize(new File(path).length());
                 apk.setSizeDesc(FileUtils.getFileSize(apk.getSize()));
                 appList.add(apk);

@@ -238,7 +238,7 @@ public class ChooseFileActivity extends BaseActivity {
         mScreenWidth = getWindowManager().getDefaultDisplay().getWidth();
         mScreenHeight = getWindowManager().getDefaultDisplay().getHeight();
 
-        mApkListFragment = ApkListFragment.newInstance(FTType.APK);
+        mApkListFragment = new ApkListFragment();
         mImageListFragment = new ImageListFragment();
         mMusicListFragment = new MusicListFragment();
         mVideoListFragment = new VideoListFragment();

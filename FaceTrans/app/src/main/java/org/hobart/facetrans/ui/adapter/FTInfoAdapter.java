@@ -35,13 +35,13 @@ public class FTInfoAdapter<T> extends FTAdapter {
         if (mType == FTType.APK) {
             ApkViewHolder viewHolder = null;
             if (convertView == null) {
-                convertView = View.inflate(getContext(), R.layout.item_apk, null);
-                viewHolder = new ApkViewHolder();
-                viewHolder.iv_shortcut = (ImageView) convertView.findViewById(R.id.iv_shortcut);
-                viewHolder.iv_ok_tick = (ImageView) convertView.findViewById(R.id.iv_ok_tick);
-                viewHolder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);
-                viewHolder.tv_size = (TextView) convertView.findViewById(R.id.tv_size);
-                convertView.setTag(viewHolder);
+//                convertView = View.inflate(getContext(), R.layout.item_apk, null);
+//                viewHolder = new ApkViewHolder();
+//                viewHolder.iv_shortcut = (ImageView) convertView.findViewById(R.id.iv_shortcut);
+//                viewHolder.iv_ok_tick = (ImageView) convertView.findViewById(R.id.iv_ok_tick);
+//                viewHolder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);
+//                viewHolder.tv_size = (TextView) convertView.findViewById(R.id.tv_size);
+//                convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ApkViewHolder) convertView.getTag();
             }
@@ -89,12 +89,12 @@ public class FTInfoAdapter<T> extends FTAdapter {
         } else if (mType == FTType.MUSIC) {
             MusicViewHolder viewHolder = null;
             if (convertView == null) {
-                convertView = View.inflate(getContext(), R.layout.item_mp3, null);
-                viewHolder = new MusicViewHolder();
-                viewHolder.iv_ok_tick = (ImageView) convertView.findViewById(R.id.iv_ok_tick);
-                viewHolder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);
-                viewHolder.tv_size = (TextView) convertView.findViewById(R.id.tv_size);
-                convertView.setTag(viewHolder);
+//                convertView = View.inflate(getContext(), R.layout.item_mp3, null);
+//                viewHolder = new MusicViewHolder();
+//                viewHolder.iv_ok_tick = (ImageView) convertView.findViewById(R.id.iv_ok_tick);
+//                viewHolder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);
+//                viewHolder.tv_size = (TextView) convertView.findViewById(R.id.tv_size);
+//                convertView.setTag(viewHolder);
             } else {
                 viewHolder = (MusicViewHolder) convertView.getTag();
             }

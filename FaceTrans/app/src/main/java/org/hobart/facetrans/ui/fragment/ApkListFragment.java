@@ -2,39 +2,64 @@ package org.hobart.facetrans.ui.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
-import org.hobart.facetrans.FTType;
+import org.hobart.facetrans.R;
+import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Apk;
-import org.hobart.facetrans.model.Music;
+import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.task.FTTaskCallback;
 import org.hobart.facetrans.task.impl.ApkAsyncTask;
-import org.hobart.facetrans.ui.adapter.FTInfoAdapter;
+import org.hobart.facetrans.ui.activity.ChooseFileActivity;
+import org.hobart.facetrans.ui.adapter.ApkListAdapter;
+import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.ui.view.RecyclerViewItemDecoration;
+import org.hobart.facetrans.util.AnimationUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by huzeyin on 2017/11/27.
  */
 
-public class ApkListFragment extends BaseListFragment {
+public class ApkListFragment extends Fragment {
 
+    static Executor MAIN_EXECUTOR = Executors.newFixedThreadPool(5);
 
-    public static ApkListFragment newInstance(FTType type) {
-        ApkListFragment fragment = new ApkListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putInt("type", type.getValue());
-        fragment.setArguments(bundle);
-        return fragment;
+    private List<Apk> mDataList = new ArrayList<>();
+    private ApkListAdapter mFTInfoAdapter;
+    private RecyclerView recycleView;
+    private ProgressBar progressBar;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        View rootView = inflater.inflate(R.layout.fragment_apk_list, container, false);
+
+        recycleView = (RecyclerView) rootView.findViewById(R.id.recycleView);
+        recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recycleView.setHasFixedSize(true);
+        recycleView.addItemDecoration(new RecyclerViewItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+
+        progressBar = (ProgressBar) rootView.findViewById(R.id.pb);
+
+        initView();
+
+        return rootView;
     }
 
-    @Override
-    protected void initView(View rootView) {
-
-        gridView.setNumColumns(4);
-
-
+    private void initView() {
         new ApkAsyncTask(new FTTaskCallback<List<Apk>>() {
             @Override
             public void onPreExecute() {
@@ -47,18 +72,74 @@ public class ApkListFragment extends BaseListFragment {
             }
 
             @Override
-            public void onFinished(List<Apk> apks) {
+            public void onFinished(List<Apk> apkList) {
                 hideProgressBar();
-                if (apks != null && apks.size() > 0) {
+                if (apkList != null && apkList.size() > 0) {
                     mDataList.clear();
-                    mDataList.addAll(apks);
-                    mFTInfoAdapter = new FTInfoAdapter(getContext(), apks, FTType.APK);
-                    gridView.setAdapter(mFTInfoAdapter);
+                    mDataList.addAll(apkList);
+                    mFTInfoAdapter = new ApkListAdapter(mDataList, new OnRecyclerViewClickListener() {
+                        @Override
+                        public void onItemClick(View container, View view, int position) {
+
+                            FTFile ftFile = mDataList.get(position);
+                            if (FTFileManager.getInstance().isFTFileExist(ftFile)) {
+                                FTFileManager.getInstance().delFTFile(ftFile);
+                                updateSelectedView();
+                            } else {
+                                FTFileManager.getInstance().addFTFile(ftFile);
+                                View startView = null;
+                                View targetView = null;
+                                startView = view.findViewById(R.id.iv_shortcut);
+                                if (getActivity() != null && (getActivity() instanceof ChooseFileActivity)) {
+                                    ChooseFileActivity chooseFileActivity = (ChooseFileActivity) getActivity();
+                                    targetView = chooseFileActivity.getSelectedView();
+                                }
+                                AnimationUtils.setAddTaskAnimation(getActivity(), startView, targetView, null);
+                            }
+                            mFTInfoAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onItemLongClick(View container, View view, int position) {
+
+                        }
+                    });
+                    recycleView.setAdapter(mFTInfoAdapter);
 
                 } else {
                     ToastUtils.showLongToast("暂时找不到应用的信息");
                 }
             }
         }).executeOnExecutor(MAIN_EXECUTOR);
+    }
+
+    @Override
+    public void onResume() {
+        updateFileInfoAdapter();
+        super.onResume();
+    }
+
+    public void updateFileInfoAdapter() {
+        if (mFTInfoAdapter != null)
+            mFTInfoAdapter.notifyDataSetChanged();
+    }
+
+    private void updateSelectedView() {
+        if (getActivity() != null && (getActivity() instanceof ChooseFileActivity)) {
+            ChooseFileActivity chooseFileActivity = (ChooseFileActivity) getActivity();
+            chooseFileActivity.getSelectedView();
+        }
+    }
+
+    protected void showProgressBar() {
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    protected void hideProgressBar() {
+        if (progressBar != null && progressBar.isShown()) {
+            progressBar.setVisibility(View.GONE);
+        }
     }
 }
