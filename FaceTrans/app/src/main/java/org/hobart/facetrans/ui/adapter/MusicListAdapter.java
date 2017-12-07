@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -43,6 +44,8 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
 
         holder.tv_size.setText(music.getSizeDesc() == null ? "" : music.getSizeDesc());
 
+        holder.iv_shortcut.setImageResource(R.mipmap.icon_music_default);
+
         if (FTFileManager.getInstance().isFTFileExist(music)) {
 
             holder.rootView.setPressed(true);
@@ -71,10 +74,12 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
         TextView tv_name;
         TextView tv_size;
         RelativeLayout rootView;
+        ImageView iv_shortcut;
 
         public MusicViewHolder(View itemView) {
             super(itemView);
             rootView = (RelativeLayout) itemView.findViewById(R.id.rootView);
+            iv_shortcut = (ImageView) itemView.findViewById(R.id.iv_shortcut);
             tv_name = (TextView) itemView.findViewById(R.id.tv_name);
             tv_size = (TextView) itemView.findViewById(R.id.tv_size);
         }

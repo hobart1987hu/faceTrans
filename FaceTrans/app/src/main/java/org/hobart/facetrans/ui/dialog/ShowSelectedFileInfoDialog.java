@@ -30,8 +30,6 @@ public class ShowSelectedFileInfoDialog {
     /**
      * UI控件
      */
-    @Bind(R.id.btn_operation)
-    Button btn_operation;
     @Bind(R.id.tv_title)
     TextView tv_title;
     @Bind(R.id.lv_result)

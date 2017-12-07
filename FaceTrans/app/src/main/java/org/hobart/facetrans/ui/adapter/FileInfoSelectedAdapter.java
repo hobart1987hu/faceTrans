@@ -74,10 +74,8 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
             convertView = View.inflate(mContext, R.layout.item_transfer, null);
             viewHolder = new FileSenderHolder();
             viewHolder.iv_shortcut = (ImageView) convertView.findViewById(R.id.iv_shortcut);
-            viewHolder.tv_name = (TextView) convertView.findViewById(R.id.tv_name);
-            viewHolder.tv_progress = (TextView) convertView.findViewById(R.id.tv_progress);
-            viewHolder.pb_file = (ProgressBar) convertView.findViewById(R.id.pb_file);
-            viewHolder.btn_operation = (Button) convertView.findViewById(R.id.btn_operation);
+            viewHolder.tv_path = (TextView) convertView.findViewById(R.id.tv_path);
+            viewHolder.tv_size = (TextView) convertView.findViewById(R.id.tv_size);
             viewHolder.iv_tick = (ImageView) convertView.findViewById(R.id.iv_tick);
             convertView.setTag(viewHolder);
         } else {
@@ -85,27 +83,20 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
         }
 
         if (fileInfo != null) {
-            //初始化
-            viewHolder.pb_file.setVisibility(View.INVISIBLE);
-            viewHolder.btn_operation.setVisibility(View.INVISIBLE);
-            viewHolder.iv_tick.setVisibility(View.VISIBLE);
-            viewHolder.iv_tick.setImageBitmap(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher));
-
-            if (FileUtils.isApkFile(fileInfo.getFilePath()) || FileUtils.isVideoFile(fileInfo.getFilePath())) { //Apk格式 或者MP4格式需要 缩略图
+            if (FileUtils.isApkFile(fileInfo.getFilePath()) || FileUtils.isVideoFile(fileInfo.getFilePath())) {
                 viewHolder.iv_shortcut.setImageBitmap(fileInfo.getBitmap());
-            } else if (FileUtils.isImageFile(fileInfo.getFilePath())) {//图片格式
+            } else if (FileUtils.isImageFile(fileInfo.getFilePath())) {
                 Glide.with(mContext)
                         .load(fileInfo.getFilePath())
                         .centerCrop()
                         .placeholder(R.mipmap.ic_launcher)
                         .crossFade()
                         .into(viewHolder.iv_shortcut);
-            } else if (FileUtils.isMusicFile(fileInfo.getFilePath())) {//音乐格式
-                viewHolder.iv_shortcut.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.ic_launcher));
+            } else if (FileUtils.isMusicFile(fileInfo.getFilePath())) {
+                viewHolder.iv_shortcut.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_music_default));
             }
-
-            viewHolder.tv_name.setText(fileInfo.getFilePath());
-            viewHolder.tv_progress.setText(FileUtils.getFileSize(fileInfo.getSize()));
+            viewHolder.tv_path.setText(fileInfo.getFilePath());
+            viewHolder.tv_size.setText(FileUtils.getFileSize(fileInfo.getSize()));
 
             viewHolder.iv_tick.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -123,10 +114,8 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
 
     static class FileSenderHolder {
         ImageView iv_shortcut;
-        TextView tv_name;
-        TextView tv_progress;
-        ProgressBar pb_file;
-        Button btn_operation;
+        TextView tv_path;
+        TextView tv_size;
         ImageView iv_tick;
     }
 
