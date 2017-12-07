@@ -3,10 +3,8 @@ package org.hobart.facetrans.socket.transfer;
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.event.SocketEvent;
-import org.hobart.facetrans.event.SocketFileEvent;
-import org.hobart.facetrans.event.SocketTextEvent;
+import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.SocketConstants;
-import org.hobart.facetrans.socket.transfer.model.TransModel;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 
@@ -35,7 +33,7 @@ public class ReceiveRunnable implements Runnable {
     private int mCurrentTransferStatus = TransferStatus.WAITING;
     private long totalSize = 0;
     private long fileSize = 0;
-    private boolean isZipFile;
+    private int type;
     private String savePath = null;
     private String fileName;
     private String id;
@@ -60,21 +58,29 @@ public class ReceiveRunnable implements Runnable {
                     continue;
                 }
 
-                int type = mInputStream.readInt();
+                type = mInputStream.readInt();
 
-                LogcatUtils.d(LOG_PREFIX + "接收类型 " + type);
+                LogcatUtils.d(LOG_PREFIX + "接收文件类型 " + type);
 
-                if (type == TransModel.TYPE_LIST || type == TransModel.TYPE_HEART_BEAT) {
-
-                    LogcatUtils.d(LOG_PREFIX + "接收文本 ");
-
-                    receiveText(type, mInputStream);
-
-                } else if (type == TransModel.TYPE_FILE) {
-
-                    LogcatUtils.d(LOG_PREFIX + "接收文件 ");
-
-                    receiveFile(mInputStream);
+                switch (type) {
+                    case TransferModel.TYPE_APK:
+                    case TransferModel.TYPE_FILE:
+                    case TransferModel.TYPE_IMAGE:
+                    case TransferModel.TYPE_MUSIC:
+                    case TransferModel.TYPE_VIDEO:
+                        receiveFile(mInputStream);
+                        break;
+                    case TransferModel.TYPE_HEART_BEAT:
+                        receiveHearBeat(mInputStream);
+                        break;
+                    case TransferModel.TYPE_TRANSFER_DATA_LIST:
+                        receiveTransferDataList(mInputStream);
+                        break;
+                    case TransferModel.TYPE_FOLDER:
+                        //TODO:
+                        break;
+                    default:
+                        continue;
                 }
                 try {
                     Thread.sleep(1000);
@@ -87,16 +93,38 @@ public class ReceiveRunnable implements Runnable {
         }
     }
 
-    private void receiveText(int type, DataInputStream inputStream) {
+    /**
+     * 接收心跳
+     *
+     * @param inputStream
+     */
+    private void receiveHearBeat(DataInputStream inputStream) {
 
         if (null == inputStream) return;
         try {
             String content = inputStream.readUTF();
 
-            LogcatUtils.d(LOG_PREFIX + "接收的文本内容是 " + content);
+            LogcatUtils.d(LOG_PREFIX + "接收的心跳内容是： " + content);
 
-            if (type == TransModel.TYPE_LIST)
-                postReceiveText(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 接收数据传输列表
+     *
+     * @param inputStream
+     */
+    private void receiveTransferDataList(DataInputStream inputStream) {
+
+        if (null == inputStream) return;
+        try {
+            String content = inputStream.readUTF();
+
+            LogcatUtils.d(LOG_PREFIX + "接收的数据传输列表是 " + content);
+
+            postReceiveText(content);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,10 +141,6 @@ public class ReceiveRunnable implements Runnable {
         reset();
 
         try {
-
-            isZipFile = inputStream.readInt() == 1 ? true : false;
-
-            LogcatUtils.d(LOG_PREFIX + "接收的文件是否是压缩形式 " + isZipFile);
 
             fileSize = inputStream.readLong();
 
@@ -239,12 +263,11 @@ public class ReceiveRunnable implements Runnable {
 
     private void postReceiverFileInfo() {
         int progress = getReceiveProgress(fileSize, totalSize);
-        SocketFileEvent event = new SocketFileEvent(TransModel.TYPE_FILE, mCurrentTransferStatus, SocketEvent.OPERATION_MODE_RECEIVER);
+        SocketEvent event = new SocketEvent(type, mCurrentTransferStatus, SocketEvent.OPERATION_MODE_RECEIVER);
         event.progress = progress;
         event.fileName = fileName;
         event.id = id;
-        event.fileSavePath = savePath;
-        event.isZipFile = isZipFile;
+        event.filePath = savePath;
         if (mCurrentTransferStatus == TransferStatus.TRANSFER_SUCCESS
                 || mCurrentTransferStatus == TransferStatus.TRANSFER_FAILED) {
             if (mReceiveThread != null) {
@@ -264,7 +287,7 @@ public class ReceiveRunnable implements Runnable {
     }
 
     private void postReceiveText(String content) {
-        SocketTextEvent event = new SocketTextEvent(TransModel.TYPE_LIST, TransferStatus.TRANSFER_SUCCESS, TransModel.OPERATION_MODE_RECEIVER);
+        SocketEvent event = new SocketEvent(type, TransferStatus.TRANSFER_SUCCESS, SocketEvent.OPERATION_MODE_RECEIVER);
         event.content = content;
         EventBus.getDefault().post(event);
     }
@@ -272,7 +295,6 @@ public class ReceiveRunnable implements Runnable {
     private void reset() {
         totalSize = 0;
         fileSize = 0;
-        isZipFile = false;
         savePath = null;
         fileName = null;
         id = null;

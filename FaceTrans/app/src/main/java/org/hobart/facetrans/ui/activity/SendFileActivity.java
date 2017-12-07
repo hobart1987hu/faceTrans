@@ -17,19 +17,14 @@ import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.event.SocketEvent;
-import org.hobart.facetrans.event.SocketFileEvent;
-import org.hobart.facetrans.event.SocketTextEvent;
 import org.hobart.facetrans.event.ZipFTFileEvent;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.TransferModel;
-import org.hobart.facetrans.socket.SocketExecutorService;
 import org.hobart.facetrans.socket.service.SocketSenderService;
 import org.hobart.facetrans.socket.transfer.SocketTransferQueue;
 import org.hobart.facetrans.socket.transfer.TransferSender;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
-import org.hobart.facetrans.socket.transfer.thread.DeleteTransFileRunnable;
-import org.hobart.facetrans.socket.transfer.thread.ZipFTFileRunnable;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.adapter.SenderFileListAdapter;
 import org.hobart.facetrans.util.FileUtils;
@@ -86,11 +81,13 @@ public class SendFileActivity extends BaseActivity {
         while (iterator.hasNext()) {
             FTFile ftFile = iterator.next();
             TransferModel model = new TransferModel();
-            model.setFileName(ftFile.getName());
-            model.setId("" + mAutoCreateTransferId.incrementAndGet());
-            model.setSize("" + ftFile.getSize());
-            model.setTransferStatus(TransferStatus.WAITING);
-            model.setFilePath(ftFile.getFilePath());
+            model.fileName = ftFile.getName();
+            model.id = "" + mAutoCreateTransferId.incrementAndGet();
+            model.fileSize = ftFile.getSize();
+            model.size = "" + model.fileSize;
+            model.transferStatus = TransferStatus.WAITING;
+            model.filePath = ftFile.getFilePath();
+            model.type = TransferModel.convertyFileType(ftFile.getFileType());
             mSendFileLists.add(model);
         }
         mAdapter = new SenderFileListAdapter(this, mSendFileLists);
@@ -133,27 +130,29 @@ public class SendFileActivity extends BaseActivity {
         final int type = event.type;
         switch (type) {
             case SocketEvent.TYPE_FILE:
+            case TransferModel.TYPE_APK:
+            case TransferModel.TYPE_IMAGE:
+            case TransferModel.TYPE_MUSIC:
+            case TransferModel.TYPE_VIDEO:
                 //接收发送进度
-                SocketFileEvent fileEvent = (SocketFileEvent) event;
-                if (fileEvent.mode == SocketEvent.OPERATION_MODE_SEND) {
-                    updateAdapter(fileEvent);
-                    if (fileEvent.status == TransferStatus.TRANSFER_SUCCESS) {
+                if (event.mode == SocketEvent.OPERATION_MODE_SEND) {
+                    updateAdapter(event);
+                    if (event.transferStatus == TransferStatus.TRANSFER_SUCCESS) {
                         sendSingleFTFile();
-                        if (fileEvent.isZipFile)
-                            SocketExecutorService.getExecute().execute(new DeleteTransFileRunnable(fileEvent.fileSavePath));
+//                        if (fileEvent.isZipFile)
+//                            SocketExecutorService.getExecute().execute(new DeleteTransFileRunnable(fileEvent.fileSavePath));
                     }
                 }
                 break;
-            case SocketEvent.TYPE_LIST:
+            case SocketEvent.TYPE_TRANSFER_DATA_LIST:
                 //接收发送list列表完成
-                SocketTextEvent textEvent = (SocketTextEvent) event;
-                if (textEvent.mode == SocketEvent.OPERATION_MODE_SEND
-                        && textEvent.status == TransferStatus.TRANSFER_SUCCESS) {
+                if (event.mode == SocketEvent.OPERATION_MODE_SEND
+                        && event.transferStatus == TransferStatus.TRANSFER_SUCCESS) {
                     sendSingleFTFile();
                 }
                 break;
-            case SocketEvent.TYPE_HEART_BEAT:
-                //接收发送心跳 do nothing
+            case TransferModel.TYPE_FOLDER:
+                // TODO: 2017/12/7
                 break;
         }
     }
@@ -166,14 +165,14 @@ public class SendFileActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onZipFTFileCallback(ZipFTFileEvent event) {
 
-        TransferModel transferModel = mSendFileLists.get(event.index);
-        if (event.status == ZipFTFileEvent.ZIP_SUCCESS) {
-            transferModel.setTransferStatus(TransferStatus.TRANSFERING);
-            SocketTransferQueue.getInstance().sendSingleFTFile(transferModel, event.zipFilePath, true);
-        } else {
-            transferModel.setTransferStatus(TransferStatus.FAILED);
-        }
-        mAdapter.notifyItemChanged(event.index);
+//        TransferModel transferModel = mSendFileLists.get(event.index);
+//        if (event.status == ZipFTFileEvent.ZIP_SUCCESS) {
+//            transferModel.setTransferStatus(TransferStatus.TRANSFERING);
+//            SocketTransferQueue.getInstance().sendSingleFTFile(transferModel, event.zipFilePath, true);
+//        } else {
+//            transferModel.setTransferStatus(TransferStatus.FAILED);
+//        }
+//        mAdapter.notifyItemChanged(event.index);
     }
 
     private volatile int mSendPointer = -1;
@@ -193,21 +192,21 @@ public class SendFileActivity extends BaseActivity {
 //            mAdapter.notifyItemChanged(mSendPointer);
 //            SocketExecutorService.getExecute().execute(new ZipFTFileRunnable(mSendPointer, transferModel.getFilePath(), transferModel.getFileName()));
 //        } else {
-            transferModel.setTransferStatus(TransferStatus.TRANSFERING);
-            mAdapter.notifyItemChanged(mSendPointer);
-            SocketTransferQueue.getInstance().sendSingleFTFile(transferModel, transferModel.getFilePath(), false);
+        transferModel.transferStatus = TransferStatus.TRANSFERING;
+        mAdapter.notifyItemChanged(mSendPointer);
+        SocketTransferQueue.getInstance().sendTranferData(transferModel);
 //        }
     }
 
-    private void updateAdapter(SocketFileEvent event) {
+    private void updateAdapter(SocketEvent event) {
         int position = -1;
         synchronized (mSendFileLists) {
             final int size = mSendFileLists.size();
             for (int i = 0; i < size; i++) {
                 TransferModel model = mSendFileLists.get(i);
-                if (TextUtils.equals(model.getId(), event.id)) {
-                    model.setTransferStatus(event.status);
-                    model.setProgress(event.progress);
+                if (TextUtils.equals(model.id, event.id)) {
+                    model.transferStatus = event.transferStatus;
+                    model.progress = event.progress;
                     mSendFileLists.set(i, model);
                     position = i;
                     break;

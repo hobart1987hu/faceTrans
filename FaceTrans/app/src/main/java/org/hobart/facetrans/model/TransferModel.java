@@ -1,108 +1,117 @@
 package org.hobart.facetrans.model;
 
+import org.hobart.facetrans.FTType;
+
 /**
  * Created by huzeyin on 2017/11/28.
  */
 
 public class TransferModel {
+
+    // 接收操作
+    public static final int OPERATION_MODE_SEND = 0;
+    // 发送操作
+    public static final int OPERATION_MODE_RECEIVER = 1;
+
+    public static final String CONTENT_HEART_BEAT = "$HB";
+
+    /**
+     * 发送心跳
+     */
+    public static final int TYPE_HEART_BEAT = 1;
+
+    /**
+     * 发送列表数据
+     */
+    public static final int TYPE_TRANSFER_DATA_LIST = 2;
+
+    /**
+     * 发送文件
+     */
+    public static final int TYPE_FILE = 3;
+
+    /**
+     * 发送音乐
+     */
+    public static final int TYPE_MUSIC = 4;
+
+    /**
+     * 发送图片
+     */
+    public static final int TYPE_IMAGE = 5;
+
+    /**
+     * 发送apk包
+     */
+    public static final int TYPE_APK = 6;
+
+    /**
+     * 发送视频文件
+     */
+    public static final int TYPE_VIDEO = 7;
+
+    /**
+     * 发送文件夹包
+     */
+    public static final int TYPE_FOLDER = 8;
+
     /**
      * 文件编号
      */
-    private String id;
+    public String id;
     /**
      * 传输进度
      */
-    private int progress;
+    public int progress;
     /**
-     * 传输状态 （等待-传输中-完成-失败）
+     * 传输状态 {@link org.hobart.facetrans.socket.transfer.TransferStatus }
      */
-    private int transferStatus;
+    public int transferStatus;
     /**
      * 问否已经传输
      */
-    private boolean selectedTransfer;
+    public boolean selectedTransfer;
     /**
      * 文件大小
      */
-    private String size;
+    public String size;
+
+    /**
+     * 文件大小
+     */
+    public long fileSize;
+
     /**
      * 文件名称
      */
-    private String fileName;
+    public String fileName;
 
     /**
      * 文件图标
      */
-    private String fileIcon;
+    public String fileIcon;
 
     /**
      * 文件的路径
      */
-    private String filePath;
+    public String filePath;
 
-    public String getFilePath() {
-        return filePath;
-    }
+    /**
+     * 传输模式，发送还是接收
+     */
+    public int mode;
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
 
-    public String getId() {
-        return id;
-    }
+    /**
+     * 传输的数据类型
+     */
+    public int type;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    /**
+     * 传输的文本内容
+     */
+    public String content;
 
-    public int getProgress() {
-        return progress;
-    }
-
-    public void setProgress(int progress) {
-        this.progress = progress;
-    }
-
-    public int getTransferStatus() {
-        return transferStatus;
-    }
-
-    public void setTransferStatus(int transferStatus) {
-        this.transferStatus = transferStatus;
-    }
-
-    public boolean isSelectedTransfer() {
-        return selectedTransfer;
-    }
-
-    public void setSelectedTransfer(boolean selectedTransfer) {
-        this.selectedTransfer = selectedTransfer;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public String getFileIcon() {
-        return fileIcon;
-    }
-
-    public void setFileIcon(String fileIcon) {
-        this.fileIcon = fileIcon;
-    }
 
     @Override
     public String toString() {
@@ -115,6 +124,24 @@ public class TransferModel {
                 ", fileName='" + fileName + '\'' +
                 ", fileIcon='" + fileIcon + '\'' +
                 ", filePath='" + filePath + '\'' +
+                ", mode=" + mode +
+                ", type=" + type +
+                ", content='" + content + '\'' +
                 '}';
+    }
+
+    public static int convertyFileType(FTType type) {
+        if (type.getValue() == 1) {
+            return TYPE_MUSIC;
+        } else if (type.getValue() == 2) {
+            return TYPE_VIDEO;
+        } else if (type.getValue() == 3) {
+            return TYPE_APK;
+        } else if (type.getValue() == 4) {
+            return TYPE_FILE;
+        } else if (type.getValue() == 5) {
+            return TYPE_IMAGE;
+        }
+        return 0;
     }
 }

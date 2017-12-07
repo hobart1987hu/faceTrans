@@ -43,11 +43,11 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         TransferModel model = mReceiveLists.get(position);
         setTransferStatus(viewHolder.tv_transfer_status, model);
-        viewHolder.tv_file_name.setText(model.getFileName());
-        viewHolder.tv_fileSize.setText(FileUtils.getFileSize(Long.parseLong(model.getSize())));
+        viewHolder.tv_file_name.setText(model.fileName);
+        viewHolder.tv_fileSize.setText(FileUtils.getFileSize(model.fileSize));
         Glide
                 .with(mContext)
-                .load(model.getFileIcon())
+                .load(model.fileIcon)
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher)
                 .crossFade()
@@ -55,7 +55,7 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
     }
 
     private void setTransferStatus(TextView tv_transfer_status, TransferModel model) {
-        int status = model.getTransferStatus();
+        int status = model.transferStatus;
         tv_transfer_status.setText("");
         switch (status) {
             case TransferStatus.UN_KNOW:
@@ -66,7 +66,7 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
                 break;
             case TransferStatus.TRANSFERING:
                 //进度中
-                tv_transfer_status.setText(model.getProgress() + "%");
+                tv_transfer_status.setText(model.progress + "%");
                 break;
             case TransferStatus.TRANSFER_SUCCESS:
                 //已经完成

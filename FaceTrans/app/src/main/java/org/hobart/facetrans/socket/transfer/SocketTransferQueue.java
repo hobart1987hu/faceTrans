@@ -3,9 +3,6 @@ package org.hobart.facetrans.socket.transfer;
 import com.google.gson.Gson;
 
 import org.hobart.facetrans.model.TransferModel;
-import org.hobart.facetrans.socket.transfer.model.FileTransModel;
-import org.hobart.facetrans.socket.transfer.model.TextTransModel;
-import org.hobart.facetrans.socket.transfer.model.TransModel;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -19,7 +16,7 @@ public class SocketTransferQueue {
 
     private static SocketTransferQueue sInstance = null;
 
-    private LinkedBlockingDeque<TransModel> mTransferQueue = new LinkedBlockingDeque();
+    private LinkedBlockingDeque<TransferModel> mTransferQueue = new LinkedBlockingDeque();
 
     private static ReentrantLock LOCK = new ReentrantLock();
 
@@ -47,8 +44,11 @@ public class SocketTransferQueue {
     public void sendFTFileList(List<TransferModel> transferModels) {
         Gson gson = new Gson();
         String ftFileLists = gson.toJson(transferModels);
-        TextTransModel ftFileListModel = new TextTransModel(TransModel.TYPE_LIST, ftFileLists);
-        ftFileListModel.mode = TransModel.OPERATION_MODE_SEND;
+        TransferModel ftFileListModel = new TransferModel();
+        ftFileListModel.type = TransferModel.TYPE_TRANSFER_DATA_LIST;
+        ftFileListModel.content = ftFileLists;
+        ftFileListModel.mode = TransferModel.OPERATION_MODE_SEND;
+        ftFileListModel.transferStatus = TransferStatus.WAITING;
         put(ftFileListModel);
     }
 
@@ -56,26 +56,31 @@ public class SocketTransferQueue {
      * 发送心跳包
      */
     public void sendHeartMsg() {
-//        TextTransModel heartBeatModel = new TextTransModel(TransModel.TYPE_HEART_BEAT, TransModel.CONTENT_HEART_BEAT);
-//        heartBeatModel.mode = TransModel.OPERATION_MODE_SEND;
-//        put(heartBeatModel);
+        TransferModel heartBeatModel = new TransferModel();
+        heartBeatModel.type = TransferModel.TYPE_HEART_BEAT;
+        heartBeatModel.content = TransferModel.CONTENT_HEART_BEAT + System.currentTimeMillis();
+        heartBeatModel.mode = TransferModel.OPERATION_MODE_SEND;
+        put(heartBeatModel);
     }
 
-    public void sendSingleFTFile(TransferModel transferModel, String filePath, boolean isZipFile) {
-        FileTransModel fileTransModel = new FileTransModel();
-        fileTransModel.mode = FileTransModel.OPERATION_MODE_SEND;
-        fileTransModel.type = FileTransModel.TYPE_FILE;
-        fileTransModel.status = TransferStatus.TRANSFERING;
-        fileTransModel.setZipFile(isZipFile);
-        fileTransModel.setFilePath(filePath);
-        fileTransModel.setFileSize(Long.parseLong(transferModel.getSize()));
-        fileTransModel.setId(transferModel.getId());
-        fileTransModel.setFileName(transferModel.getFileName());
+    /**
+     * 发送数据
+     *
+     * @param model
+     */
+    public void sendTranferData(TransferModel model) {
+        TransferModel fileTransModel = new TransferModel();
+        fileTransModel.mode = TransferModel.OPERATION_MODE_SEND;
+        fileTransModel.type = model.type;
+        fileTransModel.transferStatus = TransferStatus.WAITING;
+        fileTransModel.filePath = model.filePath;
+        fileTransModel.fileSize = model.fileSize;
+        fileTransModel.id = model.id;
+        fileTransModel.fileName = model.fileName;
         put(fileTransModel);
     }
 
-
-    public void put(TransModel transModel) {
+    public void put(TransferModel transModel) {
 
         try {
             mTransferQueue.put(transModel);
@@ -84,7 +89,7 @@ public class SocketTransferQueue {
         }
     }
 
-    public TransModel take() throws InterruptedException {
+    public TransferModel take() throws InterruptedException {
         return mTransferQueue.take();
     }
 

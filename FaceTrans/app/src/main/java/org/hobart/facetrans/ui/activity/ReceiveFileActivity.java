@@ -18,8 +18,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.SocketEvent;
-import org.hobart.facetrans.event.SocketFileEvent;
-import org.hobart.facetrans.event.SocketTextEvent;
 import org.hobart.facetrans.event.UnZipFTFileEvent;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.SocketExecutorService;
@@ -99,27 +97,29 @@ public class ReceiveFileActivity extends BaseActivity {
         final int type = event.type;
         switch (type) {
             case SocketEvent.TYPE_FILE:
+            case TransferModel.TYPE_APK:
+            case TransferModel.TYPE_IMAGE:
+            case TransferModel.TYPE_MUSIC:
+            case TransferModel.TYPE_VIDEO:
                 //接收发送进度
-                SocketFileEvent fileEvent = (SocketFileEvent) event;
-                if (fileEvent.mode == SocketEvent.OPERATION_MODE_RECEIVER) {
-                    updateAdapter(fileEvent);
-                    if (fileEvent.status == TransferStatus.TRANSFER_SUCCESS) {
+                if (event.mode == SocketEvent.OPERATION_MODE_RECEIVER) {
+                    updateAdapter(event);
+                    if (event.transferStatus == TransferStatus.TRANSFER_SUCCESS) {
                         //解压缩文件
-                        if (fileEvent.isZipFile) {
-                            unZipFTFile(fileEvent);
-                        } else {
-                            //直接更新完成
-                            updateAdapterByStatus(fileEvent, TransferStatus.FINISH);
-                        }
+//                        if (fileEvent.isZipFile) {
+//                            unZipFTFile(fileEvent);
+//                        } else {
+                        //直接更新完成
+                        updateAdapterByStatus(event, TransferStatus.FINISH);
+//                        }
                     }
                 }
                 break;
-            case SocketEvent.TYPE_LIST:
+            case SocketEvent.TYPE_TRANSFER_DATA_LIST:
                 //接收发送list列表完成
-                SocketTextEvent textEvent = (SocketTextEvent) event;
-                if (textEvent.mode == SocketEvent.OPERATION_MODE_RECEIVER
-                        && textEvent.status == TransferStatus.TRANSFER_SUCCESS) {
-                    setAdapterData(textEvent.content);
+                if (event.mode == SocketEvent.OPERATION_MODE_RECEIVER
+                        && event.transferStatus == TransferStatus.TRANSFER_SUCCESS) {
+                    setAdapterData(event.content);
                 }
                 break;
             case SocketEvent.TYPE_HEART_BEAT:
@@ -137,39 +137,39 @@ public class ReceiveFileActivity extends BaseActivity {
     public void unZipFTFileCallback(UnZipFTFileEvent event) {
 
         final int index = event.index;
-        TransferModel model = mReceiveFileLists.get(index);
-        if (event.status == UnZipFTFileEvent.UNZIP_SUCCESS) {
-            model.setTransferStatus(TransferStatus.FINISH);
-        } else {
-            model.setTransferStatus(TransferStatus.FAILED);
-        }
-        mReceiveFileLists.set(index, model);
-        mAdapter.notifyItemChanged(index);
+//        TransferModel model = mReceiveFileLists.get(index);
+//        if (event.status == UnZipFTFileEvent.UNZIP_SUCCESS) {
+//            model.setTransferStatus(TransferStatus.FINISH);
+//        } else {
+//            model.setTransferStatus(TransferStatus.FAILED);
+//        }
+//        mReceiveFileLists.set(index, model);
+//        mAdapter.notifyItemChanged(index);
     }
 
-    private void unZipFTFile(SocketFileEvent event) {
+//    private void unZipFTFile(SocketFileEvent event) {
+//
+//        final int position = updateAdapterByStatus(event, TransferStatus.UNZIP);
+//
+//        if (position == -1) return;
+//
+//        SocketExecutorService.getExecute().execute(new UnZipFTFileRunnable(position, event.fileSavePath));
+//    }
 
-        final int position = updateAdapterByStatus(event, TransferStatus.UNZIP);
+    private void updateAdapter(SocketEvent event) {
 
-        if (position == -1) return;
-
-        SocketExecutorService.getExecute().execute(new UnZipFTFileRunnable(position, event.fileSavePath));
+        updateAdapterByStatus(event, event.transferStatus);
     }
 
-    private void updateAdapter(SocketFileEvent event) {
-
-        updateAdapterByStatus(event, event.status);
-    }
-
-    private int updateAdapterByStatus(SocketFileEvent event, int status) {
+    private int updateAdapterByStatus(SocketEvent event, int status) {
         int position = -1;
         synchronized (mReceiveFileLists) {
             final int size = mReceiveFileLists.size();
             for (int i = 0; i < size; i++) {
                 TransferModel model = mReceiveFileLists.get(i);
-                if (TextUtils.equals(model.getId(), event.id)) {
-                    model.setTransferStatus(status);
-                    model.setProgress(event.progress);
+                if (TextUtils.equals(model.id, event.id)) {
+                    model.transferStatus = status;
+                    model.progress = event.progress;
                     mReceiveFileLists.set(i, model);
                     position = i;
                     break;

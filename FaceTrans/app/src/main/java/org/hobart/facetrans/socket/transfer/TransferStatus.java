@@ -4,7 +4,7 @@ package org.hobart.facetrans.socket.transfer;
  * Created by huzeyin on 2017/11/24.
  */
 
-public class TransferStatus {
+public interface TransferStatus {
     //未知
     public static final int UN_KNOW = -1;
     //等待中

@@ -4,12 +4,8 @@ import android.text.TextUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.event.SocketEvent;
-import org.hobart.facetrans.event.SocketFileEvent;
-import org.hobart.facetrans.event.SocketTextEvent;
+import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.SocketConstants;
-import org.hobart.facetrans.socket.transfer.model.FileTransModel;
-import org.hobart.facetrans.socket.transfer.model.TextTransModel;
-import org.hobart.facetrans.socket.transfer.model.TransModel;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 
@@ -45,7 +41,7 @@ public class SendRunnable implements Runnable {
 
     private long fileSize;
 
-    private boolean isZipFile;
+    private int type;
 
     private String fileName;
 
@@ -62,7 +58,6 @@ public class SendRunnable implements Runnable {
         mSocket = socket;
     }
 
-
     @Override
     public void run() {
         try {
@@ -73,7 +68,7 @@ public class SendRunnable implements Runnable {
                     continue;
                 }
 
-                TransModel transferBean = null;
+                TransferModel transferBean = null;
                 try {
                     transferBean = SocketTransferQueue.getInstance().take();
                 } catch (InterruptedException e) {
@@ -84,13 +79,27 @@ public class SendRunnable implements Runnable {
                     continue;
                 }
 
-                if (transferBean instanceof TextTransModel) {
+                LogcatUtils.d(LOG_PREFIX + " run transferBean:" + transferBean.toString());
 
-                    sendText((TextTransModel) transferBean);
-
-                } else if (transferBean instanceof FileTransModel) {
-
-                    sendFile((FileTransModel) transferBean);
+                switch (transferBean.type) {
+                    case TransferModel.TYPE_APK:
+                    case TransferModel.TYPE_FILE:
+                    case TransferModel.TYPE_IMAGE:
+                    case TransferModel.TYPE_MUSIC:
+                    case TransferModel.TYPE_VIDEO:
+                        sendFile(transferBean);
+                        break;
+                    case TransferModel.TYPE_HEART_BEAT:
+                        sendHearBeat(transferBean);
+                        break;
+                    case TransferModel.TYPE_TRANSFER_DATA_LIST:
+                        sendTransferDataList(transferBean);
+                        break;
+                    case TransferModel.TYPE_FOLDER:
+                        //TODO:
+                        break;
+                    default:
+                        continue;
                 }
                 try {
                     Thread.sleep(1000);
@@ -104,16 +113,45 @@ public class SendRunnable implements Runnable {
         }
     }
 
-    private void sendText(TextTransModel textTransferBean) {
+    /**
+     * 发送心跳包，这个不需要回调给ui界面
+     */
+    private void sendHearBeat(TransferModel transferBean) {
 
-        if (null == mOutputStream || null == textTransferBean || TextUtils.isEmpty(textTransferBean.getContent()))
+        if (null == mOutputStream || null == transferBean || TextUtils.isEmpty(transferBean.content))
             return;
 
-        String content = textTransferBean.getContent();
+        String content = transferBean.content;
+
+        try {
+            LogcatUtils.d(LOG_PREFIX + " 开始发送心跳包" + content);
+            //先发送数据类型
+            mOutputStream.writeInt(transferBean.type);
+            mOutputStream.flush();
+            //在发送文本数据
+            mOutputStream.writeUTF(content);
+            mOutputStream.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 发送需要传输的数据列表
+     *
+     * @param textTransferBean
+     */
+    private void sendTransferDataList(TransferModel textTransferBean) {
+
+        if (null == mOutputStream || null == textTransferBean || TextUtils.isEmpty(textTransferBean.content))
+            return;
+
+        String content = textTransferBean.content;
 
         try {
 
-            LogcatUtils.d(LOG_PREFIX + " 开始发送文本信息" + content + "type->" + textTransferBean.type);
+            LogcatUtils.d(LOG_PREFIX + " 开始发送传输的数据列表" + content);
 
             mOutputStream.writeInt(textTransferBean.type);
             mOutputStream.flush();
@@ -127,20 +165,22 @@ public class SendRunnable implements Runnable {
         }
     }
 
-    private void postSendText(TextTransModel transModel) {
-        SocketTextEvent event = new SocketTextEvent(transModel.type, TransferStatus.TRANSFER_SUCCESS, TextTransModel.OPERATION_MODE_SEND);
-        event.content = transModel.getContent();
+    private void postSendText(TransferModel transModel) {
+        SocketEvent event = new SocketEvent(transModel.type, TransferStatus.TRANSFER_SUCCESS, TransferModel.OPERATION_MODE_SEND);
         EventBus.getDefault().post(event);
     }
 
-    private void sendFile(FileTransModel fileTransferBean) {
+    private void sendFile(TransferModel fileTransferBean) {
 
         if (null == mOutputStream || null == fileTransferBean)
             return;
+
+        LogcatUtils.d(LOG_PREFIX + " 开始发送文件 type:" + fileTransferBean.type);
+
         File file;
         byte[] buffer = null;
         reset();
-        filePath = fileTransferBean.getFilePath();
+        filePath = fileTransferBean.filePath;
 
         if (FileUtils.isFileExist(filePath)) {
 
@@ -148,28 +188,25 @@ public class SendRunnable implements Runnable {
             try {
                 mInputStream = new BufferedInputStream(new FileInputStream(file));
 
-                mOutputStream.writeInt(TransModel.TYPE_FILE);
+                type = fileTransferBean.type;
+                mOutputStream.writeInt(type);
                 mOutputStream.flush();
 
-                isZipFile = fileTransferBean.isZipFile();
-                mOutputStream.writeInt(isZipFile ? 1 : 0);
-                mOutputStream.flush();
+                LogcatUtils.d(LOG_PREFIX + "发送文件 类型：" + type);
 
-                LogcatUtils.d(LOG_PREFIX + "发送文件 是否是压缩文件：" + isZipFile);
-
-                fileSize = fileTransferBean.getFileSize();
+                fileSize = fileTransferBean.fileSize;
                 mOutputStream.writeLong(fileSize);
                 mOutputStream.flush();
 
                 LogcatUtils.d(LOG_PREFIX + "发送文件 大小：" + fileSize);
 
-                fileName = fileTransferBean.getFileName();
+                fileName = fileTransferBean.fileName;
                 mOutputStream.writeUTF(fileName);
                 mOutputStream.flush();
 
                 LogcatUtils.d(LOG_PREFIX + "发送文件 名称：" + fileName);
 
-                id = fileTransferBean.getId();
+                id = fileTransferBean.id;
                 mOutputStream.writeUTF(id);
                 mOutputStream.flush();
 
@@ -212,7 +249,7 @@ public class SendRunnable implements Runnable {
         fileName = null;
         filePath = null;
         id = null;
-        isZipFile = false;
+        type = -1;
     }
 
     public void setIsContinue(boolean isContinue) {
@@ -248,12 +285,11 @@ public class SendRunnable implements Runnable {
 
     private void postSendFileInfo() {
         int progress = getSendProgress(fileSize, totalSize);
-        SocketFileEvent event = new SocketFileEvent(SocketEvent.TYPE_FILE, mTransferStatus, SocketEvent.OPERATION_MODE_SEND);
+        SocketEvent event = new SocketEvent(type, mTransferStatus, SocketEvent.OPERATION_MODE_SEND);
         event.progress = progress;
         event.fileName = fileName;
-        event.fileSavePath = filePath;
+        event.filePath = filePath;
         event.id = id;
-        event.isZipFile = isZipFile;
         if (mTransferStatus == TransferStatus.TRANSFER_SUCCESS
                 || mTransferStatus == TransferStatus.TRANSFER_FAILED) {
             if (mSendThread != null) {
