@@ -1,18 +1,10 @@
 package org.hobart.facetrans.ui.fragment;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
-import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.Image;
@@ -23,65 +15,50 @@ import org.hobart.facetrans.ui.activity.ChooseFileActivity;
 import org.hobart.facetrans.ui.adapter.ImageFileListAdapter;
 import org.hobart.facetrans.ui.adapter.ImageGridApter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
-import org.hobart.facetrans.ui.view.RecyclerViewItemDecoration;
 import org.hobart.facetrans.util.AnimationUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Created by huzeyin on 2017/11/27.
  */
 
-public class ImageListFragment extends Fragment {
-
-    static Executor MAIN_EXECUTOR = Executors.newFixedThreadPool(5);
+public class ImageListFragment extends BaseListFragment {
 
     private List<ImageFolder> mDataList = new ArrayList<>();
-    private ImageFileListAdapter mFTInfoAdapter;
-    private RecyclerView recycleView;
-    private ProgressBar progressBar;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        View rootView = inflater.inflate(R.layout.fragment_image_list, container, false);
-
-        recycleView = (RecyclerView) rootView.findViewById(R.id.recycleView);
-        recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recycleView.setHasFixedSize(true);
-        recycleView.addItemDecoration(new RecyclerViewItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
-
-        progressBar = (ProgressBar) rootView.findViewById(R.id.pb);
-
-        initView();
-
-        return rootView;
-    }
-
-    private void initView() {
+    protected void fetchData(final boolean isSwipeRefresh) {
         new ImageAsyncTask(new FTTaskCallback<List<ImageFolder>>() {
             @Override
             public void onPreExecute() {
-                showProgressBar();
+                if (!isSwipeRefresh) {
+                    showProgressBar();
+                }
             }
 
             @Override
             public void onCancelled() {
-                hideProgressBar();
+                if (isSwipeRefresh) {
+                    stopRefreshing();
+                } else {
+                    hideProgressBar();
+                }
             }
 
             @Override
             public void onFinished(List<ImageFolder> images) {
-                hideProgressBar();
+                if (isSwipeRefresh) {
+                    stopRefreshing();
+                } else {
+                    hideProgressBar();
+                }
                 if (images != null && images.size() > 0) {
                     mDataList.clear();
                     mDataList.addAll(images);
-                    mFTInfoAdapter = new ImageFileListAdapter(getContext(), mDataList, new OnRecyclerViewClickListener() {
+                    mAdapter = new ImageFileListAdapter(getContext(), mDataList, new OnRecyclerViewClickListener() {
                         @Override
                         public void onItemClick(View container, View view, int position) {
 
@@ -93,13 +70,18 @@ public class ImageListFragment extends Fragment {
 
                         }
                     });
-                    recycleView.setAdapter(mFTInfoAdapter);
+                    recycleView.setAdapter(mAdapter);
 
                 } else {
                     ToastUtils.showLongToast("暂时找不到应用的信息");
                 }
             }
         }).executeOnExecutor(MAIN_EXECUTOR);
+    }
+
+    @Override
+    protected void initView(View view) {
+        if (checkEnableFetchData()) fetchData(false);
     }
 
     private ImageGridApter imageGridApter;
@@ -148,35 +130,5 @@ public class ImageListFragment extends Fragment {
         recyclerView.setAdapter(imageGridApter);
 
         parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), folder.getFirstFilePath(), null);
-    }
-
-    @Override
-    public void onResume() {
-        updateFileInfoAdapter();
-        super.onResume();
-    }
-
-    public void updateFileInfoAdapter() {
-        if (mFTInfoAdapter != null)
-            mFTInfoAdapter.notifyDataSetChanged();
-    }
-
-    private void updateSelectedView() {
-        if (getActivity() != null && (getActivity() instanceof ChooseFileActivity)) {
-            ChooseFileActivity chooseFileActivity = (ChooseFileActivity) getActivity();
-            chooseFileActivity.getSelectedView();
-        }
-    }
-
-    protected void showProgressBar() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void hideProgressBar() {
-        if (progressBar != null && progressBar.isShown()) {
-            progressBar.setVisibility(View.GONE);
-        }
     }
 }

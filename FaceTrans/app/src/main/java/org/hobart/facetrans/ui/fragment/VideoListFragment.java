@@ -1,18 +1,10 @@
 package org.hobart.facetrans.ui.fragment;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
-import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.Video;
@@ -23,63 +15,52 @@ import org.hobart.facetrans.ui.activity.ChooseFileActivity;
 import org.hobart.facetrans.ui.adapter.VideoFileListAdapter;
 import org.hobart.facetrans.ui.adapter.VideoGridApter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
-import org.hobart.facetrans.ui.view.RecyclerViewItemDecoration;
 import org.hobart.facetrans.util.AnimationUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Created by huzeyin on 2017/11/27.
  */
 
-public class VideoListFragment extends Fragment {
-    static Executor MAIN_EXECUTOR = Executors.newFixedThreadPool(5);
+public class VideoListFragment extends BaseListFragment {
+
     private List<VideoFolder> mDataList = new ArrayList<>();
-    private VideoFileListAdapter mFTInfoAdapter;
-    private RecyclerView recycleView;
-    private ProgressBar progressBar;
+    private VideoGridApter videoGridApter;
+    private List<Video> videos;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        View rootView = inflater.inflate(R.layout.fragment_video_list, container, false);
-
-        recycleView = (RecyclerView) rootView.findViewById(R.id.recycleView);
-        recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recycleView.setHasFixedSize(true);
-        recycleView.addItemDecoration(new RecyclerViewItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
-
-        progressBar = (ProgressBar) rootView.findViewById(R.id.pb);
-
-        initView();
-
-        return rootView;
-    }
-
-    private void initView() {
+    protected void fetchData(final boolean isSwipeRefresh) {
         new VideoAsyncTask(new FTTaskCallback<List<VideoFolder>>() {
             @Override
             public void onPreExecute() {
-                showProgressBar();
+                if (!isSwipeRefresh) {
+                    showProgressBar();
+                }
             }
 
             @Override
             public void onCancelled() {
-                hideProgressBar();
+                if (isSwipeRefresh) {
+                    stopRefreshing();
+                } else {
+                    hideProgressBar();
+                }
             }
 
             @Override
             public void onFinished(List<VideoFolder> videoFolders) {
-                hideProgressBar();
+                if (isSwipeRefresh) {
+                    stopRefreshing();
+                } else {
+                    hideProgressBar();
+                }
                 if (videoFolders != null && videoFolders.size() > 0) {
                     mDataList.clear();
                     mDataList.addAll(videoFolders);
-                    mFTInfoAdapter = new VideoFileListAdapter(getContext(), mDataList, new OnRecyclerViewClickListener() {
+                    mAdapter = new VideoFileListAdapter(getContext(), mDataList, new OnRecyclerViewClickListener() {
                         @Override
                         public void onItemClick(View container, View view, int position) {
 
@@ -91,7 +72,7 @@ public class VideoListFragment extends Fragment {
 
                         }
                     });
-                    recycleView.setAdapter(mFTInfoAdapter);
+                    recycleView.setAdapter(mAdapter);
 
                 } else {
                     ToastUtils.showLongToast("暂时找不到应用的信息");
@@ -100,8 +81,10 @@ public class VideoListFragment extends Fragment {
         }).executeOnExecutor(MAIN_EXECUTOR);
     }
 
-    private VideoGridApter videoGridApter;
-    private List<Video> videos;
+    @Override
+    protected void initView(View view) {
+        if (checkEnableFetchData()) fetchData(false);
+    }
 
     private void showVideoFileListView(final View container, final View view, int position) {
 
@@ -164,33 +147,4 @@ public class VideoListFragment extends Fragment {
         parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), "", folder.getFirstVideoBitmap());
     }
 
-    @Override
-    public void onResume() {
-        updateFileInfoAdapter();
-        super.onResume();
-    }
-
-    public void updateFileInfoAdapter() {
-        if (mFTInfoAdapter != null)
-            mFTInfoAdapter.notifyDataSetChanged();
-    }
-
-    private void updateSelectedView() {
-        if (getActivity() != null && (getActivity() instanceof ChooseFileActivity)) {
-            ChooseFileActivity chooseFileActivity = (ChooseFileActivity) getActivity();
-            chooseFileActivity.getSelectedView();
-        }
-    }
-
-    protected void showProgressBar() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void hideProgressBar() {
-        if (progressBar != null && progressBar.isShown()) {
-            progressBar.setVisibility(View.GONE);
-        }
-    }
 }

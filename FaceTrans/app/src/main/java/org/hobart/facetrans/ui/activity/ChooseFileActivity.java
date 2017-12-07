@@ -239,9 +239,13 @@ public class ChooseFileActivity extends BaseActivity {
         mScreenHeight = getWindowManager().getDefaultDisplay().getHeight();
 
         mApkListFragment = new ApkListFragment();
+        mApkListFragment.setUserVisibleHint(false);
         mImageListFragment = new ImageListFragment();
+        mImageListFragment.setUserVisibleHint(false);
         mMusicListFragment = new MusicListFragment();
+        mMusicListFragment.setUserVisibleHint(false);
         mVideoListFragment = new VideoListFragment();
+        mVideoListFragment.setUserVisibleHint(false);
         mCurrentFragment = mApkListFragment;
 
         String[] titles = getResources().getStringArray(R.array.array_res);
@@ -263,6 +267,7 @@ public class ChooseFileActivity extends BaseActivity {
                 } else if (position == 3) {
                     mCurrentFragment = mVideoListFragment;
                 }
+                mCurrentFragment.setUserVisibleHint(true);
             }
 
             @Override
@@ -278,6 +283,8 @@ public class ChooseFileActivity extends BaseActivity {
         setSelectedViewStyle(false);
 
         mShowSelectedFileInfoDialog = new ShowSelectedFileInfoDialog(this);
+
+        view_pager.setCurrentItem(0);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

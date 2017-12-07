@@ -1,14 +1,6 @@
 package org.hobart.facetrans.ui.fragment;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
@@ -19,65 +11,52 @@ import org.hobart.facetrans.task.impl.ApkAsyncTask;
 import org.hobart.facetrans.ui.activity.ChooseFileActivity;
 import org.hobart.facetrans.ui.adapter.ApkListAdapter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
-import org.hobart.facetrans.ui.view.RecyclerViewItemDecoration;
 import org.hobart.facetrans.util.AnimationUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Created by huzeyin on 2017/11/27.
  */
 
-public class ApkListFragment extends Fragment {
-
-    static Executor MAIN_EXECUTOR = Executors.newFixedThreadPool(5);
+public class ApkListFragment extends BaseListFragment {
 
     private List<Apk> mDataList = new ArrayList<>();
-    private ApkListAdapter mFTInfoAdapter;
-    private RecyclerView recycleView;
-    private ProgressBar progressBar;
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    protected void fetchData(final boolean isSwipeRefresh) {
 
-        View rootView = inflater.inflate(R.layout.fragment_apk_list, container, false);
-
-        recycleView = (RecyclerView) rootView.findViewById(R.id.recycleView);
-        recycleView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recycleView.setHasFixedSize(true);
-        recycleView.addItemDecoration(new RecyclerViewItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
-
-        progressBar = (ProgressBar) rootView.findViewById(R.id.pb);
-
-        initView();
-
-        return rootView;
-    }
-
-    private void initView() {
         new ApkAsyncTask(new FTTaskCallback<List<Apk>>() {
             @Override
             public void onPreExecute() {
-                showProgressBar();
+                if (!isSwipeRefresh) {
+                    showProgressBar();
+                }
             }
 
             @Override
             public void onCancelled() {
-                hideProgressBar();
+                if (isSwipeRefresh) {
+                    stopRefreshing();
+                } else {
+                    hideProgressBar();
+                }
             }
 
             @Override
             public void onFinished(List<Apk> apkList) {
-                hideProgressBar();
+
+                if (isSwipeRefresh) {
+                    stopRefreshing();
+                } else {
+                    hideProgressBar();
+                }
                 if (apkList != null && apkList.size() > 0) {
                     mDataList.clear();
                     mDataList.addAll(apkList);
-                    mFTInfoAdapter = new ApkListAdapter(mDataList, new OnRecyclerViewClickListener() {
+                    mAdapter = new ApkListAdapter(mDataList, new OnRecyclerViewClickListener() {
                         @Override
                         public void onItemClick(View container, View view, int position) {
 
@@ -96,7 +75,7 @@ public class ApkListFragment extends Fragment {
                                 }
                                 AnimationUtils.setAddTaskAnimation(getActivity(), startView, targetView, null);
                             }
-                            mFTInfoAdapter.notifyDataSetChanged();
+                            mAdapter.notifyDataSetChanged();
                         }
 
                         @Override
@@ -104,7 +83,7 @@ public class ApkListFragment extends Fragment {
 
                         }
                     });
-                    recycleView.setAdapter(mFTInfoAdapter);
+                    recycleView.setAdapter(mAdapter);
 
                 } else {
                     ToastUtils.showLongToast("暂时找不到应用的信息");
@@ -114,32 +93,7 @@ public class ApkListFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        updateFileInfoAdapter();
-        super.onResume();
-    }
-
-    public void updateFileInfoAdapter() {
-        if (mFTInfoAdapter != null)
-            mFTInfoAdapter.notifyDataSetChanged();
-    }
-
-    private void updateSelectedView() {
-        if (getActivity() != null && (getActivity() instanceof ChooseFileActivity)) {
-            ChooseFileActivity chooseFileActivity = (ChooseFileActivity) getActivity();
-            chooseFileActivity.getSelectedView();
-        }
-    }
-
-    protected void showProgressBar() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void hideProgressBar() {
-        if (progressBar != null && progressBar.isShown()) {
-            progressBar.setVisibility(View.GONE);
-        }
+    protected void initView(View view) {
+        if (checkEnableFetchData()) fetchData(false);
     }
 }
