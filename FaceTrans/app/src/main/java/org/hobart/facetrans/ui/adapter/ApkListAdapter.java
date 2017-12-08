@@ -55,7 +55,7 @@ public class ApkListAdapter extends RecyclerView.Adapter<ApkListAdapter.MusicVie
             holder.rootView.setPressed(false);
         }
 
-        holder.iv_shortcut.setImageBitmap(apk.getBitmap());
+        holder.iv_shortcut.setImageDrawable(apk.getDrawable());
 
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override

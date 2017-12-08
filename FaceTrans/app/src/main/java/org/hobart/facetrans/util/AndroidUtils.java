@@ -2,10 +2,15 @@ package org.hobart.facetrans.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -27,6 +32,44 @@ public class AndroidUtils {
 
     public static String getDeviceModel() {
         return Build.MODEL;
+    }
+
+    public static String getVersionName(String apkPath) {
+
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+        PackageInfo pi = context.getPackageManager().getPackageArchiveInfo(apkPath,
+                PackageManager.GET_ACTIVITIES);
+        String versionName = null;
+        if (pi != null) {
+            versionName = pi.versionName;
+        }
+        return versionName;
+    }
+
+    /**
+     * 获取应用程序图片Drawable
+     *
+     * @param apkPath
+     * @return
+     */
+    public static Drawable getApkIcon(String apkPath) {
+
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+        PackageInfo pi = context.getPackageManager().getPackageArchiveInfo(apkPath,
+                PackageManager.GET_ACTIVITIES);
+        if (pi != null) {
+            ApplicationInfo appInfo = pi.applicationInfo;
+            appInfo.sourceDir = apkPath;
+            appInfo.publicSourceDir = apkPath;
+            try {
+                return appInfo.loadIcon(context.getPackageManager());
+            } catch (OutOfMemoryError e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public static Bitmap loadBitmapFromView(View comBitmap, int width, int height) {

@@ -12,11 +12,15 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
+import org.hobart.facetrans.model.Apk;
 import org.hobart.facetrans.model.FTFile;
+import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.util.FileUtils;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,18 +86,21 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
             viewHolder = (FileSenderHolder) convertView.getTag();
         }
         if (fileInfo != null) {
-            if (FileUtils.isApkFile(fileInfo.getFilePath()) || FileUtils.isVideoFile(fileInfo.getFilePath())) {
-                //TODO:
-//                viewHolder.iv_shortcut.setImageBitmap(fileInfo.getBitmap());
-            } else if (FileUtils.isImageFile(fileInfo.getFilePath())) {
+            if (fileInfo.getFileType() == FTType.APK) {
+                Apk apk = (Apk) fileInfo;
+                viewHolder.iv_shortcut.setImageDrawable(apk.getDrawable());
+            } else if (fileInfo.getFileType() == FTType.IMAGE) {
                 Glide.with(mContext)
                         .load(fileInfo.getFilePath())
                         .centerCrop()
                         .placeholder(R.mipmap.ic_launcher)
                         .crossFade()
                         .into(viewHolder.iv_shortcut);
-            } else if (FileUtils.isMusicFile(fileInfo.getFilePath())) {
+            } else if (fileInfo.getFileType() == FTType.MUSIC) {
                 viewHolder.iv_shortcut.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_music_default));
+            } else if (fileInfo.getFileType() == FTType.VIDEO) {
+                Video video = (Video) fileInfo;
+                SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), viewHolder.iv_shortcut, R.mipmap.icon_default);
             }
             viewHolder.tv_path.setText(fileInfo.getFilePath());
             viewHolder.tv_size.setText(FileUtils.getFileSize(fileInfo.getSize()));

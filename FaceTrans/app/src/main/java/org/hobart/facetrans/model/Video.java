@@ -2,8 +2,6 @@ package org.hobart.facetrans.model;
 
 import org.hobart.facetrans.util.DateUtils;
 
-import java.util.Comparator;
-
 /**
  * Created by huzeyin on 2017/11/27.
  */

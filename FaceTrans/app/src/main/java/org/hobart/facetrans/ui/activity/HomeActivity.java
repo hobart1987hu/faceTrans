@@ -33,7 +33,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.functions.Action1;
-import test.VideoListTask;
 
 /**
  * Created by huzeyin on 2017/11/14.
@@ -113,8 +112,6 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                         }
                     }
                 });
-        VideoListTask.loadLocalFolderContainsVideo();
-
     }
 
 
