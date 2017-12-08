@@ -81,10 +81,10 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
         } else {
             viewHolder = (FileSenderHolder) convertView.getTag();
         }
-
         if (fileInfo != null) {
             if (FileUtils.isApkFile(fileInfo.getFilePath()) || FileUtils.isVideoFile(fileInfo.getFilePath())) {
-                viewHolder.iv_shortcut.setImageBitmap(fileInfo.getBitmap());
+                //TODO:
+//                viewHolder.iv_shortcut.setImageBitmap(fileInfo.getBitmap());
             } else if (FileUtils.isImageFile(fileInfo.getFilePath())) {
                 Glide.with(mContext)
                         .load(fileInfo.getFilePath())

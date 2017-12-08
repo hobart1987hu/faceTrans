@@ -194,7 +194,7 @@ public class SendFileActivity extends BaseActivity {
 //        } else {
         transferModel.transferStatus = TransferStatus.TRANSFERING;
         mAdapter.notifyItemChanged(mSendPointer);
-        SocketTransferQueue.getInstance().sendTranferData(transferModel);
+        SocketTransferQueue.getInstance().sendTransferData(transferModel);
 //        }
     }
 

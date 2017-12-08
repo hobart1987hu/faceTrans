@@ -17,6 +17,7 @@ import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.ScreenshotUtils;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,13 +63,7 @@ public class VideoGridApter extends RecyclerView.Adapter<VideoGridApter.GridView
         } else {
             holder.iv_mask.setVisibility(View.GONE);
         }
-        Glide
-                .with(mContext)
-                .load(FileUtils.convertBitmapToBytes(video.getBitmap()))
-                .centerCrop()
-                .placeholder(R.mipmap.icon_default)
-                .crossFade()
-                .into(holder.iv_pic);
+        SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), holder.iv_pic, R.mipmap.icon_default);
     }
 
     @Override

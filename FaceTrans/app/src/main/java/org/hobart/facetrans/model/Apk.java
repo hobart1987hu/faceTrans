@@ -1,5 +1,7 @@
 package org.hobart.facetrans.model;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by huzeyin on 2017/11/27.
  */
@@ -19,4 +21,16 @@ public class Apk extends FTFile {
      */
     private String versionName;
 
+    /**
+     * APK图标
+     */
+    private Bitmap bitmap;
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
 }

@@ -1,7 +1,5 @@
 package org.hobart.facetrans.model;
 
-import android.graphics.Bitmap;
-
 import java.util.List;
 
 /**
@@ -16,11 +14,6 @@ public class VideoFolder {
     private String folderName;
 
     /**
-     * 文件夹创建日期
-     */
-    private String folderCreateDate;
-
-    /**
      * 文件夹中文件的个数
      */
     private int folderFileNum;
@@ -31,33 +24,21 @@ public class VideoFolder {
     private List<Video> videos;
 
     /**
-     * 第一个视频图片
+     * 文件夹icon 存放路径
      */
-    private Bitmap firstVideoBitmap;
+    private String folderIconPath;
+
     /**
      * 文件夹的路径
      */
     private String folderPath;
 
-    /**
-     * 是否已经加载过当前文件夹下的所有视频
-     */
-    private boolean isLoadAllVideo = false;
-
-    public boolean isLoadAllVideo() {
-        return isLoadAllVideo;
+    public String getFolderIconPath() {
+        return folderIconPath;
     }
 
-    public void setLoadAllVideo(boolean loadAllVideo) {
-        isLoadAllVideo = loadAllVideo;
-    }
-
-    public Bitmap getFirstVideoBitmap() {
-        return firstVideoBitmap;
-    }
-
-    public void setFirstVideoBitmap(Bitmap firstVideoBitmap) {
-        this.firstVideoBitmap = firstVideoBitmap;
+    public void setFolderIconPath(String folderIconPath) {
+        this.folderIconPath = folderIconPath;
     }
 
     public String getFolderPath() {
@@ -84,14 +65,6 @@ public class VideoFolder {
         this.folderName = folderName;
     }
 
-    public String getFolderCreateDate() {
-        return folderCreateDate;
-    }
-
-    public void setFolderCreateDate(String folderCreateDate) {
-        this.folderCreateDate = folderCreateDate;
-    }
-
     public int getFolderFileNum() {
         return folderFileNum;
     }
@@ -104,9 +77,9 @@ public class VideoFolder {
     public String toString() {
         return "VideoFolder{" +
                 "folderName='" + folderName + '\'' +
-                ", folderCreateDate='" + folderCreateDate + '\'' +
                 ", folderFileNum=" + folderFileNum +
                 ", videos=" + videos +
+                ", folderIconPath='" + folderIconPath + '\'' +
                 ", folderPath='" + folderPath + '\'' +
                 '}';
     }

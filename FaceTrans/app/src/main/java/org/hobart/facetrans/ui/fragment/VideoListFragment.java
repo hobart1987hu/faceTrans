@@ -1,10 +1,13 @@
 package org.hobart.facetrans.ui.fragment;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 
+import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.Video;
@@ -16,6 +19,7 @@ import org.hobart.facetrans.ui.adapter.VideoFileListAdapter;
 import org.hobart.facetrans.ui.adapter.VideoGridApter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.AnimationUtils;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 import org.hobart.facetrans.util.ToastUtils;
 
 import java.util.ArrayList;
@@ -100,20 +104,7 @@ public class VideoListFragment extends BaseListFragment {
 
         videos = folder.getVideos();
         if (null == videos || videos.size() <= 0) {
-            if (folder.isLoadAllVideo()) {
-                parent.setFlip(false);
-                return;
-            }
-            ToastUtils.showLongToast("正在加载数据----");
-            List<Video> tempVideos = VideoAsyncTask.queryFolderVideos(folder.getFolderPath());
-            if (null == tempVideos || tempVideos.size() <= 0) {
-                folder.setLoadAllVideo(true);
-                hideProgressBar();
-                return;
-            }
-            folder.setVideos(tempVideos);
-            videos = tempVideos;
-            ToastUtils.showLongToast("数据加载完成----");
+            return;
         }
 
         RecyclerView recyclerView = parent.getFileListRecycleView();
@@ -144,7 +135,12 @@ public class VideoListFragment extends BaseListFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(videoGridApter);
 
-        parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), "", folder.getFirstVideoBitmap());
+        Bitmap bitmap = SimpleImageThumbnailLoader.getInstance().getBitmapToMemoryCache(folder.getFolderIconPath());
+
+        if (null == bitmap) {
+            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_default);
+        }
+        parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), "", bitmap);
     }
 
 }

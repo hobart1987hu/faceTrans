@@ -18,6 +18,7 @@ import org.hobart.facetrans.opengl.OpenGlUtils;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.FileUtils;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
 import java.util.List;
 
@@ -55,14 +56,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
         VideoFolder videoFolder = mVideoFolders.get(position);
         holder.tv_fileName.setText(videoFolder.getFolderName());
         holder.tv_fileNums.setText(String.format(mContext.getResources().getString(R.string.photo_num), videoFolder.getFolderFileNum()));
-        Glide
-                .with(mContext)
-                .load(FileUtils.convertBitmapToBytes(videoFolder.getFirstVideoBitmap()))
-                .fitCenter()
-                .placeholder(R.mipmap.icon_default)
-                .crossFade()
-                .into(holder.iv_icon);
-
+        SimpleImageThumbnailLoader.getInstance().displayImageView(videoFolder.getFolderIconPath(), holder.iv_icon, R.mipmap.icon_default);
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

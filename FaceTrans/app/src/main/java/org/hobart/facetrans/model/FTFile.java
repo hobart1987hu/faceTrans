@@ -1,7 +1,5 @@
 package org.hobart.facetrans.model;
 
-import android.graphics.Bitmap;
-
 import org.hobart.facetrans.FTType;
 
 import java.io.Serializable;
@@ -37,11 +35,6 @@ public class FTFile implements Serializable {
      */
     private String sizeDesc;
 
-    /**
-     * 文件缩略图 视频文件和apk文件需要的
-     */
-    private Bitmap bitmap;
-
     public FTFile() {
 
     }
@@ -73,14 +66,6 @@ public class FTFile implements Serializable {
 
     public void setFileType(FTType fileType) {
         this.fileType = fileType;
-    }
-
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
     }
 
     public String getName() {

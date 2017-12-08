@@ -46,13 +46,13 @@ public class TransferSender {
         @Override
         public void run() {
             while (monitor) {
-//                try {
-//                    SocketTransferQueue.getInstance().sendHeartMsg();
-////                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                    e.printStackTrace();
-//                }
+                try {
+                    SocketTransferQueue.getInstance().sendHeartMsg();
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    e.printStackTrace();
+                }
             }
         }
 

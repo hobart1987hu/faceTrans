@@ -68,7 +68,7 @@ public class SocketTransferQueue {
      *
      * @param model
      */
-    public void sendTranferData(TransferModel model) {
+    public void sendTransferData(TransferModel model) {
         TransferModel fileTransModel = new TransferModel();
         fileTransModel.mode = TransferModel.OPERATION_MODE_SEND;
         fileTransModel.type = model.type;
@@ -81,7 +81,6 @@ public class SocketTransferQueue {
     }
 
     public void put(TransferModel transModel) {
-
         try {
             mTransferQueue.put(transModel);
         } catch (InterruptedException e) {

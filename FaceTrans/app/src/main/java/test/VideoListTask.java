@@ -1,47 +1,36 @@
-package org.hobart.facetrans.task.impl;
+package test;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
 
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.model.VideoFolder;
-import org.hobart.facetrans.task.FTTask;
-import org.hobart.facetrans.task.FTTaskCallback;
-import org.hobart.facetrans.util.LogcatUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
- * Created by huzeyin on 2017/11/20.
+ * Created by huzeyin on 2017/12/8.
  */
 
-public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
+public class VideoListTask {
 
-    public VideoAsyncTask(FTTaskCallback<List<VideoFolder>> callback) {
-        super(callback);
-    }
+    public static HashMap<String, List<Video>> loadLocalFolderContainsVideo() {
 
-    @Override
-    protected List<VideoFolder> execute() {
         long startTime = System.currentTimeMillis();
-        LogcatUtils.d("VideoAsyncTask query start time :" + startTime);
-        List<VideoFolder> videoFolders = loadLocalFolderContainsVideo();
-        LogcatUtils.d("VideoAsyncTask query cost time :" + (System.currentTimeMillis() - startTime) / 1000 + "秒");
-        return videoFolders;
-    }
 
-    private static ArrayList<VideoFolder> loadLocalFolderContainsVideo() {
-
-        ArrayList<VideoFolder> videoFolders = new ArrayList<>();
+        Log.d("hulaoda", "loadLocalFolderContainsVideo start time " + startTime);
 
         String[] projection = {
                 MediaStore.Files.FileColumns.DATA,
@@ -71,43 +60,51 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE));
-                if (size <= 10) continue;
                 Video video = new Video();
+                long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)); // 大小
                 String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA));
                 video.setFilePath(path);
                 video.setName(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME)));
                 video.setSize(size);
-                long dataAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED));
-                video.setDateAdded(dataAdded);
-                video.setFileType(FTType.VIDEO);
-                if (path.contains("/tencent/MicroMsg/")) {
+                final String tempPath = path;
+                if (tempPath.contains("/tencent/MicroMsg/")) {
                     //认为是同个文件夹
+                    video.setName("微信");
                     if (!videoMaps.containsKey("微信")) {
+                        Log.d("hulaoda", "微信 add");
                         List<Video> videos = new ArrayList<>();
                         videos.add(video);
                         videoMaps.put("微信", videos);
                     } else {
+                        Log.d("hulaoda", "微信 put");
                         videoMaps.get("微信").add(video);
                     }
-                } else if (path.contains("/tencent/MobileQQ/")) {
+                } else if (tempPath.contains("/tencent/MobileQQ/")) {
+                    video.setName("QQ");
                     if (!videoMaps.containsKey("QQ")) {
+                        Log.d("hulaoda", "QQ put");
                         List<Video> videos = new ArrayList<>();
                         videos.add(video);
                         videoMaps.put("QQ", videos);
                     } else {
+                        Log.d("hulaoda", "QQ add");
                         videoMaps.get("QQ").add(video);
                     }
-                } else if (path.contains("/com.qiyi.video/files/")) {
+                } else if (tempPath.contains("/com.qiyi.video/files/")) {
+                    video.setName("爱奇艺");
                     if (!videoMaps.containsKey("爱奇艺")) {
+                        Log.d("hulaoda", "爱奇艺 add");
                         List<Video> videos = new ArrayList<>();
                         videos.add(video);
                         videoMaps.put("爱奇艺", videos);
                     } else {
+                        Log.d("hulaoda", "爱奇艺 put");
                         videoMaps.get("爱奇艺").add(video);
                     }
                 } else {
+                    //获取该图片的父路径名
                     String parentName = new File(path).getParentFile().getName();
+                    //这边只做分组
                     if (!videoMaps.containsKey(parentName)) {
                         List<Video> videos = new ArrayList<>();
                         videos.add(video);
@@ -119,26 +116,7 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
             }
             cursor.close();
         }
-
-        if (null != videoMaps && videoMaps.size() > 0) {
-            Set<String> keys = videoMaps.keySet();
-            for (String key : keys) {
-                List<Video> videos = videoMaps.get(key);
-                Collections.sort(videos, new Comparator<Video>() {
-                    @Override
-                    public int compare(Video o1, Video o2) {
-                        return o1.getDateAdded() > o2.getDateAdded() ? 1 : 0;
-                    }
-                });
-                final int size = videos.size();
-                VideoFolder folder = new VideoFolder();
-                folder.setVideos(videos);
-                folder.setFolderName(key);
-                folder.setFolderFileNum(size);
-                folder.setFolderIconPath(videos.get(0).getFilePath());
-                videoFolders.add(folder);
-            }
-        }
-        return videoFolders;
+        Log.d("hulaoda", "loadLocalFolderContainsVideo cost  time " + (System.currentTimeMillis() - startTime) / 1000 + "秒");
+        return videoMaps;
     }
 }
