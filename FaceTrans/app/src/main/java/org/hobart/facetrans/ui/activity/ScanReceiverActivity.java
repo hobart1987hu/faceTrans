@@ -12,6 +12,7 @@ import android.os.CountDownTimer;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -53,6 +54,13 @@ public class ScanReceiverActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_receiver);
+
+        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
         startCountDownTimer();

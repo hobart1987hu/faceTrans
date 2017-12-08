@@ -49,9 +49,13 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
         viewHolder.tv_fileSize.setText(FileUtils.getFileSize(model.fileSize));
 
         if (model.type == TransferModel.TYPE_APK) {
-            try {
-                viewHolder.iv_fileIcon.setImageDrawable(AndroidUtils.getApkIcon(model.savePath));
-            } catch (Exception e) {
+            if (model.transferStatus == TransferStatus.FINISH) {
+                try {
+                    viewHolder.iv_fileIcon.setImageDrawable(AndroidUtils.getApkIcon(model.savePath));
+                } catch (Exception e) {
+                    viewHolder.iv_fileIcon.setImageResource(R.mipmap.ic_launcher);
+                }
+            } else {
                 viewHolder.iv_fileIcon.setImageResource(R.mipmap.ic_launcher);
             }
         } else {

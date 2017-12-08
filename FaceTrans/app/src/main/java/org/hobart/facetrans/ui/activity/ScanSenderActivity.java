@@ -3,6 +3,7 @@ package org.hobart.facetrans.ui.activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
+import android.view.View;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -41,6 +42,14 @@ public class ScanSenderActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_sender);
+
+        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
         createAp();
