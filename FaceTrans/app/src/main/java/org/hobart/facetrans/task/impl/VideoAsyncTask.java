@@ -2,6 +2,8 @@ package org.hobart.facetrans.task.impl;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.provider.MediaStore;
 
 import org.hobart.facetrans.FTType;
@@ -10,6 +12,7 @@ import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.model.VideoFolder;
 import org.hobart.facetrans.task.FTTask;
 import org.hobart.facetrans.task.FTTaskCallback;
+import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 
 import java.io.File;
@@ -46,7 +49,6 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
         String[] projection = {
                 MediaStore.Files.FileColumns.DATA,
                 MediaStore.Files.FileColumns.DATE_ADDED,
-                MediaStore.Files.FileColumns.DISPLAY_NAME,
                 MediaStore.Files.FileColumns.SIZE
         };
 
@@ -59,8 +61,8 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
                 + MediaStore.Files.FileColumns.MIME_TYPE + "=? or "
                 + MediaStore.Files.FileColumns.MIME_TYPE + "=? or "
                 + MediaStore.Files.FileColumns.MIME_TYPE + "=?";
-        String[] whereArgs = {"video/mp4", "video/3gp", "video/aiv", "video/rmvb", "video/vob", "video/flv",
-                "video/mkv", "video/mov", "video/mpg"};
+        String[] whereArgs = {"video/mp4"/*, "video/3gp", "video/aiv", "video/rmvb", "video/vob", "video/flv",
+                "video/mkv", "video/mov", "video/mpg"*/};
 
         HashMap<String, List<Video>> videoMaps = new HashMap<>();
 
@@ -73,13 +75,18 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
             while (cursor.moveToNext()) {
                 long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE));
                 if (size <= 10) continue;
-                Video video = new Video();
                 String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA));
+                long duration = getVideoDuration(path);
+                if (duration <= 0) continue;
+                Video video = new Video();
+                video.setDuration(duration);
                 video.setFilePath(path);
-                video.setName(cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DISPLAY_NAME)));
+                video.setName(FileUtils.getFileName(path));
                 video.setSize(size);
+                video.setSizeDesc(FileUtils.getFileSize(size));
                 long dataAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED));
                 video.setDateAdded(dataAdded);
+
                 video.setFileType(FTType.VIDEO);
                 if (path.contains("/tencent/MicroMsg/")) {
                     //认为是同个文件夹
@@ -140,5 +147,19 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
             }
         }
         return videoFolders;
+    }
+
+    public static long getVideoDuration(String path) {
+        try {
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(context, Uri.fromFile(new File(path)));
+            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            long timeInMilliSeconds = Long.parseLong(time);
+            retriever.release();
+            return timeInMilliSeconds;
+        } catch (Exception e) {
+        }
+        return 0;
     }
 }

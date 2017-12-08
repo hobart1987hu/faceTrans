@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FaceTrans</string>
+    <string name="app_name">众传</string>
 
     <string name="str_name">名称</string>
     <string name="str_has_selected">已选（0）</string>

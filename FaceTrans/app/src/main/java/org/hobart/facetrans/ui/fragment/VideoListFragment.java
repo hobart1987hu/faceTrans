@@ -3,6 +3,7 @@ package org.hobart.facetrans.ui.fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
@@ -16,7 +17,7 @@ import org.hobart.facetrans.task.FTTaskCallback;
 import org.hobart.facetrans.task.impl.VideoAsyncTask;
 import org.hobart.facetrans.ui.activity.ChooseFileActivity;
 import org.hobart.facetrans.ui.adapter.VideoFileListAdapter;
-import org.hobart.facetrans.ui.adapter.VideoGridApter;
+import org.hobart.facetrans.ui.adapter.VideoListApter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.AnimationUtils;
 import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
@@ -32,7 +33,7 @@ import java.util.List;
 public class VideoListFragment extends BaseListFragment {
 
     private List<VideoFolder> mDataList = new ArrayList<>();
-    private VideoGridApter videoGridApter;
+    private VideoListApter videoGridApter;
     private List<Video> videos;
 
     @Override
@@ -109,7 +110,7 @@ public class VideoListFragment extends BaseListFragment {
 
         RecyclerView recyclerView = parent.getFileListRecycleView();
 
-        videoGridApter = new VideoGridApter(getContext(), new OnRecyclerViewClickListener.SimpleOnRecyclerViewClickListener() {
+        videoGridApter = new VideoListApter(new OnRecyclerViewClickListener.SimpleOnRecyclerViewClickListener() {
             @Override
             public void onItemClick(View container, View view, int position) {
                 FTFile ftFile = videos.get(position);
@@ -130,7 +131,7 @@ public class VideoListFragment extends BaseListFragment {
             }
         });
         videoGridApter.setDatas(videos);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(videoGridApter);

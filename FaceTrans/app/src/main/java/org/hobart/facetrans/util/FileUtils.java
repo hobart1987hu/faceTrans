@@ -33,7 +33,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -106,6 +108,31 @@ public class FileUtils {
             return FORMAT.format(value) + "GB";
         }
     }
+
+    public static String formatVideoTime(long timeMs) {
+
+        StringBuilder mFormatBuilder = new StringBuilder();
+
+        Formatter mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
+
+        long totalSeconds = timeMs / 1000;
+        long seconds = totalSeconds % 60;
+
+
+        long minutes = (totalSeconds / 60) % 60;
+
+
+        long hours = totalSeconds / 3600;
+
+        mFormatBuilder.setLength(0);
+
+        if (hours > 0) {
+            return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
+        } else {
+            return mFormatter.format("%02d:%02d", minutes, seconds).toString();
+        }
+    }
+
 
     public static long getFileSize(String filePath) {
         File file = new File(filePath);
