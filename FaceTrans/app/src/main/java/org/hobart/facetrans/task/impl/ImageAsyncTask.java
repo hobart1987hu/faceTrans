@@ -10,6 +10,7 @@ import org.hobart.facetrans.model.Image;
 import org.hobart.facetrans.model.ImageFolder;
 import org.hobart.facetrans.task.FTTask;
 import org.hobart.facetrans.task.FTTaskCallback;
+import org.hobart.facetrans.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -100,6 +101,8 @@ public class ImageAsyncTask extends FTTask<List<ImageFolder>> {
                         image.setSize(size);
                     } catch (Exception e) {
                     }
+                    image.setSizeDesc(FileUtils.getFileSize(size));
+                    image.setName(FileUtils.getFileName(path));
                     image.setFilePath(path);
                     image.setFileType(FTType.IMAGE);
                     list.add(0, image);

@@ -9,16 +9,20 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.event.SocketEvent;
 import org.hobart.facetrans.event.ZipFTFileEvent;
 import org.hobart.facetrans.manager.FTFileManager;
+import org.hobart.facetrans.model.Apk;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.service.SocketSenderService;
@@ -69,6 +73,17 @@ public class SendFileActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
+        TextView tv_title = (TextView) findViewById(R.id.tv_title);
+        tv_title.setText("发送文件");
+        tv_title.setVisibility(View.VISIBLE);
+
+        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         init();
 
         bindReceiveService();
@@ -81,10 +96,14 @@ public class SendFileActivity extends BaseActivity {
         while (iterator.hasNext()) {
             FTFile ftFile = iterator.next();
             TransferModel model = new TransferModel();
+            if (ftFile.getFileType() == FTType.APK) {
+                model.drawable = ((Apk) ftFile).getDrawable();
+            }
             model.fileName = ftFile.getName();
             model.id = "" + mAutoCreateTransferId.incrementAndGet();
             model.fileSize = ftFile.getSize();
             model.size = "" + model.fileSize;
+            model.fileIcon = ftFile.getFilePath();
             model.transferStatus = TransferStatus.WAITING;
             model.filePath = ftFile.getFilePath();
             model.type = TransferModel.convertyFileType(ftFile.getFileType());

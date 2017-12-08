@@ -1,6 +1,5 @@
 package org.hobart.facetrans.model;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 /**
@@ -9,6 +8,11 @@ import android.graphics.drawable.Drawable;
 
 public class Apk extends FTFile {
 
+    /**
+     * 当前版本号
+     */
+    private String versionName;
+
     public String getVersionName() {
         return versionName;
     }
@@ -16,11 +20,6 @@ public class Apk extends FTFile {
     public void setVersionName(String versionName) {
         this.versionName = versionName;
     }
-
-    /**
-     * 当前版本号
-     */
-    private String versionName;
 
     /**
      * Apk图标
@@ -33,18 +32,5 @@ public class Apk extends FTFile {
 
     public void setDrawable(Drawable drawable) {
         this.drawable = drawable;
-    }
-
-    /**
-     * APK图标
-     */
-    private Bitmap bitmap;
-
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
     }
 }

@@ -20,7 +20,7 @@ public class TransferSender {
 
     private ReceiveRunnable mReceiveThread;
 
-    private HeartBeatRunnable mHeartBeatThread;
+//    private HeartBeatRunnable mHeartBeatThread;
 
     public TransferSender(Socket socket) {
         mSocket = socket;
@@ -31,35 +31,35 @@ public class TransferSender {
         if (mSocket != null && mSocket.isConnected()) {
             mSendThread = new SendRunnable(mSocket);
             mReceiveThread = new ReceiveRunnable(mSocket);
-            mHeartBeatThread = new HeartBeatRunnable();
+//            mHeartBeatThread = new HeartBeatRunnable();
             mExecute.execute(mReceiveThread);
             mExecute.execute(mSendThread);
-            mExecute.execute(mHeartBeatThread);
+//            mExecute.execute(mHeartBeatThread);
         }
     }
 
-
-    private final class HeartBeatRunnable implements Runnable {
-
-        volatile boolean monitor = true;
-
-        @Override
-        public void run() {
-            while (monitor) {
-                try {
-                    SocketTransferQueue.getInstance().sendHeartMsg();
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        public void setMonitor(boolean monitor) {
-            this.monitor = monitor;
-        }
-    }
+//
+//    private final class HeartBeatRunnable implements Runnable {
+//
+//        volatile boolean monitor = true;
+//
+//        @Override
+//        public void run() {
+//            while (monitor) {
+//                try {
+//                    SocketTransferQueue.getInstance().sendHeartMsg();
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//        public void setMonitor(boolean monitor) {
+//            this.monitor = monitor;
+//        }
+//    }
 
     private void releaseSocket() {
         if (mSocket != null && !mSocket.isClosed()) {
@@ -73,9 +73,9 @@ public class TransferSender {
 
 
     private void stopMonitor() {
-        if (mHeartBeatThread != null) {
-            mHeartBeatThread.setMonitor(false);
-        }
+//        if (mHeartBeatThread != null) {
+//            mHeartBeatThread.setMonitor(false);
+//        }
     }
 
 

@@ -14,6 +14,7 @@ import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.util.FileUtils;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
 import java.util.List;
 
@@ -45,13 +46,17 @@ public class SenderFileListAdapter extends RecyclerView.Adapter<SenderFileListAd
         setTransferStatus(viewHolder.tv_transfer_status, model);
         viewHolder.tv_file_name.setText(model.fileName);
         viewHolder.tv_fileSize.setText(FileUtils.getFileSize(model.fileSize));
-        Glide
-                .with(mContext)
-                .load(model.fileIcon)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .crossFade()
-                .into(viewHolder.iv_fileIcon);
+        if (model.type == TransferModel.TYPE_APK) {
+            viewHolder.iv_fileIcon.setImageDrawable(model.drawable);
+        } else {
+            Glide
+                    .with(mContext)
+                    .load(model.fileIcon)
+                    .centerCrop()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .crossFade()
+                    .into(viewHolder.iv_fileIcon);
+        }
     }
 
     //设置传输状态

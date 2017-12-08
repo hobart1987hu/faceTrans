@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.hobart.facetrans.model.TransferModel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.ReentrantLock;
@@ -41,9 +42,13 @@ public class SocketTransferQueue {
     /**
      * 发送传输文件列表
      */
-    public void sendFTFileList(List<TransferModel> transferModels) {
+    public void sendFTFileList(final List<TransferModel> transferModels) {
         Gson gson = new Gson();
-        String ftFileLists = gson.toJson(transferModels);
+        List<TransferModel> jsonLists = new ArrayList<>();
+        for (TransferModel model : transferModels) {
+            jsonLists.add(model.clone());
+        }
+        String ftFileLists = gson.toJson(jsonLists);
         TransferModel ftFileListModel = new TransferModel();
         ftFileListModel.type = TransferModel.TYPE_TRANSFER_DATA_LIST;
         ftFileListModel.content = ftFileLists;

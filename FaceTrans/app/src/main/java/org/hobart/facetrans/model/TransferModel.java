@@ -1,5 +1,7 @@
 package org.hobart.facetrans.model;
 
+import android.graphics.drawable.Drawable;
+
 import org.hobart.facetrans.FTType;
 
 /**
@@ -112,6 +114,34 @@ public class TransferModel {
      */
     public String content;
 
+    /**
+     * apk文件的icon
+     */
+    public Drawable drawable;
+
+    /**
+     * 文件保存路径
+     */
+    public String savePath;
+
+    @Override
+    public TransferModel clone() {
+        TransferModel temp = new TransferModel();
+        temp.fileIcon = this.fileIcon;
+        temp.type = this.type;
+        temp.content = this.content;
+        temp.mode = this.mode;
+        temp.filePath = this.filePath;
+        temp.fileName = this.fileName;
+        temp.fileSize = this.fileSize;
+        temp.id = this.id;
+        temp.progress = this.progress;
+        temp.transferStatus = this.transferStatus;
+        temp.size = this.size;
+        temp.selectedTransfer = this.selectedTransfer;
+        temp.savePath = this.savePath;
+        return temp;
+    }
 
     @Override
     public String toString() {

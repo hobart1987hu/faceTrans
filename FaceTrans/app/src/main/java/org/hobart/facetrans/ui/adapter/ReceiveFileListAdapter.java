@@ -2,6 +2,7 @@ package org.hobart.facetrans.ui.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import com.bumptech.glide.Glide;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
+import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.FileUtils;
 
 import java.util.List;
@@ -45,6 +47,23 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
         setTransferStatus(viewHolder.tv_transfer_status, model);
         viewHolder.tv_file_name.setText(model.fileName);
         viewHolder.tv_fileSize.setText(FileUtils.getFileSize(model.fileSize));
+
+        if (model.type == TransferModel.TYPE_APK) {
+            try {
+                viewHolder.iv_fileIcon.setImageDrawable(AndroidUtils.getApkIcon(model.savePath));
+            } catch (Exception e) {
+                viewHolder.iv_fileIcon.setImageResource(R.mipmap.ic_launcher);
+            }
+        } else {
+            Glide
+                    .with(mContext)
+                    .load(model.fileIcon)
+                    .centerCrop()
+                    .placeholder(R.mipmap.ic_launcher)
+                    .crossFade()
+                    .into(viewHolder.iv_fileIcon);
+        }
+
         Glide
                 .with(mContext)
                 .load(model.fileIcon)

@@ -58,7 +58,7 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
             if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 Apk apk = new Apk();
                 String path = packageInfo.applicationInfo.sourceDir;
-                apk.setName(packageInfo.applicationInfo.loadLabel(packageManager).toString());
+                apk.setName(packageInfo.applicationInfo.loadLabel(packageManager).toString() + ".apk");
                 apk.setDrawable(packageInfo.applicationInfo.loadIcon(packageManager));
                 apk.setFilePath(path);
                 apk.setVersionName(packageInfo.versionName);
@@ -108,12 +108,11 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
 
                     apk.setFilePath(path);
 
-
                     apk.setFileType(FTType.APK);
 
                     apk.setSizeDesc(FileUtils.getFileSize(size));
 
-                    apk.setName(FileUtils.getFileName(path));
+                    apk.setName(FileUtils.getFileName(path) + ".apk");
 
                     apk.setDrawable(AndroidUtils.getApkIcon(path));
 

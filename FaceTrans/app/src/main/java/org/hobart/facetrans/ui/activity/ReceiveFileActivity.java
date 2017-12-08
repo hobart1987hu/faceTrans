@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -61,6 +63,17 @@ public class ReceiveFileActivity extends BaseActivity {
         setContentView(R.layout.activity_receive_file);
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
+
+        TextView tv_title = (TextView) findViewById(R.id.tv_title);
+        tv_title.setText("接收文件");
+        tv_title.setVisibility(View.VISIBLE);
+
+        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ReceiveFileListAdapter(this, mReceiveFileLists);
@@ -170,6 +183,8 @@ public class ReceiveFileActivity extends BaseActivity {
                 if (TextUtils.equals(model.id, event.id)) {
                     model.transferStatus = status;
                     model.progress = event.progress;
+                    model.fileIcon = event.filePath;
+                    model.savePath = event.savePath;
                     mReceiveFileLists.set(i, model);
                     position = i;
                     break;

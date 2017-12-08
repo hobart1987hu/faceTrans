@@ -267,7 +267,7 @@ public class ReceiveRunnable implements Runnable {
         event.progress = progress;
         event.fileName = fileName;
         event.id = id;
-        event.filePath = savePath;
+        event.savePath = savePath;
         if (mCurrentTransferStatus == TransferStatus.TRANSFER_SUCCESS
                 || mCurrentTransferStatus == TransferStatus.TRANSFER_FAILED) {
             if (mReceiveThread != null) {
