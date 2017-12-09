@@ -83,7 +83,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
             tv_fileNums = (TextView) itemView.findViewById(R.id.tv_pic_nums);
             iv_icon = (ImageView) itemView.findViewById(R.id.iv_icon);
             float ratio = OpenGlUtils.VIEW_W_H;
-            int w = AndroidUtils.dip2px(120);
+            int w = AndroidUtils.dip2px(72);
             int h = w;
             if (w / h > ratio) {
                 w = (int) (h * ratio);

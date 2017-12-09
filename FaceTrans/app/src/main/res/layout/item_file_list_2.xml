@@ -54,5 +54,14 @@
             android:layout_marginRight="10dp"
             android:background="@mipmap/set_right_arrows"
             android:contentDescription="@null" />
+
+        <View
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_below="@id/iv_icon"
+            android:layout_toRightOf="@id/iv_icon"
+            android:background="#cccccc" />
+
     </RelativeLayout>
 </RelativeLayout>
