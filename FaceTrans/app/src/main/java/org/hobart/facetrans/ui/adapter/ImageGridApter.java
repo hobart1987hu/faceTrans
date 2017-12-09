@@ -1,5 +1,6 @@
 package org.hobart.facetrans.ui.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 
@@ -15,6 +17,7 @@ import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Image;
 import org.hobart.facetrans.opengl.ScreenJudgeImageView;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.util.AndroidUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +30,17 @@ public class ImageGridApter extends RecyclerView.Adapter<ImageGridApter.GridView
     private List<Image> mImages = new ArrayList<>();
     private Context mContext;
     private OnRecyclerViewClickListener mListener;
+    private int margin2;
+    private int mImageHeight;
+    private int mImageWidth;
 
     public ImageGridApter(Context context, OnRecyclerViewClickListener listener) {
         mContext = context;
         mListener = listener;
+        int screenWidth = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
+        margin2 = AndroidUtils.dip2px(2);
+        mImageHeight = AndroidUtils.dip2px(120);
+        mImageWidth = screenWidth / 3 - (margin2 * 6 / 3);
     }
 
     public void setDatas(List<Image> list) {
@@ -65,6 +75,7 @@ public class ImageGridApter extends RecyclerView.Adapter<ImageGridApter.GridView
                 .load(image.getFilePath())
                 .placeholder(R.mipmap.icon_default)
                 .crossFade()
+                .centerCrop()
                 .into(holder.iv_pic);
     }
 
@@ -82,7 +93,10 @@ public class ImageGridApter extends RecyclerView.Adapter<ImageGridApter.GridView
         public GridViewHolder(View convertView) {
             super(convertView);
             containerView = convertView.findViewById(R.id.main_frame_layout);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mImageWidth, mImageHeight);
+            params.leftMargin = params.topMargin = params.bottomMargin = params.rightMargin = margin2;
             iv_pic = (ImageView) convertView.findViewById(R.id.iv_pic);
+            iv_pic.setLayoutParams(params);
             iv_mask = (ImageView) convertView.findViewById(R.id.iv_mask);
             mCardView = (CardView) convertView.findViewById(R.id.card_view);
         }

@@ -277,19 +277,16 @@ public class PerspectiveView extends GLSurfaceView implements GLSurfaceView.Rend
 
             @Override
             public void onAnimationStart(Animator animation) {
-                // TODO Auto-generated method stub
 
             }
 
             @Override
             public void onAnimationRepeat(Animator animation) {
-                // TODO Auto-generated method stub
 
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                // TODO Auto-generated method stub
                 if (animationCallback != null) {
                     animationCallback.onAnimationEnd(isReverse);
                 }
@@ -297,7 +294,6 @@ public class PerspectiveView extends GLSurfaceView implements GLSurfaceView.Rend
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                // TODO Auto-generated method stub
 
             }
         });

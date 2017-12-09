@@ -400,7 +400,7 @@ public class ChooseFileActivity extends BaseActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
             if (null != mCurrentFragment) {
-                if ((mCurrentFragment == mImageListFragment) || (mCurrentFragment == mVideoListFragment) && isFlip) {
+                if (((mCurrentFragment == mImageListFragment) || (mCurrentFragment == mVideoListFragment)) && isFlip) {
                     startReverse();
                     return true;
                 }
