@@ -3,6 +3,7 @@ package org.hobart.facetrans.util;
 import android.app.Activity;
 import android.content.Intent;
 
+import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.socket.SocketConstants;
 import org.hobart.facetrans.socket.service.ServerReceiverService;
 import org.hobart.facetrans.socket.service.SocketSenderService;
@@ -12,6 +13,7 @@ import org.hobart.facetrans.ui.activity.ReceiveFileActivity;
 import org.hobart.facetrans.ui.activity.ScanReceiverActivity;
 import org.hobart.facetrans.ui.activity.ScanSenderActivity;
 import org.hobart.facetrans.ui.activity.SendFileActivity;
+import org.hobart.facetrans.ui.activity.WebTransferActivity;
 
 /**
  * Created by huzeyin on 2017/11/14.
@@ -23,6 +25,12 @@ public class IntentUtils {
 //        Intent intent = new Intent(activity, MusicListActivity.class);
 //        activity.startActivity(intent);
 //    }
+
+    public static void intentToWebTransferActivity(Activity activity) {
+        Intent intent = new Intent(activity, WebTransferActivity.class);
+        activity.startActivity(intent);
+    }
+
 
     public static void intentToReceiveFileActivity(Activity activity) {
         Intent intent = new Intent(activity, ReceiveFileActivity.class);
@@ -46,8 +54,9 @@ public class IntentUtils {
     }
 
 
-    public static void intentToChooseFileActivity(Activity activity) {
+    public static void intentToChooseFileActivity(Activity activity, boolean isWebTransfer) {
         Intent intent = new Intent(activity, ChooseFileActivity.class);
+        intent.putExtra(GlobalConfig.KEY_WEB_TRANSFER_FLAG, isWebTransfer);
         activity.startActivity(intent);
     }
 

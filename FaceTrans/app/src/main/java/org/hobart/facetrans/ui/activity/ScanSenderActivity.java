@@ -58,9 +58,10 @@ public class ScanSenderActivity extends BaseActivity {
     private void createAp() {
         // TODO: 如果有其他的热点，我们自己在创建热点是否有影响?
         WifiHelper.getInstance().closeWifi();
-        ApWifiHelper.getInstance().createWifiAP(GlobalConfig.AP_SSID, GlobalConfig.AP_PWD);
-        mCreateWifiAPThread = new CreateWifiAPThread();
+        if (null == mCreateWifiAPThread)
+            mCreateWifiAPThread = new CreateWifiAPThread();
         new Thread(mCreateWifiAPThread).start();
+        ApWifiHelper.getInstance().createWifiAP(GlobalConfig.AP_SSID, GlobalConfig.AP_PWD);
     }
 
     private boolean connectedSuccess = false;
@@ -82,6 +83,9 @@ public class ScanSenderActivity extends BaseActivity {
                 LogcatUtils.d(LOG_PREFIX + "onWifiAPCreateCallBack onFailed: 热点创建失败");
                 ToastUtils.showLongToast("Wi-Fi热点创建失败！");
                 finish();
+                break;
+            case ApCreateEvent.TRY_AGAIN:
+                createAp();
                 break;
             default:
                 break;

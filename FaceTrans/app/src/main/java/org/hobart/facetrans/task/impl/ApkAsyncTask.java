@@ -112,7 +112,7 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
 
                     apk.setSizeDesc(FileUtils.getFileSize(size));
 
-                    apk.setName(FileUtils.getFileName(path) + ".apk");
+                    apk.setName(FileUtils.getFileName(path));
 
                     apk.setDrawable(AndroidUtils.getApkIcon(path));
 

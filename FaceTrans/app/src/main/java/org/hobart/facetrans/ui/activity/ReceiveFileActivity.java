@@ -29,6 +29,8 @@ import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.socket.transfer.thread.UnZipFTFileRunnable;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
 import org.hobart.facetrans.ui.adapter.ReceiveFileListAdapter;
+import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.WifiHelper;
@@ -76,7 +78,30 @@ public class ReceiveFileActivity extends BaseActivity {
         });
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new ReceiveFileListAdapter(this, mReceiveFileLists);
+        mAdapter = new ReceiveFileListAdapter(this, mReceiveFileLists, new OnRecyclerViewClickListener.SimpleOnRecyclerViewClickListener() {
+            @Override
+            public void onItemClick(View container, View view, int position) {
+                synchronized (mReceiveFileLists) {
+                    TransferModel model = mReceiveFileLists.get(position);
+                    if (model.transferStatus == TransferStatus.FINISH) {
+                        switch (model.type) {
+                            case TransferModel.TYPE_APK:
+                                FileUtils.install(model.savePath);
+                                break;
+                            case TransferModel.TYPE_MUSIC:
+                                FileUtils.playMusic(model.savePath);
+                                break;
+                            case TransferModel.TYPE_VIDEO:
+                                FileUtils.playVideo(model.savePath);
+                                break;
+                            case TransferModel.TYPE_IMAGE:
+                                FileUtils.showImage(model.savePath);
+                                break;
+                        }
+                    }
+                }
+            }
+        });
         recycleView.setAdapter(mAdapter);
 
         bindReceiveService();

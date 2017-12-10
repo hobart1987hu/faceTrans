@@ -24,6 +24,29 @@ public class GlobalConfig {
     public static final String EXTEND_MP4 = ".mp4";
 
 
+    /**
+     * Wifi连接上时 未分配默认的Ip地址
+     */
+    public static final String DEFAULT_UNKOWN_IP = "0.0.0.0";
+
+    /**
+     * 最大尝试数
+     */
+    public static final int DEFAULT_TRY_TIME = 1 * 100;
+
+
+    /**
+     * asset 资源名称
+     */
+    public static final String NAME_FILE_TEMPLATE = "file.template";
+    public static final String NAME_CLASSIFY_TEMPLATE = "classify.template";
+
+    /**
+     * 网页传标识
+     */
+    public static final String KEY_WEB_TRANSFER_FLAG = "KEY_WEB_TRANSFER_FLAG";
+
+
     public static String getTransferDirectory() {
         return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "facetrans";
     }
@@ -51,11 +74,13 @@ public class GlobalConfig {
     /**
      * AP 密码
      */
-    public static final String AP_PWD = "FT_HOTSPOT_1234567890";
+    public static final String AP_PWD = "1234567890";
     /**
      * AP SSID
      */
     public static final String AP_SSID = "FT_HOTSPOT";
+
+    public static final String WEB_SERVER_IP = "192.168.43.1";
 
 
     public static final Comparator<Map.Entry<String, FTFile>> DEFAULT_COMPARATOR = new Comparator<Map.Entry<String, FTFile>>() {

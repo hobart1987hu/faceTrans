@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
+import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.FileUtils;
 
@@ -30,9 +32,12 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
 
     private Context mContext;
 
-    public ReceiveFileListAdapter(Context context, List<TransferModel> datas) {
+    private OnRecyclerViewClickListener mListener;
+
+    public ReceiveFileListAdapter(Context context, List<TransferModel> datas, OnRecyclerViewClickListener listener) {
         mContext = context;
         mReceiveLists = datas;
+        mListener = listener;
     }
 
     @Override
@@ -42,7 +47,15 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(final ViewHolder viewHolder, final int position) {
+
+        viewHolder.rootView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onItemClick(viewHolder.rootView, viewHolder.rootView, position);
+            }
+        });
+
         TransferModel model = mReceiveLists.get(position);
         setTransferStatus(viewHolder.tv_transfer_status, model);
         viewHolder.tv_file_name.setText(model.fileName);
@@ -131,8 +144,11 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
 
         TextView tv_transfer_status;
 
+        RelativeLayout rootView;
+
         public ViewHolder(View itemView) {
             super(itemView);
+            rootView = (RelativeLayout) itemView.findViewById(R.id.rootView);
             iv_fileIcon = (ImageView) itemView.findViewById(R.id.iv_fileIcon);
             tv_file_name = (TextView) itemView.findViewById(R.id.tv_file_name);
             tv_fileSize = (TextView) itemView.findViewById(R.id.tv_fileSize);

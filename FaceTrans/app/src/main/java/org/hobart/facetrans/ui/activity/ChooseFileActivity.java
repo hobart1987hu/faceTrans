@@ -24,6 +24,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.FTType;
+import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.manager.FTFileManager;
@@ -99,13 +100,18 @@ public class ChooseFileActivity extends BaseActivity {
     private boolean isFlip = false;
     private String coverUrl;
     private Bitmap bitmap;
-
+    private boolean isWebTransfer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_file);
         ButterKnife.bind(this);
+
+        if (null != getIntent()) {
+            isWebTransfer = getIntent().getBooleanExtra(GlobalConfig.KEY_WEB_TRANSFER_FLAG, false);
+        }
+
         EventBus.getDefault().register(this);
         init();
         initData();
@@ -320,6 +326,11 @@ public class ChooseFileActivity extends BaseActivity {
             case R.id.btn_next: {
                 if (!FTFileManager.getInstance().isFTFilesExist()) {
                     ToastUtils.showLongToast("请选择你要传输的文件");
+                    return;
+                }
+                if (isWebTransfer) {
+                    IntentUtils.intentToWebTransferActivity(this);
+                    finish();
                     return;
                 }
                 IntentUtils.intentToScanReceiverActivity(this);

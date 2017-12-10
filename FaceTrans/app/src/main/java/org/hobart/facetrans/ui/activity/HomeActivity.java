@@ -165,7 +165,9 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        //TODO:
+        if (id == R.id.nav_web_transfer) {
+            IntentUtils.intentToChooseFileActivity(this, true);
+        }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -176,7 +178,7 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
         switch (view.getId()) {
             case R.id.btn_send:
             case R.id.btn_send_big: {
-                IntentUtils.intentToChooseFileActivity(this);
+                IntentUtils.intentToChooseFileActivity(this,false);
                 break;
             }
             case R.id.btn_receive:

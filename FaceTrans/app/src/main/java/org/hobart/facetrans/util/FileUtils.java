@@ -1,5 +1,7 @@
 package org.hobart.facetrans.util;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -10,9 +12,13 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Log;
 
+import org.hobart.facetrans.BuildConfig;
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
@@ -21,7 +27,6 @@ import org.hobart.facetrans.model.FTFile;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +48,74 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
 
     public static final DecimalFormat FORMAT = new DecimalFormat("####.##");
+
+    /**
+     * 查找指定文件名的文件
+     *
+     * @param fileName
+     * @return
+     */
+    public static FTFile getFileInfo(String fileName) {
+        List<FTFile> fileInfoList = getSpecificTypeFiles(new String[]{fileName});
+        if (fileInfoList == null && fileInfoList.size() == 0) {
+            return null;
+        }
+
+        return fileInfoList.get(0);
+    }
+
+    /**
+     * 存储卡获取 指定文件
+     *
+     * @param extension
+     * @return
+     */
+    public static List<FTFile> getSpecificTypeFiles(String[] extension) {
+        List<FTFile> fileInfoList = new ArrayList<>();
+
+        //内存卡文件的Uri
+        Uri fileUri = MediaStore.Files.getContentUri("external");
+        //筛选列，这里只筛选了：文件路径和含后缀的文件名
+        String[] projection = new String[]{
+                MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE
+        };
+
+        //构造筛选条件语句
+        String selection = "";
+        for (int i = 0; i < extension.length; i++) {
+            if (i != 0) {
+                selection = selection + " OR ";
+            }
+            selection = selection + MediaStore.Files.FileColumns.DATA + " LIKE '%" + extension[i] + "'";
+        }
+        //按时间降序条件
+        String sortOrder = MediaStore.Files.FileColumns.DATE_MODIFIED;
+
+        Cursor cursor = FaceTransApplication.getApp().getContentResolver().query(fileUri, projection, selection, null, sortOrder);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                try {
+                    String data = cursor.getString(0);
+                    FTFile fileInfo = new FTFile();
+                    fileInfo.setFilePath(data);
+                    long size = 0;
+                    try {
+                        File file = new File(data);
+                        size = file.length();
+                        fileInfo.setSize(size);
+                    } catch (Exception e) {
+
+                    }
+                    fileInfoList.add(fileInfo);
+                } catch (Exception e) {
+                    Log.i("FileUtils", "------>>>" + e.getMessage());
+                }
+
+            }
+        }
+        return fileInfoList;
+    }
+
 
     public static boolean isApkFile(String filePath) {
         if (filePath == null || filePath.equals("")) {
@@ -387,5 +460,82 @@ public class FileUtils {
             }
         }
         zf.close();
+    }
+
+    public static void install(String apkFilePath) {
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+        File file = new File(apkFilePath);
+        if (!file.exists()) {
+            return;
+        }
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+                intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+            } else {
+                intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ToastUtils.showLongToast("无法安装apk");
+        }
+    }
+
+    public static void playMusic(String musicPath) {
+        File file = new File(musicPath);
+        if (!file.exists()) {
+            return;
+        }
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+            intent.setDataAndType(contentUri, "audio/*");
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), "audio/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
+
+    public static void playVideo(String videoPath) {
+        File file = new File(videoPath);
+        if (!file.exists()) {
+            return;
+        }
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+            intent.setDataAndType(contentUri, "video/*");
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), "video/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
+
+    public static void showImage(String imagePath) {
+        File file = new File(imagePath);
+        if (!file.exists()) {
+            return;
+        }
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+            intent.setDataAndType(contentUri, "image/*");
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), "image/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
     }
 }

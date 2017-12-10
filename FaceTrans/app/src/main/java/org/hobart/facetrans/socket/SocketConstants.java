@@ -6,6 +6,8 @@ package org.hobart.facetrans.socket;
 
 public class SocketConstants {
 
+    // 网页快传端口号
+    public static final int WEB_SERVER_PORT = 1234;
     //端口号
     public static final int SERVER_PORT = 6666;
     //Socket 连接超时

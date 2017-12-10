@@ -2,6 +2,7 @@ package org.hobart.facetrans.wifi;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -140,9 +141,41 @@ public class WifiHelper {
         return intToIp(mWifiManager.getConnectionInfo().getIpAddress());
     }
 
+    /**
+     * 开启热点之后，获取自身热点的IP地址
+     * @return
+     */
+    public String getHotspotLocalIpAddress(){
+        // WifiAP ip address is hardcoded in Android.
+        /* IP/netmask: 192.168.43.1/255.255.255.0 */
+        String ipAddress = "192.168.43.1";
+        DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
+        int address = dhcpInfo.serverAddress;
+        ipAddress = ((address & 0xFF)
+                + "." + ((address >> 8) & 0xFF)
+                + "." + ((address >> 16) & 0xFF)
+                + "." + ((address >> 24) & 0xFF));
+        return ipAddress;
+    }
+    /**
+     * 设备连接Wifi之后， 设备获取Wifi热点的IP地址
+     * @return
+     */
+    public String getIpAddressFromHotspot(){
+        // WifiAP ip address is hardcoded in Android.
+        /* IP/netmask: 192.168.43.1/255.255.255.0 */
+        String ipAddress = "192.168.43.1";
+        DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
+        int address = dhcpInfo.gateway;
+        ipAddress = ((address & 0xFF)
+                + "." + ((address >> 8) & 0xFF)
+                + "." + ((address >> 16) & 0xFF)
+                + "." + ((address >> 24) & 0xFF));
+        return ipAddress;
+    }
+
     private String intToIp(int paramIntip) {
         return (paramIntip & 0xFF) + "." + ((paramIntip >> 8) & 0xFF) + "."
                 + ((paramIntip >> 16) & 0xFF) + "." + ((paramIntip >> 24) & 0xFF);
     }
-
 }

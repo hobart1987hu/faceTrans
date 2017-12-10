@@ -1,8 +1,11 @@
 package org.hobart.facetrans.manager;
 
+import android.content.Context;
+
 import org.hobart.facetrans.model.FTFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,6 +48,7 @@ public class FTFileManager {
         }
         return true;
     }
+
 
     public boolean isFTFileExist(FTFile ftFile) {
         if (mFTFiles == null) return false;
