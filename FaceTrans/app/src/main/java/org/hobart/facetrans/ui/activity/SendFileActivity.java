@@ -226,7 +226,6 @@ public class SendFileActivity extends BaseActivity {
                 if (TextUtils.equals(model.id, event.id)) {
                     model.transferStatus = event.transferStatus;
                     model.progress = event.progress;
-                    mSendFileLists.set(i, model);
                     position = i;
                     break;
                 }

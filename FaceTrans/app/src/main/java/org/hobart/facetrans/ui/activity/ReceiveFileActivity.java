@@ -208,9 +208,8 @@ public class ReceiveFileActivity extends BaseActivity {
                 if (TextUtils.equals(model.id, event.id)) {
                     model.transferStatus = status;
                     model.progress = event.progress;
-                    model.fileIcon = event.filePath;
+                    model.fileIcon = event.savePath;
                     model.savePath = event.savePath;
-                    mReceiveFileLists.set(i, model);
                     position = i;
                     break;
                 }

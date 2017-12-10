@@ -2,7 +2,6 @@ package org.hobart.facetrans.ui.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +63,7 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
         if (model.type == TransferModel.TYPE_APK) {
             if (model.transferStatus == TransferStatus.FINISH) {
                 try {
-                    viewHolder.iv_fileIcon.setImageDrawable(AndroidUtils.getApkIcon(model.savePath));
+                    viewHolder.iv_fileIcon.setImageDrawable(AndroidUtils.getApkIcon(model.fileIcon));
                 } catch (Exception e) {
                     viewHolder.iv_fileIcon.setImageResource(R.mipmap.ic_launcher);
                 }
@@ -80,14 +79,6 @@ public class ReceiveFileListAdapter extends RecyclerView.Adapter<ReceiveFileList
                     .crossFade()
                     .into(viewHolder.iv_fileIcon);
         }
-
-        Glide
-                .with(mContext)
-                .load(model.fileIcon)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .crossFade()
-                .into(viewHolder.iv_fileIcon);
     }
 
     private void setTransferStatus(TextView tv_transfer_status, TransferModel model) {

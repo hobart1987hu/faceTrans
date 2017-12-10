@@ -8,8 +8,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -47,12 +45,6 @@ public class AndroidUtils {
         return versionName;
     }
 
-    /**
-     * 获取应用程序图片Drawable
-     *
-     * @param apkPath
-     * @return
-     */
     public static Drawable getApkIcon(String apkPath) {
 
         Context context = FaceTransApplication.getFaceTransApplicationContext();
