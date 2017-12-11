@@ -1,6 +1,5 @@
 package org.hobart.facetrans.ui.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Html;
@@ -16,13 +15,16 @@ import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.ApCreateEvent;
+import org.hobart.facetrans.event.FTFilesChangedEvent;
+import org.hobart.facetrans.http_server.ImageHttpInterceptor;
 import org.hobart.facetrans.manager.FTFileManager;
-import org.hobart.facetrans.micro_server.AndroidMicroServer;
-import org.hobart.facetrans.micro_server.DownloadResUriHandler;
-import org.hobart.facetrans.micro_server.IndexResUriHandler;
+import org.hobart.facetrans.http_server.AndroidHttpServer;
+import org.hobart.facetrans.http_server.DownloadHttpUriInterceptor;
+import org.hobart.facetrans.http_server.IndexHttpUriInterceptor;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.socket.SocketConstants;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.ClassifyUtils;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.IOStreamUtils;
@@ -47,7 +49,7 @@ public class WebTransferActivity extends BaseActivity {
     private TextView tv_tip_1, tv_tip_2;
     private CreateWifiAPThread mCreateWifiAPThread;
 
-    private AndroidMicroServer mServer;
+    private AndroidHttpServer mServer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,22 +132,21 @@ public class WebTransferActivity extends BaseActivity {
                     }
                 } catch (Exception e) {
                 }
-                mServer = new AndroidMicroServer(SocketConstants.WEB_SERVER_PORT);
-                mServer.registerResUriHandler(new MyIndexResUriHandler());
-                mServer.registerResUriHandler(new DownloadResUriHandler());
+                mServer = new AndroidHttpServer(SocketConstants.WEB_SERVER_PORT);
+                mServer.registerHttpUriInterceptor(new MyIndexHttpUriInterceptor());
+                mServer.registerHttpUriInterceptor(new ImageHttpInterceptor());
+                mServer.registerHttpUriInterceptor(new DownloadHttpUriInterceptor());
                 mServer.start();
             }
         };
-
     }
 
     private void updateUI() {
 
-        String host = GlobalConfig.WEB_SERVER_IP;
+        final String host = GlobalConfig.WEB_SERVER_IP;
 
         String normalColor = "#ff000000";
         String highlightColor = "#1467CD";
-//        <font color=\'#ff0000\'>【题】</font>
         String ssid = GlobalConfig.AP_SSID;
         String tip1 = getResources().getString(R.string.tip_web_transfer_first_tip).replace("{hotspot}", ssid);
         String[] tip1StringArray = tip1.split("\\n");
@@ -158,20 +159,15 @@ public class WebTransferActivity extends BaseActivity {
         String[] tip2StringArray = tip2.split("\\n");
         Spanned tip2Spanned = Html.fromHtml("<font color='" + normalColor + "'>" + tip2StringArray[0].trim() + "</font><br>"
                 + "<font color='" + normalColor + "'>" + tip2StringArray[1].trim() + "</font><br>"
-                + "<font color='" + highlightColor + "'>" + "http://" + host + ":" + SocketConstants.SERVER_PORT + "</font><br>");
+                + "<font color='" + highlightColor + "'>" + "http://" + host + ":" + SocketConstants.WEB_SERVER_PORT + "</font><br>");
         tv_tip_2.setText(tip2Spanned);
     }
 
-    static class MyIndexResUriHandler extends IndexResUriHandler {
+    static class MyIndexHttpUriInterceptor extends IndexHttpUriInterceptor {
 
-        public static final String DOWNLOAD_PREFIX = "http://192.168.43.1:1234/download/";
-        public static final String IMAGE_PREFIX = "http://192.168.43.1:1234/image/";
-        public static final String DEFAULT_IMAGE_PATH = "http://192.168.43.1:1234/image/logo.png";
+        private Map<String, FTFile> sFileInfoMap = null;
 
-        Map<String, FTFile> sFileInfoMap = null;
-
-
-        public MyIndexResUriHandler() {
+        public MyIndexHttpUriInterceptor() {
             sFileInfoMap = FTFileManager.getInstance().getFTFiles();
         }
 
@@ -179,11 +175,10 @@ public class WebTransferActivity extends BaseActivity {
         public String convert(String indexHtml) {
             StringBuilder allFileListInfoHtmlBuilder = new StringBuilder();
             int count = this.sFileInfoMap.size();
-            indexHtml = indexHtml.replaceAll("\\{app_avatar\\}", DEFAULT_IMAGE_PATH);
-            indexHtml = indexHtml.replaceAll("\\{app_path\\}", DOWNLOAD_PREFIX);
+            indexHtml = indexHtml.replaceAll("\\{app_icon\\}", GlobalConfig.WEB_TRANSFER_APP_ICON_IMAGE_PREFIX);
+            indexHtml = indexHtml.replaceAll("\\{app_path\\}", GlobalConfig.WEB_TRANSFER_DOWNLOAD_PREFIX + AndroidUtils.getCurrentApkPath());
             indexHtml = indexHtml.replaceAll("\\{app_name\\}", FaceTransApplication.getApp().getResources().getString(R.string.app_name));
-            String ssid = GlobalConfig.AP_SSID;
-            indexHtml = indexHtml.replaceAll("\\{file_share\\}", ssid);
+            indexHtml = indexHtml.replaceAll("\\{file_share\\}", GlobalConfig.AP_SSID);
             indexHtml = indexHtml.replaceAll("\\{file_count\\}", String.valueOf(count));
 
             List<FTFile> apkInfos = ClassifyUtils.filter(this.sFileInfoMap, FTType.APK);
@@ -193,14 +188,14 @@ public class WebTransferActivity extends BaseActivity {
 
             try {
                 String apkInfosHtml = getClassifyFileInfoListHtml(apkInfos, FTType.APK);
-                String jpgInfosHtml = getClassifyFileInfoListHtml(imageInfos, FTType.IMAGE);
-                String mp3InfosHtml = getClassifyFileInfoListHtml(musicInfos, FTType.MUSIC);
-                String mp4InfosHtml = getClassifyFileInfoListHtml(videoInfos, FTType.VIDEO);
+                String imageInfosHtml = getClassifyFileInfoListHtml(imageInfos, FTType.IMAGE);
+                String musicInfosHtml = getClassifyFileInfoListHtml(musicInfos, FTType.MUSIC);
+                String videoInfosHtml = getClassifyFileInfoListHtml(videoInfos, FTType.VIDEO);
 
                 allFileListInfoHtmlBuilder.append(apkInfosHtml);
-                allFileListInfoHtmlBuilder.append(jpgInfosHtml);
-                allFileListInfoHtmlBuilder.append(mp3InfosHtml);
-                allFileListInfoHtmlBuilder.append(mp4InfosHtml);
+                allFileListInfoHtmlBuilder.append(imageInfosHtml);
+                allFileListInfoHtmlBuilder.append(musicInfosHtml);
+                allFileListInfoHtmlBuilder.append(videoInfosHtml);
                 indexHtml = indexHtml.replaceAll("\\{file_list_template\\}", allFileListInfoHtmlBuilder.toString());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -209,14 +204,18 @@ public class WebTransferActivity extends BaseActivity {
             return indexHtml;
         }
 
-        private String getFileInfoListHtml(List<FTFile> fieInfos) throws IOException {
+        private String getFileInfoListHtml(List<FTFile> fileInfos) throws IOException {
             StringBuilder sb = new StringBuilder();
-            for (FTFile fileInfo : fieInfos) {
+            for (FTFile fileInfo : fileInfos) {
                 String fileInfoHtml = IOStreamUtils.inputStreamToString(FaceTransApplication.getApp().getAssets().open(GlobalConfig.NAME_FILE_TEMPLATE));
-                fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", IMAGE_PREFIX + FileUtils.getFileName(fileInfo.getFilePath()));
+                if (fileInfo.getFileType() == FTType.APK) {
+                    fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_APK_IMAGE_PREFIX + fileInfo.getFilePath());
+                } else {
+                    fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_IMAGE_PREFIX + fileInfo.getFilePath());
+                }
                 fileInfoHtml = fileInfoHtml.replaceAll("\\{file_name\\}", FileUtils.getFileName(fileInfo.getFilePath()));
                 fileInfoHtml = fileInfoHtml.replaceAll("\\{file_size\\}", FileUtils.getFileSize(fileInfo.getSize()));
-                fileInfoHtml = fileInfoHtml.replaceAll("\\{file_path\\}", DOWNLOAD_PREFIX + FileUtils.getFileName(fileInfo.getFilePath()));
+                fileInfoHtml = fileInfoHtml.replaceAll("\\{file_path\\}", GlobalConfig.WEB_TRANSFER_DOWNLOAD_PREFIX + fileInfo.getFilePath());
                 sb.append(fileInfoHtml);
             }
             return sb.toString();
@@ -226,7 +225,6 @@ public class WebTransferActivity extends BaseActivity {
             if (fileInfos == null || fileInfos.size() <= 0) {
                 return "";
             }
-
             String classifyHtml = IOStreamUtils.inputStreamToString(FaceTransApplication.getApp().getAssets().open(GlobalConfig.NAME_CLASSIFY_TEMPLATE));
 
             String className = "";
@@ -251,6 +249,8 @@ public class WebTransferActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        FTFileManager.getInstance().clear();
+        EventBus.getDefault().post(new FTFilesChangedEvent());
         EventBus.getDefault().unregister(this);
         if (null != mServer) mServer.stop();
         if (null != mCreateWifiAPThread) mCreateWifiAPThread.cancelDownTimer();

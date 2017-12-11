@@ -32,6 +32,30 @@ public class AndroidUtils {
         return Build.MODEL;
     }
 
+    public static Drawable getCurrentApkIcon() {
+
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+        return context.getApplicationInfo().loadIcon(context.getPackageManager());
+    }
+
+    public static String getCurrentApkPath() {
+
+        return FaceTransApplication.getFaceTransApplicationContext().getApplicationInfo().sourceDir;
+    }
+
+    public static String getApkPkgName(String apkPath) {
+        Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+        PackageInfo pi = context.getPackageManager().getPackageArchiveInfo(apkPath,
+                PackageManager.GET_ACTIVITIES);
+        String pkgName = null;
+        if (pi != null) {
+            pkgName = pi.packageName;
+        }
+        return pkgName;
+    }
+
     public static String getVersionName(String apkPath) {
 
         Context context = FaceTransApplication.getFaceTransApplicationContext();

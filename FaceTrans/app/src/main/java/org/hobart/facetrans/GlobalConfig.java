@@ -40,6 +40,13 @@ public class GlobalConfig {
      */
     public static final String NAME_FILE_TEMPLATE = "file.template";
     public static final String NAME_CLASSIFY_TEMPLATE = "classify.template";
+    /**
+     *
+     */
+    public static final String WEB_TRANSFER_DOWNLOAD_PREFIX = "http://192.168.43.1:1234/download/";
+    public static final String WEB_TRANSFER_IMAGE_PREFIX = "http://192.168.43.1:1234/image/";
+    public static final String WEB_TRANSFER_APP_ICON_IMAGE_PREFIX = WEB_TRANSFER_IMAGE_PREFIX + "appIcon/";
+    public static final String WEB_TRANSFER_APK_IMAGE_PREFIX = WEB_TRANSFER_IMAGE_PREFIX + "apk/";
 
     /**
      * 网页传标识
@@ -50,7 +57,6 @@ public class GlobalConfig {
     public static String getTransferDirectory() {
         return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "facetrans";
     }
-
     /**
      * 存放压缩文件
      *
@@ -67,6 +73,10 @@ public class GlobalConfig {
      */
     public static String getTransferUnZipDirectory() {
         return getTransferDirectory() + File.separator + "transUnSZipDir" + File.separator;
+    }
+
+    public static final String getApkIconDirectory() {
+        return getTransferDirectory() + File.separator + "apkIcons" + File.separator;
     }
 
     public static final boolean DEBUG = true;

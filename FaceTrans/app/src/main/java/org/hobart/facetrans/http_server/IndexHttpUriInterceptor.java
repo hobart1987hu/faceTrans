@@ -1,4 +1,4 @@
-package org.hobart.facetrans.micro_server;
+package org.hobart.facetrans.http_server;
 
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.util.IOStreamUtils;
@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class IndexResUriHandler implements ResUriHandler {
+public class IndexHttpUriInterceptor implements HttpUriInterceptor {
 
     @Override
     public boolean matches(String uri) {
@@ -19,7 +19,7 @@ public class IndexResUriHandler implements ResUriHandler {
     }
 
     @Override
-    public void handler(Request request) {
+    public void interceptor(Request request) {
         String indexHtml = null;
         try {
             InputStream is = FaceTransApplication.getApp().getAssets().open("index.html");

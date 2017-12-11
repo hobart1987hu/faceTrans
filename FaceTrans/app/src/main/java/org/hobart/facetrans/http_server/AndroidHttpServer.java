@@ -1,4 +1,4 @@
-package org.hobart.facetrans.micro_server;
+package org.hobart.facetrans.http_server;
 
 import org.hobart.facetrans.util.IOStreamUtils;
 import org.hobart.facetrans.util.LogcatUtils;
@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,38 +17,35 @@ import java.util.concurrent.Executors;
  * Created by huzeyin on 2017/12/9.
  */
 
-public class AndroidMicroServer {
+public class AndroidHttpServer {
 
-    private static final String LOGO_PREFIX = "AndroidMicroServer ->";
+    private static final String LOGO_PREFIX = "AndroidHttpServer ->";
 
     private int mPort;
-
 
     private ServerSocket mServerSocket;
 
 
     private ExecutorService mThreadPool = Executors.newCachedThreadPool();
 
-
-    private List<ResUriHandler> mResUriHandlerList = new ArrayList<ResUriHandler>();
+    private List<HttpUriInterceptor> mHttpUriInterceptorList = new ArrayList<HttpUriInterceptor>();
 
     private volatile boolean monitor = true;
 
 
-    public AndroidMicroServer(int port) {
+    public AndroidHttpServer(int port) {
         this.mPort = port;
     }
 
-    public void registerResUriHandler(ResUriHandler resUriHandler) {
-        this.mResUriHandlerList.add(resUriHandler);
+    public void registerHttpUriInterceptor(HttpUriInterceptor resUriHandler) {
+        this.mHttpUriInterceptorList.add(resUriHandler);
     }
 
-    public void unregisterResUriHandlerList() {
-        for (ResUriHandler resUriHandler : mResUriHandlerList) {
+    public void unregisterHttpUriInterceptorList() {
+        for (HttpUriInterceptor resUriHandler : mHttpUriInterceptorList) {
             resUriHandler.destroy();
-            resUriHandler = null;
         }
-        mResUriHandlerList.clear();
+        mHttpUriInterceptorList.clear();
     }
 
     public void start() {
@@ -70,10 +66,8 @@ public class AndroidMicroServer {
     }
 
     public void stop() {
-        if (monitor) {
-            monitor = false;
-        }
-        unregisterResUriHandlerList();
+        monitor = false;
+        unregisterHttpUriInterceptorList();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -87,6 +81,7 @@ public class AndroidMicroServer {
                 }
             }
         }).start();
+        mThreadPool.shutdownNow();
     }
 
     private void handlerSocketAsync(final Socket socket) {
@@ -94,11 +89,11 @@ public class AndroidMicroServer {
             @Override
             public void run() {
                 Request request = createRequest(socket);
-                for (ResUriHandler resUriHandler : mResUriHandlerList) {
-                    if (!resUriHandler.matches(request.getUri())) {
+                for (HttpUriInterceptor httpUriInterceptor : mHttpUriInterceptorList) {
+                    if (!httpUriInterceptor.matches(request.getUri())) {
                         continue;
                     }
-                    resUriHandler.handler(request);
+                    httpUriInterceptor.interceptor(request);
                 }
             }
         });
@@ -108,7 +103,6 @@ public class AndroidMicroServer {
         Request request = new Request();
         request.setClient(socket);
         try {
-            SocketAddress socketAddress = socket.getRemoteSocketAddress();
             InputStream is = socket.getInputStream();
             String requestLine = IOStreamUtils.readLine(is);
             LogcatUtils.d(LOGO_PREFIX + "createRequest requestLine:" + requestLine);

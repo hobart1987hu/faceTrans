@@ -10,41 +10,26 @@ import java.io.InputStream;
 
 public class IOStreamUtils {
 
-    /**
-     * get the string line and the line is end with '\r\n'
-     * @param is
-     * @return
-     * @throws IOException
-     */
     public static String readLine(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();
         int a = 0, b = 0;
-        while((b != -1) && !(a == '\r' && b == '\n')){
+        while ((b != -1) && !(a == '\r' && b == '\n')) {
             a = b;
             b = is.read();
-            sb.append((char)(b));
+            sb.append((char) (b));
         }
 
         String line = sb.toString();
-//        if(line == null || line.equals(" ")){
-//            return null;
-//        }
 
-        if(line == null || line.equals("\r\n")){
+        if (line == null || line.equals("\r\n")) {
             return null;
         }
 
         return line;
     }
 
-
-    /**
-     * convert inputstream to string
-     * @param is
-     * @return
-     */
-    public static String inputStreamToString(InputStream is){
-        if(is == null){
+    public static String inputStreamToString(InputStream is) {
+        if (is == null) {
             return null;
         }
 
@@ -52,7 +37,7 @@ public class IOStreamUtils {
         int len = 0;
         byte[] bytes = new byte[2048];
         try {
-            while((len = is.read(bytes)) != -1){
+            while ((len = is.read(bytes)) != -1) {
                 baos.write(bytes, 0, len);
             }
 

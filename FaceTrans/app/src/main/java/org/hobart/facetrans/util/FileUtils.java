@@ -280,6 +280,53 @@ public class FileUtils {
         return bitmap;
     }
 
+    public synchronized static String autoCreateApkIcon(String apkPath) {
+
+        File screenshotFile = null;
+        try {
+            Bitmap screenshotBitmap = null;
+            FileOutputStream fos = null;
+            if (TextUtils.isEmpty(apkPath)) {
+                apkPath = AndroidUtils.getCurrentApkPath();
+            }
+            
+            final String pkgName = AndroidUtils.getApkPkgName(apkPath);
+            //
+            String savePath = GlobalConfig.getApkIconDirectory() + File.separator + pkgName + ".png";
+
+            if (!FileUtils.isFolderExist(savePath)) {
+                FileUtils.makeDirs(savePath);
+            }
+
+            screenshotFile = new File(savePath);
+
+            if (screenshotFile.exists()) {
+                return screenshotFile.getAbsolutePath();
+            }
+
+            if (!screenshotFile.exists()) screenshotFile.createNewFile();
+
+            fos = new FileOutputStream(screenshotFile);
+
+            Drawable appIconDrawable = AndroidUtils.getApkIcon(apkPath);
+            if (null == appIconDrawable) {
+                appIconDrawable = AndroidUtils.getCurrentApkIcon();
+            }
+            screenshotBitmap = drawableToBitmap(appIconDrawable);
+            screenshotBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            if (screenshotBitmap != null) {
+                screenshotBitmap.recycle();
+            }
+            if (fos != null) {
+                fos.close();
+                fos = null;
+            }
+        } catch (IOException e) {
+
+        }
+        return screenshotFile.getAbsolutePath();
+    }
+
     public static boolean isFileExist(String filePath) {
         if (TextUtils.isEmpty(filePath)) {
             return false;

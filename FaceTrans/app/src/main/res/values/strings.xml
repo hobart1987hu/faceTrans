@@ -26,6 +26,6 @@
     <string name="tip_web_transfer_second_tip">
         第2步 \n
         请好友在浏览器输入以下网址 \n
-        http://192.168.43.1:21234
+        http://192.168.43.1:1234
     </string>
 </resources>
