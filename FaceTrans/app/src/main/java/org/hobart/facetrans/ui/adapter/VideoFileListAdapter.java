@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.VideoFolder;
 import org.hobart.facetrans.opengl.OpenGlUtils;
@@ -56,7 +57,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
         VideoFolder videoFolder = mVideoFolders.get(position);
         holder.tv_fileName.setText(videoFolder.getFolderName());
         holder.tv_fileNums.setText(String.format(mContext.getResources().getString(R.string.photo_num), videoFolder.getFolderFileNum()));
-        SimpleImageThumbnailLoader.getInstance().displayImageView(videoFolder.getFolderIconPath(), holder.iv_icon, R.mipmap.icon_default);
+        SimpleImageThumbnailLoader.getInstance().displayImageView(videoFolder.getFolderIconPath(), FTType.VIDEO, holder.iv_icon, R.mipmap.icon_default);
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

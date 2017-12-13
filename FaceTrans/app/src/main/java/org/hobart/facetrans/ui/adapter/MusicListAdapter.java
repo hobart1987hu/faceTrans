@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Music;
@@ -45,11 +46,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
 
         holder.tv_size.setText(music.getSizeDesc() == null ? "" : music.getSizeDesc());
 
-        if (music.getThumbnail() == null) {
-            holder.iv_shortcut.setImageResource(R.mipmap.icon_music_default);
-        } else {
-            holder.iv_shortcut.setImageBitmap(music.getThumbnail());
-        }
+        SimpleImageThumbnailLoader.getInstance().displayImageView(music.getFilePath(), FTType.MUSIC, holder.iv_shortcut, R.mipmap.icon_music_default);
 
         if (FTFileManager.getInstance().isFTFileExist(music)) {
             holder.rootView.setPressed(true);

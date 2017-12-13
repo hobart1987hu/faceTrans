@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -38,8 +40,6 @@ import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -191,7 +191,7 @@ public class FileUtils {
     }
 
 
-    private static Bitmap drawableToBitmap(Drawable drawable) {
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable == null) {
             return null;
         }
@@ -264,7 +264,7 @@ public class FileUtils {
 
                         file.createNewFile();
 
-                        Bitmap bitmap = music.getThumbnail();
+                        Bitmap bitmap = getMusicThumbnail(music.getFilePath());
 
                         if (null == bitmap) {
                             getCurrentApkIcon(file, outputStream);
@@ -313,6 +313,25 @@ public class FileUtils {
             }
         }
         return file.getAbsolutePath();
+    }
+
+    private static Bitmap getMusicThumbnail(String path) {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(path);
+            byte[] embedPic = retriever.getEmbeddedPicture();
+            bitmap = BitmapFactory.decodeByteArray(embedPic, 0, embedPic.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                retriever.release();
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        return bitmap;
     }
 
     private synchronized static File getCurrentApkIcon(File file, FileOutputStream outputStream) {

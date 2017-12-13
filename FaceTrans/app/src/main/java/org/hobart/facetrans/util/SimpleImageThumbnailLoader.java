@@ -1,12 +1,16 @@
 package org.hobart.facetrans.util;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
 
 import java.lang.ref.WeakReference;
@@ -19,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 从Thumbnail里面获取图片
  * Created by huzeyin on 2017/12/8.
  */
 
@@ -61,16 +64,16 @@ public class SimpleImageThumbnailLoader {
 
     private static final int TAG_KEY_URL = R.id.image_tag;
 
-    public void displayImageView(final String path, final ImageView imageView, int defaultResId) {
+    public void displayImageView(String filePath, FTType type, final ImageView imageView, int defaultResId) {
 
-        imageView.setTag(TAG_KEY_URL, path);
+        imageView.setTag(TAG_KEY_URL, filePath);
 
-        Bitmap bitmap = getBitmapToMemoryCache(path);
+        Bitmap bitmap = getBitmapToMemoryCache(filePath);
         if (null != bitmap) {
             imageView.setImageBitmap(bitmap);
             return;
         }
-        THREAD_POOL_EXECUTOR.execute(new LoadBitmapTask(imageView, path, defaultResId));
+        THREAD_POOL_EXECUTOR.execute(new LoadBitmapTask(imageView, filePath, type, defaultResId));
     }
 
     private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
@@ -82,37 +85,65 @@ public class SimpleImageThumbnailLoader {
         return mMemoryCache.get(key);
     }
 
-    private Bitmap loadBitmapFromPath(String path) {
+    private Bitmap loadBitmapFromPath(String path, FTType type) {
+
         Bitmap bitmap = null;
+
         try {
-            bitmap = ScreenshotUtils.createVideoThumbnail(path);
+            if (type == FTType.APK) {
+                Drawable drawable = AndroidUtils.getApkIcon(path);
+                if (null != drawable) {
+                    bitmap = FileUtils.drawableToBitmap(drawable);
+                }
+            } else if (type == FTType.MUSIC) {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                try {
+                    retriever.setDataSource(path);
+                    byte[] embedPic = retriever.getEmbeddedPicture();
+                    if (null != embedPic && embedPic.length > 0) {
+                        bitmap = BitmapFactory.decodeByteArray(embedPic, 0, embedPic.length);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        retriever.release();
+                    } catch (Exception e2) {
+                        e2.printStackTrace();
+                    }
+                }
+            } else if (type == FTType.VIDEO) {
+                bitmap = ScreenshotUtils.createVideoThumbnail(path);
+            }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return bitmap;
     }
 
     class LoadBitmapTask implements Runnable {
         private WeakReference<ImageView> imageViewWeakReference;
-        private String path;
+        private String filePath;
+        private FTType type;
         private int defaultResId;
 
-        public LoadBitmapTask(ImageView imageView, String path, int defaultResId) {
+        public LoadBitmapTask(ImageView imageView, String filePath, FTType type, int defaultResId) {
             imageViewWeakReference = new WeakReference<>(imageView);
-            this.path = path;
+            this.filePath = filePath;
+            this.type = type;
             this.defaultResId = defaultResId;
         }
 
         @Override
         public void run() {
-            Bitmap bitmap = loadBitmapFromPath(path);
+            Bitmap bitmap = loadBitmapFromPath(filePath, type);
             ImageView imageView = imageViewWeakReference.get();
             if (null != imageView) {
-                LoaderResult result = new LoaderResult(imageView, path,
-                        bitmap, defaultResId);
+                LoaderResult result = new LoaderResult(imageView, filePath, bitmap, defaultResId);
                 mMainHandler.obtainMessage(MESSAGE_POST_RESULT, result)
                         .sendToTarget();
             }
-            if (null != bitmap) addBitmapToMemoryCache(path, bitmap);
+            if (null != bitmap) addBitmapToMemoryCache(filePath, bitmap);
         }
     }
 
@@ -149,7 +180,7 @@ public class SimpleImageThumbnailLoader {
                 LoaderResult result = (LoaderResult) msg.obj;
                 ImageView imageView = result.imageView;
                 String path = (String) imageView.getTag(TAG_KEY_URL);
-                if (path.equals(result.path)) {
+                if (path.equals(result.filePath)) {
                     if (null != result.bitmap) {
                         imageView.setImageBitmap(result.bitmap);
                     } else {
@@ -162,13 +193,13 @@ public class SimpleImageThumbnailLoader {
 
     class LoaderResult {
         ImageView imageView;
-        String path;
+        String filePath;
         Bitmap bitmap;
         int defaultResId;
 
-        public LoaderResult(ImageView imageView, String path, Bitmap bitmap, int defaultResId) {
+        public LoaderResult(ImageView imageView, String filePath, Bitmap bitmap, int defaultResId) {
             this.imageView = imageView;
-            this.path = path;
+            this.filePath = filePath;
             this.bitmap = bitmap;
             this.defaultResId = defaultResId;
         }

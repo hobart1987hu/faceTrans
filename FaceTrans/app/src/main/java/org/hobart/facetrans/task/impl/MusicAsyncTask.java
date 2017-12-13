@@ -1,15 +1,11 @@
 package org.hobart.facetrans.task.impl;
 
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
-import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.Music;
 import org.hobart.facetrans.task.FTTask;
 import org.hobart.facetrans.task.FTTaskCallback;
@@ -34,6 +30,9 @@ public class MusicAsyncTask extends FTTask<List<Music>> {
         return getSpecificTypeFiles();
     }
 
+    /**
+     * @return
+     */
     private static List<Music> getSpecificTypeFiles() {
 
         List<Music> musics = new ArrayList<>();
@@ -65,31 +64,11 @@ public class MusicAsyncTask extends FTTask<List<Music>> {
                     music.setName(FileUtils.getFileName(music.getFilePath()));
                     music.setSizeDesc(FileUtils.getFileSize(music.getSize()));
                     music.setFileType(FTType.MUSIC);
-                    music.setThumbnail(createAlbumArt(path));
                     musics.add(music);
                 } catch (Exception e) {
                 }
             }
         }
         return musics;
-    }
-
-    static Bitmap createAlbumArt(final String filePath) {
-        Bitmap bitmap = null;
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(filePath);
-            byte[] embedPic = retriever.getEmbeddedPicture();
-            bitmap = BitmapFactory.decodeByteArray(embedPic, 0, embedPic.length);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                retriever.release();
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
-        return bitmap;
     }
 }

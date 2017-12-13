@@ -1,6 +1,5 @@
 package org.hobart.facetrans.ui.adapter;
 
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,12 +8,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Apk;
-import org.hobart.facetrans.model.Image;
-import org.hobart.facetrans.model.Music;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class ApkListAdapter extends RecyclerView.Adapter<ApkListAdapter.MusicVie
             holder.rootView.setPressed(false);
         }
 
-        holder.iv_shortcut.setImageDrawable(apk.getDrawable());
+        SimpleImageThumbnailLoader.getInstance().displayImageView(apk.getFilePath(), FTType.APK, holder.iv_shortcut, R.mipmap.ic_launcher);
 
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override

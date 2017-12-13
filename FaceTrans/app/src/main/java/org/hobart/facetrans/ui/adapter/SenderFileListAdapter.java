@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
@@ -47,7 +48,11 @@ public class SenderFileListAdapter extends RecyclerView.Adapter<SenderFileListAd
         viewHolder.tv_file_name.setText(model.fileName);
         viewHolder.tv_fileSize.setText(FileUtils.getFileSize(model.fileSize));
         if (model.type == TransferModel.TYPE_APK) {
-            viewHolder.iv_fileIcon.setImageDrawable(model.drawable);
+            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.APK, viewHolder.iv_fileIcon, R.mipmap.ic_launcher);
+        } else if (model.type == TransferModel.TYPE_MUSIC) {
+            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.MUSIC, viewHolder.iv_fileIcon, R.mipmap.icon_music_default);
+        } else if (model.type == TransferModel.TYPE_VIDEO) {
+            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.VIDEO, viewHolder.iv_fileIcon, R.mipmap.icon_default);
         } else {
             Glide
                     .with(mContext)

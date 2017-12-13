@@ -113,12 +113,6 @@ public class TransferModel {
      * 传输的文本内容
      */
     public String content;
-
-    /**
-     * apk文件的icon
-     */
-    public Drawable drawable;
-
     /**
      * 文件保存路径
      */
@@ -160,7 +154,7 @@ public class TransferModel {
                 '}';
     }
 
-    public static int convertyFileType(FTType type) {
+    public static int convertFileType(FTType type) {
         if (type.getValue() == 1) {
             return TYPE_MUSIC;
         } else if (type.getValue() == 2) {

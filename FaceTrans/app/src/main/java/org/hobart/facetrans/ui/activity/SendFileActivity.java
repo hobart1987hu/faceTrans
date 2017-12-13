@@ -15,14 +15,12 @@ import android.widget.TextView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.event.SocketEvent;
 import org.hobart.facetrans.event.ZipFTFileEvent;
 import org.hobart.facetrans.manager.FTFileManager;
-import org.hobart.facetrans.model.Apk;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.service.SocketSenderService;
@@ -96,9 +94,6 @@ public class SendFileActivity extends BaseActivity {
         while (iterator.hasNext()) {
             FTFile ftFile = iterator.next();
             TransferModel model = new TransferModel();
-            if (ftFile.getFileType() == FTType.APK) {
-                model.drawable = ((Apk) ftFile).getDrawable();
-            }
             model.fileName = ftFile.getName();
             model.id = "" + mAutoCreateTransferId.incrementAndGet();
             model.fileSize = ftFile.getSize();
@@ -106,7 +101,7 @@ public class SendFileActivity extends BaseActivity {
             model.fileIcon = ftFile.getFilePath();
             model.transferStatus = TransferStatus.WAITING;
             model.filePath = ftFile.getFilePath();
-            model.type = TransferModel.convertyFileType(ftFile.getFileType());
+            model.type = TransferModel.convertFileType(ftFile.getFileType());
             mSendFileLists.add(model);
         }
         mAdapter = new SenderFileListAdapter(this, mSendFileLists);

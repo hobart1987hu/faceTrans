@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Video;
@@ -62,7 +63,7 @@ public class VideoListApter extends RecyclerView.Adapter<VideoListApter.VideList
         } else {
             holder.containerView.setPressed(false);
         }
-        SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), holder.iv_shortcut, R.mipmap.icon_default);
+        SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), FTType.VIDEO, holder.iv_shortcut, R.mipmap.icon_default);
     }
 
     @Override

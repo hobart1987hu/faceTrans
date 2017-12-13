@@ -5,20 +5,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
-import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.model.Apk;
-import org.hobart.facetrans.model.Video;
-import org.hobart.facetrans.model.VideoFolder;
 import org.hobart.facetrans.task.FTTask;
 import org.hobart.facetrans.task.FTTaskCallback;
 import org.hobart.facetrans.util.AndroidUtils;
@@ -26,11 +18,7 @@ import org.hobart.facetrans.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by huzeyin on 2017/11/20.
@@ -59,7 +47,6 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
                 Apk apk = new Apk();
                 String path = packageInfo.applicationInfo.sourceDir;
                 apk.setName(packageInfo.applicationInfo.loadLabel(packageManager).toString() + ".apk");
-                apk.setDrawable(packageInfo.applicationInfo.loadIcon(packageManager));
                 apk.setFilePath(path);
                 apk.setVersionName(packageInfo.versionName);
                 apk.setSize(new File(path).length());
@@ -113,8 +100,6 @@ public class ApkAsyncTask extends FTTask<List<Apk>> {
                     apk.setSizeDesc(FileUtils.getFileSize(size));
 
                     apk.setName(FileUtils.getFileName(path));
-
-                    apk.setDrawable(AndroidUtils.getApkIcon(path));
 
                     apk.setVersionName(AndroidUtils.getVersionName(path));
 

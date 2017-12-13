@@ -71,6 +71,7 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
         final FTFile fileInfo = (FTFile) getItem(position);
 
         FileSenderHolder viewHolder = null;
@@ -87,8 +88,7 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
         }
         if (fileInfo != null) {
             if (fileInfo.getFileType() == FTType.APK) {
-                Apk apk = (Apk) fileInfo;
-                viewHolder.iv_shortcut.setImageDrawable(apk.getDrawable());
+                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.APK, viewHolder.iv_shortcut, R.mipmap.ic_launcher);
             } else if (fileInfo.getFileType() == FTType.IMAGE) {
                 Glide.with(mContext)
                         .load(fileInfo.getFilePath())
@@ -97,10 +97,9 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
                         .crossFade()
                         .into(viewHolder.iv_shortcut);
             } else if (fileInfo.getFileType() == FTType.MUSIC) {
-                viewHolder.iv_shortcut.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_music_default));
+                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.MUSIC, viewHolder.iv_shortcut, R.mipmap.icon_default);
             } else if (fileInfo.getFileType() == FTType.VIDEO) {
-                Video video = (Video) fileInfo;
-                SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), viewHolder.iv_shortcut, R.mipmap.icon_default);
+                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.VIDEO, viewHolder.iv_shortcut, R.mipmap.icon_default);
             }
             viewHolder.tv_path.setText(fileInfo.getFilePath());
             viewHolder.tv_size.setText(FileUtils.getFileSize(fileInfo.getSize()));
