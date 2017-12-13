@@ -30,9 +30,9 @@ import java.util.Map;
 public class FileInfoSelectedAdapter extends BaseAdapter {
 
     private Context mContext;
-    private Map<String, FTFile> mDataHashMap;
+    private Map<Long, FTFile> mDataHashMap;
 
-    private List<Map.Entry<String, FTFile>> fileInfoMapList;
+    private List<Map.Entry<Long, FTFile>> fileInfoMapList;
     private OnDataListChangedListener mOnDataListChangedListener;
 
     public FileInfoSelectedAdapter(Context mContext) {

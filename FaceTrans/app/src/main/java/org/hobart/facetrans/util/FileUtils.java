@@ -2,12 +2,8 @@ package org.hobart.facetrans.util;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -22,14 +18,15 @@ import org.hobart.facetrans.BuildConfig;
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
-import org.hobart.facetrans.R;
+import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
+import org.hobart.facetrans.model.Music;
+import org.hobart.facetrans.model.Video;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +38,8 @@ import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -48,21 +47,6 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
 
     public static final DecimalFormat FORMAT = new DecimalFormat("####.##");
-
-    /**
-     * 查找指定文件名的文件
-     *
-     * @param fileName
-     * @return
-     */
-    public static FTFile getFileInfo(String fileName) {
-        List<FTFile> fileInfoList = getSpecificTypeFiles(new String[]{fileName});
-        if (fileInfoList == null && fileInfoList.size() == 0) {
-            return null;
-        }
-
-        return fileInfoList.get(0);
-    }
 
     /**
      * 存储卡获取 指定文件
@@ -207,64 +191,6 @@ public class FileUtils {
     }
 
 
-    public static long getFileSize(String filePath) {
-        File file = new File(filePath);
-        return file.length();
-    }
-
-    private static Bitmap getScreenshotBitmap(String filePath, FTType type) {
-        Bitmap bitmap = null;
-        if (type == FTType.APK) {
-            Drawable drawable = getApkThumbnail(filePath);
-            if (drawable != null) {
-                bitmap = drawableToBitmap(drawable);
-            } else {
-                bitmap = BitmapFactory.decodeResource(FaceTransApplication.getApp().getResources(), R.mipmap.ic_launcher);
-            }
-            return bitmap;
-        } else if (type == FTType.IMAGE) {
-            try {
-                bitmap = BitmapFactory.decodeStream(new FileInputStream(new File(filePath)));
-            } catch (FileNotFoundException e) {
-                bitmap = BitmapFactory.decodeResource(FaceTransApplication.getApp().getResources(), R.mipmap.ic_launcher);
-            }
-            bitmap = ScreenshotUtils.extractThumbnail(bitmap, 100, 100);
-            return bitmap;
-        } else if (type == FTType.MUSIC) {
-            bitmap = BitmapFactory.decodeResource(FaceTransApplication.getApp().getResources(), R.mipmap.ic_launcher);
-            bitmap = ScreenshotUtils.extractThumbnail(bitmap, 100, 100);
-            return bitmap;
-        } else if (type == FTType.VIDEO) {
-            try {
-                bitmap = ScreenshotUtils.createVideoThumbnail(filePath);
-            } catch (Exception e) {
-                bitmap = BitmapFactory.decodeResource(FaceTransApplication.getApp().getResources(), R.mipmap.ic_launcher);
-            }
-            bitmap = ScreenshotUtils.extractThumbnail(bitmap, 100, 100);
-            return bitmap;
-        }
-        return bitmap;
-    }
-
-    private static Drawable getApkThumbnail(String apk_path) {
-
-        try {
-            PackageManager pm = FaceTransApplication.getApp().getPackageManager();
-            PackageInfo packageInfo = pm.getPackageArchiveInfo(apk_path, PackageManager.GET_ACTIVITIES);
-            ApplicationInfo appInfo = packageInfo.applicationInfo;
-            appInfo.sourceDir = apk_path;
-            appInfo.publicSourceDir = apk_path;
-            if (appInfo != null) {
-                Drawable apk_icon = appInfo.loadIcon(pm);
-                return apk_icon;
-            }
-        } catch (Exception e) {
-
-        }
-
-        return null;
-    }
-
     private static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable == null) {
             return null;
@@ -280,52 +206,155 @@ public class FileUtils {
         return bitmap;
     }
 
-    public synchronized static String autoCreateApkIcon(String apkPath) {
+    public synchronized static String getWebTransferImage(String imageUrl, FTType ftType) {
 
-        File screenshotFile = null;
+        FileOutputStream outputStream = null;
+
+        File file = null;
         try {
-            Bitmap screenshotBitmap = null;
-            FileOutputStream fos = null;
-            if (TextUtils.isEmpty(apkPath)) {
-                apkPath = AndroidUtils.getCurrentApkPath();
+            long ftFileId = 0;
+            if (!TextUtils.isEmpty(imageUrl)) {
+                try {
+                    ftFileId = Long.parseLong(imageUrl);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            
-            final String pkgName = AndroidUtils.getApkPkgName(apkPath);
-            //
-            String savePath = GlobalConfig.getApkIconDirectory() + File.separator + pkgName + ".png";
+            FTFile ftFile = FTFileManager.getInstance().getFTFile(ftFileId);
 
-            if (!FileUtils.isFolderExist(savePath)) {
-                FileUtils.makeDirs(savePath);
+            if (null == ftFile) {
+
+                file = getCurrentApkIcon(file, outputStream);
+
+            } else {
+
+                if (ftType == FTType.APK) {
+
+                    String savePath = GlobalConfig.getApkIconDirectory() + File.separator + AndroidUtils.getApkPkgName(ftFile.getFilePath()) + ".png";
+
+                    if (!FileUtils.isFolderExist(savePath)) FileUtils.makeDirs(savePath);
+
+                    file = new File(savePath);
+
+                    if (!file.exists()) {
+
+                        file.createNewFile();
+
+                        Drawable drawable = AndroidUtils.getApkIcon(ftFile.getFilePath());
+
+                        if (null == drawable) {
+                            getCurrentApkIcon(file, outputStream);
+                        } else {
+                            Bitmap bitmap = drawableToBitmap(drawable);
+                            outputStream = new FileOutputStream(file);
+                            compressBitmapToSdcard(bitmap, outputStream);
+                        }
+                    }
+                } else if (ftType == FTType.MUSIC) {
+
+                    Music music = (Music) ftFile;
+
+                    String savePath = GlobalConfig.getMusicIconDirectory() + File.separator + music.getName() + ".png";
+
+                    if (!FileUtils.isFolderExist(savePath)) FileUtils.makeDirs(savePath);
+
+                    file = new File(savePath);
+
+                    if (!file.exists()) {
+
+                        file.createNewFile();
+
+                        Bitmap bitmap = music.getThumbnail();
+
+                        if (null == bitmap) {
+                            getCurrentApkIcon(file, outputStream);
+                        } else {
+                            outputStream = new FileOutputStream(file);
+                            compressBitmapToSdcard(bitmap, outputStream);
+                        }
+                    }
+                } else if (ftType == FTType.VIDEO) {
+
+                    Video video = (Video) ftFile;
+
+                    String savePath = GlobalConfig.getVideoIconDirectory() + File.separator + video.getName() + ".png";
+
+                    if (!FileUtils.isFolderExist(savePath)) FileUtils.makeDirs(savePath);
+
+                    file = new File(savePath);
+
+                    if (!file.exists()) {
+
+                        file.createNewFile();
+
+                        Bitmap bitmap = null;
+                        try {
+                            bitmap = ScreenshotUtils.createVideoThumbnail(ftFile.getFilePath());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        if (null == bitmap) {
+                            getCurrentApkIcon(file, outputStream);
+                        } else {
+                            outputStream = new FileOutputStream(file);
+                            compressBitmapToSdcard(bitmap, outputStream);
+                        }
+                    }
+                }
             }
-
-            screenshotFile = new File(savePath);
-
-            if (screenshotFile.exists()) {
-                return screenshotFile.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (null != outputStream)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+        return file.getAbsolutePath();
+    }
 
-            if (!screenshotFile.exists()) screenshotFile.createNewFile();
+    private synchronized static File getCurrentApkIcon(File file, FileOutputStream outputStream) {
 
-            fos = new FileOutputStream(screenshotFile);
+        try {
+            Bitmap appIconBitmap = null;
 
-            Drawable appIconDrawable = AndroidUtils.getApkIcon(apkPath);
-            if (null == appIconDrawable) {
-                appIconDrawable = AndroidUtils.getCurrentApkIcon();
-            }
-            screenshotBitmap = drawableToBitmap(appIconDrawable);
-            screenshotBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            if (screenshotBitmap != null) {
-                screenshotBitmap.recycle();
-            }
-            if (fos != null) {
-                fos.close();
-                fos = null;
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+            String savePath = GlobalConfig.getApkIconDirectory() + File.separator + context.getApplicationInfo().packageName + ".png";
+
+            if (!FileUtils.isFolderExist(savePath)) FileUtils.makeDirs(savePath);
+
+            file = new File(savePath);
+
+            if (file.exists()) return file;
+
+            file.createNewFile();
+
+            Drawable appIconDrawable = context.getApplicationInfo().loadIcon(context.getPackageManager());
+
+            appIconBitmap = drawableToBitmap(appIconDrawable);
+
+            outputStream = new FileOutputStream(file);
+
+            compressBitmapToSdcard(appIconBitmap, outputStream);
+
+            if (appIconBitmap != null) {
+
+                appIconBitmap.recycle();
             }
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
-        return screenshotFile.getAbsolutePath();
+        return file;
     }
+
+    private static void compressBitmapToSdcard(Bitmap bitmap, FileOutputStream outputStream) {
+        if (null == bitmap || null == outputStream) return;
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+    }
+
 
     public static boolean isFileExist(String filePath) {
         if (TextUtils.isEmpty(filePath)) {

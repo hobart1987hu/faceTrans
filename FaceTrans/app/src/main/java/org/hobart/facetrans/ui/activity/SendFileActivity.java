@@ -91,7 +91,7 @@ public class SendFileActivity extends BaseActivity {
 
     private void init() {
         mAutoCreateTransferId = new AtomicLong(2);
-        Map<String, FTFile> map = FTFileManager.getInstance().getFTFiles();
+        Map<Long, FTFile> map = FTFileManager.getInstance().getFTFiles();
         Iterator<FTFile> iterator = map.values().iterator();
         while (iterator.hasNext()) {
             FTFile ftFile = iterator.next();

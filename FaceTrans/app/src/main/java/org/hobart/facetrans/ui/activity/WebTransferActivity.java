@@ -165,7 +165,7 @@ public class WebTransferActivity extends BaseActivity {
 
     static class MyIndexHttpUriInterceptor extends IndexHttpUriInterceptor {
 
-        private Map<String, FTFile> sFileInfoMap = null;
+        private Map<Long, FTFile> sFileInfoMap = null;
 
         public MyIndexHttpUriInterceptor() {
             sFileInfoMap = FTFileManager.getInstance().getFTFiles();
@@ -209,7 +209,11 @@ public class WebTransferActivity extends BaseActivity {
             for (FTFile fileInfo : fileInfos) {
                 String fileInfoHtml = IOStreamUtils.inputStreamToString(FaceTransApplication.getApp().getAssets().open(GlobalConfig.NAME_FILE_TEMPLATE));
                 if (fileInfo.getFileType() == FTType.APK) {
-                    fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_APK_IMAGE_PREFIX + fileInfo.getFilePath());
+                    fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_APK_IMAGE_PREFIX + fileInfo.getId());
+                } else if (fileInfo.getFileType() == FTType.MUSIC) {
+                    fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_MUSIC_IMAGE_PREFIX + fileInfo.getId());
+                } else if (fileInfo.getFileType() == FTType.VIDEO) {
+                    fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_VIDEO_IMAGE_PREFIX + fileInfo.getId());
                 } else {
                     fileInfoHtml = fileInfoHtml.replaceAll("\\{file_avatar\\}", GlobalConfig.WEB_TRANSFER_IMAGE_PREFIX + fileInfo.getFilePath());
                 }

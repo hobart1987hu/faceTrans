@@ -2,7 +2,7 @@ package org.hobart.facetrans.http_server;
 
 import android.util.Log;
 
-import org.hobart.facetrans.model.FTFile;
+import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.util.FileUtils;
 
 import java.io.File;
@@ -34,8 +34,6 @@ public class ImageHttpInterceptor implements HttpUriInterceptor {
 
         String imageUrl = uri.replace("/image/", "");
 
-        //如果是视频或者mp3文件怎么处理
-
         try {
             imageUrl = URLDecoder.decode(imageUrl, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -43,10 +41,16 @@ public class ImageHttpInterceptor implements HttpUriInterceptor {
         }
         File imageFile = null;
         if (imageUrl.equals("appIcon/")) {
-            imageFile = new File(FileUtils.autoCreateApkIcon(""));
+            imageFile = new File(FileUtils.getWebTransferImage("", FTType.IMAGE));
         } else if (imageUrl.startsWith("apk/")) {
             imageUrl = imageUrl.replace("apk/", "");
-            imageFile = new File(FileUtils.autoCreateApkIcon(imageUrl));
+            imageFile = new File(FileUtils.getWebTransferImage(imageUrl, FTType.APK));
+        } else if (imageUrl.startsWith("music/")) {
+            imageUrl = imageUrl.replace("music/", "");
+            imageFile = new File(FileUtils.getWebTransferImage(imageUrl, FTType.MUSIC));
+        } else if (imageUrl.startsWith("video/")) {
+            imageUrl = imageUrl.replace("video/", "");
+            imageFile = new File(FileUtils.getWebTransferImage(imageUrl, FTType.VIDEO));
         } else {
             imageFile = new File(imageUrl);
         }

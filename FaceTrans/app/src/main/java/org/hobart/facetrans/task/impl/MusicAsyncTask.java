@@ -1,6 +1,9 @@
 package org.hobart.facetrans.task.impl;
 
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -28,9 +31,7 @@ public class MusicAsyncTask extends FTTask<List<Music>> {
 
     @Override
     protected List<Music> execute() {
-        List<Music> musics = getSpecificTypeFiles();
-        musics = getDetailFTFiles(musics);
-        return musics;
+        return getSpecificTypeFiles();
     }
 
     private static List<Music> getSpecificTypeFiles() {
@@ -38,10 +39,8 @@ public class MusicAsyncTask extends FTTask<List<Music>> {
         List<Music> musics = new ArrayList<>();
 
         Uri fileUri = MediaStore.Files.getContentUri("external");
-        String[] projection = new String[]{
-                MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE,
-                MediaStore.Files.FileColumns.PARENT,
-        };
+
+        String[] projection = new String[]{MediaStore.Files.FileColumns.DATA};
 
         String selection = MediaStore.Files.FileColumns.DATA + " LIKE '%" + ".mp3" + "'";
 
@@ -51,17 +50,22 @@ public class MusicAsyncTask extends FTTask<List<Music>> {
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 try {
-                    String data = cursor.getString(0);
+                    String path = cursor.getString(0);
                     Music music = new Music();
-                    music.setFilePath(data);
+                    music.setFilePath(path);
                     long size = 0;
                     try {
-                        File file = new File(data);
+                        File file = new File(path);
                         size = file.length();
+                        if (size <= 0) continue;
                         music.setSize(size);
                     } catch (Exception e) {
 
                     }
+                    music.setName(FileUtils.getFileName(music.getFilePath()));
+                    music.setSizeDesc(FileUtils.getFileSize(music.getSize()));
+                    music.setFileType(FTType.MUSIC);
+                    music.setThumbnail(createAlbumArt(path));
                     musics.add(music);
                 } catch (Exception e) {
                 }
@@ -70,19 +74,22 @@ public class MusicAsyncTask extends FTTask<List<Music>> {
         return musics;
     }
 
-    static List<Music> getDetailFTFiles(List<Music> fileInfoList) {
-
-        if (fileInfoList == null || fileInfoList.size() <= 0) {
-            return fileInfoList;
-        }
-        for (Music music : fileInfoList) {
-            if (music != null) {
-                music.setName(FileUtils.getFileName(music.getFilePath()));
-                music.setSizeDesc(FileUtils.getFileSize(music.getSize()));
-                music.setFileType(FTType.MUSIC);
+    static Bitmap createAlbumArt(final String filePath) {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(filePath);
+            byte[] embedPic = retriever.getEmbeddedPicture();
+            bitmap = BitmapFactory.decodeByteArray(embedPic, 0, embedPic.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                retriever.release();
+            } catch (Exception e2) {
+                e2.printStackTrace();
             }
         }
-        return fileInfoList;
+        return bitmap;
     }
-
 }

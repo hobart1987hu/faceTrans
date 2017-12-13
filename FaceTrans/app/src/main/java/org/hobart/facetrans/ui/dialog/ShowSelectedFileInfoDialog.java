@@ -87,8 +87,8 @@ public class ShowSelectedFileInfoDialog {
         String title = "";
 
         long totalSize = 0;
-        Set<Map.Entry<String, FTFile>> entrySet = FTFileManager.getInstance().getFTFiles().entrySet();
-        for (Map.Entry<String, FTFile> entry : entrySet) {
+        Set<Map.Entry<Long, FTFile>> entrySet = FTFileManager.getInstance().getFTFiles().entrySet();
+        for (Map.Entry<Long, FTFile> entry : entrySet) {
             FTFile fileInfo = entry.getValue();
             totalSize = totalSize + fileInfo.getSize();
         }

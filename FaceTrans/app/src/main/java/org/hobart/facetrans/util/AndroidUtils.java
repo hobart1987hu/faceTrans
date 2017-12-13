@@ -24,21 +24,6 @@ import org.hobart.facetrans.FaceTransApplication;
 
 public class AndroidUtils {
 
-    public static int getAndroidVersion() {
-        return Build.VERSION.SDK_INT;
-    }
-
-    public static String getDeviceModel() {
-        return Build.MODEL;
-    }
-
-    public static Drawable getCurrentApkIcon() {
-
-        Context context = FaceTransApplication.getFaceTransApplicationContext();
-
-        return context.getApplicationInfo().loadIcon(context.getPackageManager());
-    }
-
     public static String getCurrentApkPath() {
 
         return FaceTransApplication.getFaceTransApplicationContext().getApplicationInfo().sourceDir;
@@ -133,12 +118,6 @@ public class AndroidUtils {
         activity.startActivityForResult(intent, requestCode);
     }
 
-    /**
-     * 根据手机的分辨率从 dp的单位转成为 px(像素)
-     *
-     * @param dpValue
-     * @return
-     */
     public static int dip2px(float dpValue) {
         final float scale = FaceTransApplication.getFaceTransApplicationContext().getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);

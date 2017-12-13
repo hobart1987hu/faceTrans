@@ -13,10 +13,10 @@ import java.util.Map;
 
 public class ClassifyUtils {
 
-    public static List<FTFile> filter(Map<String, FTFile> hashMap, FTType type) {
+    public static List<FTFile> filter(Map<Long, FTFile> hashMap, FTType type) {
         List<FTFile> fileInfos = new ArrayList<FTFile>();
 
-        for (Map.Entry<String, FTFile> entry : hashMap.entrySet()) {
+        for (Map.Entry<Long, FTFile> entry : hashMap.entrySet()) {
             FTFile fileInfo = entry.getValue();
             if (type == FTType.IMAGE) {
                 if (FileUtils.isImageFile(fileInfo.getFilePath())) {

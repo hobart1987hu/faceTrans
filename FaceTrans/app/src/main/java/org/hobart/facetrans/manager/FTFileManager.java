@@ -1,12 +1,15 @@
 package org.hobart.facetrans.manager;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import org.hobart.facetrans.model.FTFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -19,8 +22,9 @@ public class FTFileManager {
 
     private static final ReentrantLock LOCK = new ReentrantLock();
 
-    private Map<String, FTFile> mFTFiles = new HashMap<>();
+    private Map<Long, FTFile> mFTFiles = new HashMap<>();
 
+    private AtomicLong mAtomicId = new AtomicLong(2);
 
     public static FTFileManager getInstance() {
         try {
@@ -38,7 +42,7 @@ public class FTFileManager {
 
     }
 
-    public Map<String, FTFile> getFTFiles() {
+    public Map<Long, FTFile> getFTFiles() {
         return mFTFiles;
     }
 
@@ -52,19 +56,27 @@ public class FTFileManager {
 
     public boolean isFTFileExist(FTFile ftFile) {
         if (mFTFiles == null) return false;
-        return mFTFiles.containsKey(ftFile.getFilePath());
+        return mFTFiles.containsKey(ftFile.getId());
     }
 
     public void delFTFile(FTFile ftFile) {
-        if (mFTFiles.containsKey(ftFile.getFilePath())) {
-            mFTFiles.remove(ftFile.getFilePath());
+        if (mFTFiles.containsKey(ftFile.getId())) {
+            mFTFiles.remove(ftFile.getId());
         }
     }
 
     public void addFTFile(FTFile ftFile) {
-        if (!mFTFiles.containsKey(ftFile.getFilePath())) {
-            mFTFiles.put(ftFile.getFilePath(), ftFile);
+        if (!mFTFiles.containsKey(ftFile.getId())) {
+            ftFile.setId(mAtomicId.incrementAndGet());
+            mFTFiles.put(ftFile.getId(), ftFile);
         }
+    }
+
+    public FTFile getFTFile(long key) {
+
+        if (key <= 0) return null;
+
+        return mFTFiles.get(key);
     }
 
     public void clear() {

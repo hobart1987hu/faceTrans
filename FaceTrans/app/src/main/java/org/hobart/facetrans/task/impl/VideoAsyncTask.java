@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
@@ -76,6 +77,15 @@ public class VideoAsyncTask extends FTTask<List<VideoFolder>> {
                 long size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE));
                 if (size <= 10) continue;
                 String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA));
+
+                if (path.contains("/Android/data/")) {
+                    continue;
+                }
+
+                File file = new File(path);
+                if (!file.exists()) {
+                    continue;
+                }
                 long duration = getVideoDuration(path);
                 if (duration <= 0) continue;
                 Video video = new Video();

@@ -29,7 +29,7 @@ public class DownloadHttpUriInterceptor implements HttpUriInterceptor {
 
         String uri = request.getUri();
 
-        final String filePath = uri.replace("/download/", "");
+        String filePath = uri.replace("/download/", "");
 
         Socket socket = request.getClient();
         OutputStream os = null;
@@ -50,10 +50,6 @@ public class DownloadHttpUriInterceptor implements HttpUriInterceptor {
 
         File file = new File(filePath);
 
-        if (!file.exists()) {
-            showFileNoFound(printStream);
-            return;
-        }
         printStream.println("HTTP/1.1 200 OK");
         printStream.println("Content-Length:" + file.length());
         printStream.println("Content-Type:application/octet-stream");

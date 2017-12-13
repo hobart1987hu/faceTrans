@@ -12,6 +12,7 @@ import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.Music;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
+import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
 import java.util.List;
 
@@ -44,24 +45,23 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.Musi
 
         holder.tv_size.setText(music.getSizeDesc() == null ? "" : music.getSizeDesc());
 
-        holder.iv_shortcut.setImageResource(R.mipmap.icon_music_default);
-
-        if (FTFileManager.getInstance().isFTFileExist(music)) {
-
-            holder.rootView.setPressed(true);
-
+        if (music.getThumbnail() == null) {
+            holder.iv_shortcut.setImageResource(R.mipmap.icon_music_default);
         } else {
-
-            holder.rootView.setPressed(false);
+            holder.iv_shortcut.setImageBitmap(music.getThumbnail());
         }
 
+        if (FTFileManager.getInstance().isFTFileExist(music)) {
+            holder.rootView.setPressed(true);
+        } else {
+            holder.rootView.setPressed(false);
+        }
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mListener.onItemClick(holder.rootView, holder.rootView, holder.getAdapterPosition());
             }
         });
-
     }
 
     @Override

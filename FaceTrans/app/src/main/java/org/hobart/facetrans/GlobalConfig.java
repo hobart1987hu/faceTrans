@@ -40,13 +40,13 @@ public class GlobalConfig {
      */
     public static final String NAME_FILE_TEMPLATE = "file.template";
     public static final String NAME_CLASSIFY_TEMPLATE = "classify.template";
-    /**
-     *
-     */
+
     public static final String WEB_TRANSFER_DOWNLOAD_PREFIX = "http://192.168.43.1:1234/download/";
     public static final String WEB_TRANSFER_IMAGE_PREFIX = "http://192.168.43.1:1234/image/";
     public static final String WEB_TRANSFER_APP_ICON_IMAGE_PREFIX = WEB_TRANSFER_IMAGE_PREFIX + "appIcon/";
     public static final String WEB_TRANSFER_APK_IMAGE_PREFIX = WEB_TRANSFER_IMAGE_PREFIX + "apk/";
+    public static final String WEB_TRANSFER_MUSIC_IMAGE_PREFIX = WEB_TRANSFER_IMAGE_PREFIX + "music/";
+    public static final String WEB_TRANSFER_VIDEO_IMAGE_PREFIX = WEB_TRANSFER_IMAGE_PREFIX + "video/";
 
     /**
      * 网页传标识
@@ -57,6 +57,7 @@ public class GlobalConfig {
     public static String getTransferDirectory() {
         return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "facetrans";
     }
+
     /**
      * 存放压缩文件
      *
@@ -79,6 +80,14 @@ public class GlobalConfig {
         return getTransferDirectory() + File.separator + "apkIcons" + File.separator;
     }
 
+    public static final String getMusicIconDirectory() {
+        return getTransferDirectory() + File.separator + "musicIcons" + File.separator;
+    }
+
+    public static final String getVideoIconDirectory() {
+        return getTransferDirectory() + File.separator + "videoIcons" + File.separator;
+    }
+
     public static final boolean DEBUG = true;
 
     /**
@@ -93,8 +102,8 @@ public class GlobalConfig {
     public static final String WEB_SERVER_IP = "192.168.43.1";
 
 
-    public static final Comparator<Map.Entry<String, FTFile>> DEFAULT_COMPARATOR = new Comparator<Map.Entry<String, FTFile>>() {
-        public int compare(Map.Entry<String, FTFile> o1, Map.Entry<String, FTFile> o2) {
+    public static final Comparator<Map.Entry<Long, FTFile>> DEFAULT_COMPARATOR = new Comparator<Map.Entry<Long, FTFile>>() {
+        public int compare(Map.Entry<Long, FTFile> o1, Map.Entry<Long, FTFile> o2) {
             if (o1.getValue().getFileType().getValue() > o2.getValue().getFileType().getValue()) {
                 return 1;
             } else if (o1.getValue().getFileType().getValue() < o2.getValue().getFileType().getValue()) {

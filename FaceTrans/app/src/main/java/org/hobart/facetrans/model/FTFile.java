@@ -11,6 +11,11 @@ import java.io.Serializable;
 public class FTFile implements Serializable {
 
     /**
+     * 编号
+     */
+    private long id;
+
+    /**
      * 文件路径
      */
     private String filePath;
@@ -42,6 +47,14 @@ public class FTFile implements Serializable {
     public FTFile(String filePath, long size) {
         this.filePath = filePath;
         this.size = size;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public long getSize() {
