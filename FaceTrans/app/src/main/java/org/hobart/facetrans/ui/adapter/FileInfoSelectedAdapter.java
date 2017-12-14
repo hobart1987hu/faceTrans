@@ -102,7 +102,7 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
             viewHolder.iv_tick.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    FTFileManager.getInstance().getFTFiles().remove(fileInfo.getFilePath());
+                    FTFileManager.getInstance().getFTFiles().remove(fileInfo.getId());
                     notifyDataSetChanged();
                     if (mOnDataListChangedListener != null)
                         mOnDataListChangedListener.onDataChanged();

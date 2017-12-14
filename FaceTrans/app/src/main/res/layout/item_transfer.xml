@@ -25,7 +25,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="12dp"
-            android:src="@mipmap/icon_tick" />
+            android:src="@mipmap/ic_selected" />
 
         <LinearLayout
             android:layout_width="match_parent"
