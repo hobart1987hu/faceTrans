@@ -1,7 +1,5 @@
 package org.hobart.facetrans.http_server;
 
-import android.util.Log;
-
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.util.FileUtils;
 
@@ -41,7 +39,7 @@ public class ImageHttpInterceptor implements HttpUriInterceptor {
         }
         File imageFile = null;
         if (imageUrl.equals("appIcon/")) {
-            imageFile = new File(FileUtils.getWebTransferImage("", FTType.IMAGE));
+            imageFile = new File(FileUtils.getWebTransferImage("", FTType.APK));
         } else if (imageUrl.startsWith("apk/")) {
             imageUrl = imageUrl.replace("apk/", "");
             imageFile = new File(FileUtils.getWebTransferImage(imageUrl, FTType.APK));

@@ -119,7 +119,7 @@ public class RippleImageView extends RelativeLayout {
         params_bg.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         /**添加背景图片*/
         img_bg = new ImageView(context);
-        img_bg.setImageResource(R.mipmap.point_org);
+        img_bg.setImageResource(R.mipmap.icon_user_default);
         addView(img_bg, params_bg);
     }
 

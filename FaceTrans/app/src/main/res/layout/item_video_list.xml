@@ -19,7 +19,7 @@
             android:layout_width="96dp"
             android:layout_height="64dp"
             android:scaleType="fitXY"
-            android:src="@mipmap/icon_default" />
+            android:src="@mipmap/icon_video_default" />
 
         <TextView
             android:id="@+id/tv_duration"

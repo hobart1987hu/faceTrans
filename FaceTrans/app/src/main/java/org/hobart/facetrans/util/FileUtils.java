@@ -2,7 +2,6 @@ package org.hobart.facetrans.util;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,15 +10,14 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.hobart.facetrans.BuildConfig;
 import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
+import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.model.Music;
@@ -34,11 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Formatter;
-import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -47,59 +43,6 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
 
     public static final DecimalFormat FORMAT = new DecimalFormat("####.##");
-
-    /**
-     * 存储卡获取 指定文件
-     *
-     * @param extension
-     * @return
-     */
-    public static List<FTFile> getSpecificTypeFiles(String[] extension) {
-        List<FTFile> fileInfoList = new ArrayList<>();
-
-        //内存卡文件的Uri
-        Uri fileUri = MediaStore.Files.getContentUri("external");
-        //筛选列，这里只筛选了：文件路径和含后缀的文件名
-        String[] projection = new String[]{
-                MediaStore.Files.FileColumns.DATA, MediaStore.Files.FileColumns.TITLE
-        };
-
-        //构造筛选条件语句
-        String selection = "";
-        for (int i = 0; i < extension.length; i++) {
-            if (i != 0) {
-                selection = selection + " OR ";
-            }
-            selection = selection + MediaStore.Files.FileColumns.DATA + " LIKE '%" + extension[i] + "'";
-        }
-        //按时间降序条件
-        String sortOrder = MediaStore.Files.FileColumns.DATE_MODIFIED;
-
-        Cursor cursor = FaceTransApplication.getApp().getContentResolver().query(fileUri, projection, selection, null, sortOrder);
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                try {
-                    String data = cursor.getString(0);
-                    FTFile fileInfo = new FTFile();
-                    fileInfo.setFilePath(data);
-                    long size = 0;
-                    try {
-                        File file = new File(data);
-                        size = file.length();
-                        fileInfo.setSize(size);
-                    } catch (Exception e) {
-
-                    }
-                    fileInfoList.add(fileInfo);
-                } catch (Exception e) {
-                    Log.i("FileUtils", "------>>>" + e.getMessage());
-                }
-
-            }
-        }
-        return fileInfoList;
-    }
-
 
     public static boolean isApkFile(String filePath) {
         if (filePath == null || filePath.equals("")) {
@@ -223,9 +166,13 @@ public class FileUtils {
             FTFile ftFile = FTFileManager.getInstance().getFTFile(ftFileId);
 
             if (null == ftFile) {
-
-                file = getCurrentApkIcon(file, outputStream);
-
+                if (ftType == FTType.APK) {
+                    file = getCurrentApkIcon(file, outputStream);
+                } else if (ftType == FTType.MUSIC) {
+                    file = getDefaultMusicPath(file, outputStream);
+                } else if (ftType == FTType.VIDEO) {
+                    file = getDefaultVideoPath(file, outputStream);
+                }
             } else {
 
                 if (ftType == FTType.APK) {
@@ -368,6 +315,76 @@ public class FileUtils {
         }
         return file;
     }
+
+    private synchronized static File getDefaultMusicPath(File file, FileOutputStream outputStream) {
+
+        try {
+            Bitmap musicBitmap = null;
+
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+            String savePath = GlobalConfig.getMusicIconDirectory() + File.separator + "icon_music_default" + ".png";
+
+            if (!FileUtils.isFolderExist(savePath)) FileUtils.makeDirs(savePath);
+
+            file = new File(savePath);
+
+            if (file.exists()) return file;
+
+            file.createNewFile();
+
+            Drawable musicDrawable = context.getResources().getDrawable(R.mipmap.icon_music_default);
+
+            musicBitmap = drawableToBitmap(musicDrawable);
+
+            outputStream = new FileOutputStream(file);
+
+            compressBitmapToSdcard(musicBitmap, outputStream);
+
+            if (musicBitmap != null) {
+
+                musicBitmap.recycle();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
+    private synchronized static File getDefaultVideoPath(File file, FileOutputStream outputStream) {
+        try {
+            Bitmap videoBitmap = null;
+
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+
+            String savePath = GlobalConfig.getMusicIconDirectory() + File.separator + "icon_video_default" + ".png";
+
+            if (!FileUtils.isFolderExist(savePath)) FileUtils.makeDirs(savePath);
+
+            file = new File(savePath);
+
+            if (file.exists()) return file;
+
+            file.createNewFile();
+
+            Drawable videoDrawable = context.getResources().getDrawable(R.mipmap.icon_video_default);
+
+            videoBitmap = drawableToBitmap(videoDrawable);
+
+            outputStream = new FileOutputStream(file);
+
+            compressBitmapToSdcard(videoBitmap, outputStream);
+
+            if (videoBitmap != null) {
+
+                videoBitmap.recycle();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
 
     private static void compressBitmapToSdcard(Bitmap bitmap, FileOutputStream outputStream) {
         if (null == bitmap || null == outputStream) return;

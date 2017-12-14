@@ -68,7 +68,7 @@ public class SimpleImageThumbnailLoader {
 
         imageView.setTag(TAG_KEY_URL, filePath);
 
-        Bitmap bitmap = getBitmapToMemoryCache(filePath);
+        Bitmap bitmap = getBitmapFromMemoryCache(filePath);
         if (null != bitmap) {
             imageView.setImageBitmap(bitmap);
             return;
@@ -81,7 +81,7 @@ public class SimpleImageThumbnailLoader {
             mMemoryCache.put(key, bitmap);
     }
 
-    public Bitmap getBitmapToMemoryCache(String key) {
+    public Bitmap getBitmapFromMemoryCache(String key) {
         return mMemoryCache.get(key);
     }
 

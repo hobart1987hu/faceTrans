@@ -73,7 +73,7 @@ public class ImageGridApter extends RecyclerView.Adapter<ImageGridApter.GridView
         Glide
                 .with(mContext)
                 .load(image.getFilePath())
-                .placeholder(R.mipmap.icon_default)
+                .placeholder(R.mipmap.icon_image_default)
                 .crossFade()
                 .centerCrop()
                 .into(holder.iv_pic);

@@ -67,7 +67,7 @@ public class ImageFileListAdapter extends RecyclerView.Adapter<ImageFileListAdap
                 .with(mContext)
                 .load(imageFolder.getFirstFilePath())
                 .fitCenter()
-                .placeholder(R.mipmap.icon_default)
+                .placeholder(R.mipmap.icon_image_default)
                 .crossFade()
                 .into(holder.iv_icon);
 

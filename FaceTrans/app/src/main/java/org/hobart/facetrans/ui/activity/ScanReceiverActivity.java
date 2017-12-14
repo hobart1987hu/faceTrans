@@ -187,10 +187,10 @@ public class ScanReceiverActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         EventBus.getDefault().unregister(this);
         if (mWifiBroadcast != null) unregisterReceiver(mWifiBroadcast);
         if (null != mCountDownTimer) mCountDownTimer.cancel();
+        super.onDestroy();
     }
 
     @Override

@@ -233,8 +233,8 @@ public class SendFileActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         clearAll();
+        super.onDestroy();
     }
 
     private void clearAll() {

@@ -18,8 +18,7 @@
             android:layout_height="80dp"
             android:layout_gravity="center_horizontal"
             android:layout_margin="10dp"
-            android:scaleType="fitXY"
-            android:src="@mipmap/icon_default" />
+            android:scaleType="fitXY"/>
 
         <TextView
             android:id="@+id/tv_file_name"

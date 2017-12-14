@@ -48,17 +48,17 @@ public class SenderFileListAdapter extends RecyclerView.Adapter<SenderFileListAd
         viewHolder.tv_file_name.setText(model.fileName);
         viewHolder.tv_fileSize.setText(FileUtils.getFileSize(model.fileSize));
         if (model.type == TransferModel.TYPE_APK) {
-            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.APK, viewHolder.iv_fileIcon, R.mipmap.ic_launcher);
+            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.APK, viewHolder.iv_fileIcon, R.mipmap.icon_apk_default);
         } else if (model.type == TransferModel.TYPE_MUSIC) {
             SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.MUSIC, viewHolder.iv_fileIcon, R.mipmap.icon_music_default);
         } else if (model.type == TransferModel.TYPE_VIDEO) {
-            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.VIDEO, viewHolder.iv_fileIcon, R.mipmap.icon_default);
+            SimpleImageThumbnailLoader.getInstance().displayImageView(model.fileIcon, FTType.VIDEO, viewHolder.iv_fileIcon, R.mipmap.icon_video_default);
         } else {
             Glide
                     .with(mContext)
                     .load(model.fileIcon)
                     .centerCrop()
-                    .placeholder(R.mipmap.ic_launcher)
+                    .placeholder(R.mipmap.icon_image_default)
                     .crossFade()
                     .into(viewHolder.iv_fileIcon);
         }

@@ -129,6 +129,6 @@ public class ImageListFragment extends BaseListFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(imageGridApter);
 
-        parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), folder.getFirstFilePath(), null);
+        parent.delayFlipPerspectiveView(view,1, container.getX(), container.getY(), view.getWidth(), view.getHeight(), folder.getFirstFilePath(), null);
     }
 }

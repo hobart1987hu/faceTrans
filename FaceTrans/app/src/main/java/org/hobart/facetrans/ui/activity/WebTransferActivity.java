@@ -252,7 +252,6 @@ public class WebTransferActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         FTFileManager.getInstance().clear();
         EventBus.getDefault().post(new FTFilesChangedEvent());
         EventBus.getDefault().unregister(this);
@@ -264,5 +263,6 @@ public class WebTransferActivity extends BaseActivity {
         ApWifiHelper.getInstance().disableCurrentNetWork();
         //重新打开Wi-Fi
         WifiHelper.getInstance().openWifi();
+        super.onDestroy();
     }
 }

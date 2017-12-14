@@ -54,7 +54,7 @@ public class ApkListAdapter extends RecyclerView.Adapter<ApkListAdapter.MusicVie
             holder.rootView.setPressed(false);
         }
 
-        SimpleImageThumbnailLoader.getInstance().displayImageView(apk.getFilePath(), FTType.APK, holder.iv_shortcut, R.mipmap.ic_launcher);
+        SimpleImageThumbnailLoader.getInstance().displayImageView(apk.getFilePath(), FTType.APK, holder.iv_shortcut, R.mipmap.icon_apk_default);
 
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +62,6 @@ public class ApkListAdapter extends RecyclerView.Adapter<ApkListAdapter.MusicVie
                 mListener.onItemClick(holder.rootView, holder.rootView, holder.getAdapterPosition());
             }
         });
-
     }
 
     @Override

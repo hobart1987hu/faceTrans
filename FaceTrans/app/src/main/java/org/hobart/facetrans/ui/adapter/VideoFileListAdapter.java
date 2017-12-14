@@ -57,7 +57,7 @@ public class VideoFileListAdapter extends RecyclerView.Adapter<VideoFileListAdap
         VideoFolder videoFolder = mVideoFolders.get(position);
         holder.tv_fileName.setText(videoFolder.getFolderName());
         holder.tv_fileNums.setText(String.format(mContext.getResources().getString(R.string.photo_num), videoFolder.getFolderFileNum()));
-        SimpleImageThumbnailLoader.getInstance().displayImageView(videoFolder.getFolderIconPath(), FTType.VIDEO, holder.iv_icon, R.mipmap.icon_default);
+        SimpleImageThumbnailLoader.getInstance().displayImageView(videoFolder.getFolderIconPath(), FTType.VIDEO, holder.iv_icon, R.mipmap.icon_video_default);
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

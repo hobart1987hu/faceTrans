@@ -63,7 +63,7 @@ public class VideoListApter extends RecyclerView.Adapter<VideoListApter.VideList
         } else {
             holder.containerView.setPressed(false);
         }
-        SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), FTType.VIDEO, holder.iv_shortcut, R.mipmap.icon_default);
+        SimpleImageThumbnailLoader.getInstance().displayImageView(video.getFilePath(), FTType.VIDEO, holder.iv_shortcut, R.mipmap.icon_video_default);
     }
 
     @Override

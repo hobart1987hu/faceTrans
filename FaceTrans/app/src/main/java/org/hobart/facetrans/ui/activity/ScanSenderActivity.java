@@ -124,9 +124,9 @@ public class ScanSenderActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         EventBus.getDefault().unregister(this);
         if (null != mCreateWifiAPThread) mCreateWifiAPThread.cancelDownTimer();
+        super.onDestroy();
     }
 
     @Override

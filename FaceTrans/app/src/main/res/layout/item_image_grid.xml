@@ -22,7 +22,7 @@
             android:layout_margin="2dp"
             android:contentDescription="@null"
             android:scaleType="fitXY"
-            android:src="@mipmap/icon_default" />
+            android:src="@mipmap/icon_image_default" />
 
         <ImageView
             android:id="@+id/iv_mask"

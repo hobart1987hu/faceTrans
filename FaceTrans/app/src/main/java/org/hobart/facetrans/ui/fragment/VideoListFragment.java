@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 
 import org.hobart.facetrans.R;
@@ -136,12 +135,12 @@ public class VideoListFragment extends BaseListFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(videoGridApter);
 
-        Bitmap bitmap = SimpleImageThumbnailLoader.getInstance().getBitmapToMemoryCache(folder.getFolderIconPath());
+        Bitmap bitmap = SimpleImageThumbnailLoader.getInstance().getBitmapFromMemoryCache(folder.getFolderIconPath());
 
         if (null == bitmap) {
-            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_default);
+            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_video_default);
         }
-        parent.delayFlipPerspectiveView(view, container.getX(), container.getY(), view.getWidth(), view.getHeight(), "", bitmap);
+        parent.delayFlipPerspectiveView(view,2, container.getX(), container.getY(), view.getWidth(), view.getHeight(), "", bitmap);
     }
 
 }

@@ -1,13 +1,10 @@
 package org.hobart.facetrans.ui.adapter;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -16,9 +13,7 @@ import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.manager.FTFileManager;
-import org.hobart.facetrans.model.Apk;
 import org.hobart.facetrans.model.FTFile;
-import org.hobart.facetrans.model.Video;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.SimpleImageThumbnailLoader;
 
@@ -88,18 +83,18 @@ public class FileInfoSelectedAdapter extends BaseAdapter {
         }
         if (fileInfo != null) {
             if (fileInfo.getFileType() == FTType.APK) {
-                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.APK, viewHolder.iv_shortcut, R.mipmap.ic_launcher);
+                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.APK, viewHolder.iv_shortcut, R.mipmap.icon_apk_default);
             } else if (fileInfo.getFileType() == FTType.IMAGE) {
                 Glide.with(mContext)
                         .load(fileInfo.getFilePath())
                         .centerCrop()
-                        .placeholder(R.mipmap.ic_launcher)
+                        .placeholder(R.mipmap.icon_image_default)
                         .crossFade()
                         .into(viewHolder.iv_shortcut);
             } else if (fileInfo.getFileType() == FTType.MUSIC) {
-                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.MUSIC, viewHolder.iv_shortcut, R.mipmap.icon_default);
+                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.MUSIC, viewHolder.iv_shortcut, R.mipmap.icon_music_default);
             } else if (fileInfo.getFileType() == FTType.VIDEO) {
-                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.VIDEO, viewHolder.iv_shortcut, R.mipmap.icon_default);
+                SimpleImageThumbnailLoader.getInstance().displayImageView(fileInfo.getFilePath(), FTType.VIDEO, viewHolder.iv_shortcut, R.mipmap.icon_video_default);
             }
             viewHolder.tv_path.setText(fileInfo.getFilePath());
             viewHolder.tv_size.setText(FileUtils.getFileSize(fileInfo.getSize()));

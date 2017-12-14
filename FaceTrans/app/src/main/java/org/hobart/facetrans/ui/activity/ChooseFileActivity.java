@@ -102,6 +102,8 @@ public class ChooseFileActivity extends BaseActivity {
     private Bitmap bitmap;
     private boolean isWebTransfer;
 
+    private int type;//1:图片 2：视频
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -169,8 +171,13 @@ public class ChooseFileActivity extends BaseActivity {
         } else {
             coverBitmap = BitmapFactory.decodeFile(coverUrl);
         }
-        if (null == coverBitmap)
-            coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_default);
+        if (null == coverBitmap) {
+            if (type == 1) {
+                coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_image_default);
+            } else if (type == 2) {
+                coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_video_default);
+            }
+        }
         mPerspectiveView.setReverse(true, coverBitmap, getContentBitmap());
         final ObjectAnimator animator = ObjectAnimator.ofFloat(mFlipViewContainer, "alpha", 0.7f, 0f);
         animator.setDuration(300);
@@ -189,16 +196,17 @@ public class ChooseFileActivity extends BaseActivity {
         return isFlip;
     }
 
-    public void delayFlipPerspectiveView(final View view, final float x, final float y, final int w, final int h, final String coverUrl, final Bitmap bitmap) {
+    public void delayFlipPerspectiveView(final View view, final int type, final float x, final float y, final int w, final int h, final String coverUrl, final Bitmap bitmap) {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                flipPerspectiveView(view, x, y, w, h, coverUrl, bitmap);
+                flipPerspectiveView(view, type, x, y, w, h, coverUrl, bitmap);
             }
         }, 200);
     }
 
-    private void flipPerspectiveView(final View view, float x, float y, int w, int h, String coverUrl, Bitmap bitmap) {
+    private void flipPerspectiveView(final View view, int type, float x, float y, int w, int h, String coverUrl, Bitmap bitmap) {
+        this.type = type;
         this.coverUrl = coverUrl;
         this.bitmap = bitmap;
         Bitmap coverBitmap;
@@ -207,8 +215,14 @@ public class ChooseFileActivity extends BaseActivity {
         } else {
             coverBitmap = BitmapFactory.decodeFile(coverUrl);
         }
-        if (null == coverBitmap)
-            coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_default);
+        if (null == coverBitmap) {
+            if (type == 1) {
+                coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_image_default);
+            } else if (type == 2) {
+                coverBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_video_default);
+            }
+        }
+
         float ratio = OpenGlUtils.VIEW_W_H;
         if (w / h > ratio) {
             w = (int) (h * ratio);

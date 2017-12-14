@@ -5,6 +5,7 @@
     android:background="@color/colorPrimary"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
+
     <include
         android:id="@+id/topbar"
         layout="@layout/layout_top_bar" />
@@ -12,7 +13,5 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycleView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp" />
+        android:layout_height="match_parent" />
 </LinearLayout>
