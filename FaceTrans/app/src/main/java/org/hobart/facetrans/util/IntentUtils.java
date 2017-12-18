@@ -2,17 +2,20 @@ package org.hobart.facetrans.util;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.provider.Settings;
 
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.socket.SocketConstants;
 import org.hobart.facetrans.socket.service.ServerReceiverService;
 import org.hobart.facetrans.socket.service.SocketSenderService;
+import org.hobart.facetrans.ui.activity.AboutActivity;
 import org.hobart.facetrans.ui.activity.ChooseFileActivity;
 import org.hobart.facetrans.ui.activity.HomeActivity;
 import org.hobart.facetrans.ui.activity.ReceiveFileActivity;
 import org.hobart.facetrans.ui.activity.ScanReceiverActivity;
 import org.hobart.facetrans.ui.activity.ScanSenderActivity;
 import org.hobart.facetrans.ui.activity.SendFileActivity;
+import org.hobart.facetrans.ui.activity.SettingsActivity;
 import org.hobart.facetrans.ui.activity.WebTransferActivity;
 
 /**
@@ -25,6 +28,21 @@ public class IntentUtils {
 //        Intent intent = new Intent(activity, MusicListActivity.class);
 //        activity.startActivity(intent);
 //    }
+
+    public static void intentToSettingsActivity(Activity activity) {
+        Intent intent = new Intent(activity, SettingsActivity.class);
+        activity.startActivity(intent);
+    }
+
+    public static void intentToAboutActivity(Activity activity) {
+        Intent intent = new Intent(activity, AboutActivity.class);
+        activity.startActivity(intent);
+    }
+
+    public static void intentToSystemSettings(Activity activity) {
+        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+        activity.startActivity(intent);
+    }
 
     public static void intentToWebTransferActivity(Activity activity) {
         Intent intent = new Intent(activity, WebTransferActivity.class);

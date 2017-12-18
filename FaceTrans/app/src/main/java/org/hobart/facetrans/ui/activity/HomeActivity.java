@@ -24,9 +24,11 @@ import com.tbruyelle.rxpermissions.RxPermissions;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.dialog.CloseGPRSDialog;
 import org.hobart.facetrans.ui.widget.MyScrollView;
 import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.IntentUtils;
+import org.hobart.facetrans.util.NetworkUtils;
 import org.hobart.facetrans.util.ToastUtils;
 
 import butterknife.Bind;
@@ -80,9 +82,6 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
     @Bind(R.id.tv_storage_desc)
     TextView tv_storage_desc;
 
-    /**
-     * @param savedInstanceState
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,6 +166,10 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
         int id = item.getItemId();
         if (id == R.id.nav_web_transfer) {
             IntentUtils.intentToChooseFileActivity(this, true);
+        } else if (id == R.id.nav_settings) {
+            IntentUtils.intentToSettingsActivity(this);
+        } else if (id == R.id.nav_about) {
+            IntentUtils.intentToAboutActivity(this);
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -178,12 +181,16 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
         switch (view.getId()) {
             case R.id.btn_send:
             case R.id.btn_send_big: {
-                IntentUtils.intentToChooseFileActivity(this,false);
+                IntentUtils.intentToChooseFileActivity(this, false);
                 break;
             }
             case R.id.btn_receive:
             case R.id.btn_receive_big: {
-                IntentUtils.intentToScanSenderActivity(this);
+                if (NetworkUtils.isGPRSAvailable()) {
+                    showCloseGPRSDialog();
+                } else {
+                    IntentUtils.intentToScanSenderActivity(this);
+                }
                 break;
             }
             case R.id.iv_mini_avator: {
@@ -194,11 +201,32 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
             }
             case R.id.rl_file:
             case R.id.rl_storage: {
-                // NavigatorUtils.toSystemFileChooser(getContext());
                 break;
             }
 
         }
+    }
+
+    private CloseGPRSDialog mCloseGPRSDialog;
+
+    private void showCloseGPRSDialog() {
+        if (null != mCloseGPRSDialog) mCloseGPRSDialog.hide();
+        if (null == mCloseGPRSDialog) {
+            mCloseGPRSDialog = new CloseGPRSDialog(HomeActivity.this) {
+                @Override
+                public void closeGPRS() {
+                    mCloseGPRSDialog.hide();
+                    IntentUtils.intentToSystemSettings(HomeActivity.this);
+                }
+
+                @Override
+                public void useGPRS() {
+                    mCloseGPRSDialog.hide();
+                    IntentUtils.intentToScanSenderActivity(HomeActivity.this);
+                }
+            };
+        }
+        mCloseGPRSDialog.show();
     }
 
     private int mContentHeight = 0;
@@ -235,6 +263,12 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (null != mCloseGPRSDialog) mCloseGPRSDialog.hide();
     }
 }
 

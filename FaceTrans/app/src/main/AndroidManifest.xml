@@ -70,6 +70,14 @@
             android:name=".ui.activity.WebTransferActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activity.AboutActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activity.SettingsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service android:name=".socket.service.ServerReceiverService">
             <intent-filter>
@@ -79,11 +87,12 @@
 
         </service>
         <service android:name=".socket.service.SocketSenderService" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="org.hobart.facetrans.fileProvider"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />

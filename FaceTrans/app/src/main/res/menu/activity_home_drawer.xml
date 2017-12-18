@@ -2,31 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group>
-        <!--<item-->
-        <!--android:id="@+id/nav_computer"-->
-        <!--android:icon="@mipmap/icon_computer"-->
-        <!--android:title="@string/str_computer_transfer" />-->
-        <!--<item-->
-        <!--android:id="@+id/nav_web_transfer"-->
-        <!--android:icon="@mipmap/icon_web"-->
-        <!--android:title="@string/str_web_transfer" />-->
-        <!--<item-->
-        <!--android:id="@+id/nav_feedback"-->
-        <!--android:icon="@drawable/ic_mail_24dp"-->
-        <!--android:title="@string/str_feedback" />-->
-        <!--<item-->
-        <!--android:id="@+id/nav_update"-->
-        <!--android:icon="@drawable/ic_sync_24dp"-->
-        <!--android:title="@string/str_update_version" />-->
 
         <item
             android:id="@+id/nav_web_transfer"
             android:icon="@mipmap/icon_web"
             android:title="网页传" />
         <item
+            android:id="@+id/nav_settings"
+            android:icon="@mipmap/icon_settings"
+            android:title="设置" />
+        <item
             android:id="@+id/nav_about"
-            android:icon="@mipmap/ic_launcher"
-            android:title="关于作者" />
+            android:icon="@mipmap/icon_about"
+            android:title="关于" />
     </group>
 
 </menu>

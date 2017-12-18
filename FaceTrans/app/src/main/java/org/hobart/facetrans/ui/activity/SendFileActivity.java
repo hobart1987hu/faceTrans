@@ -144,10 +144,10 @@ public class SendFileActivity extends BaseActivity {
         final int type = event.type;
         switch (type) {
             case SocketEvent.TYPE_FILE:
-            case TransferModel.TYPE_APK:
-            case TransferModel.TYPE_IMAGE:
-            case TransferModel.TYPE_MUSIC:
-            case TransferModel.TYPE_VIDEO:
+            case SocketEvent.TYPE_APK:
+            case SocketEvent.TYPE_IMAGE:
+            case SocketEvent.TYPE_MUSIC:
+            case SocketEvent.TYPE_VIDEO:
                 //接收发送进度
                 if (event.mode == SocketEvent.OPERATION_MODE_SEND) {
                     updateAdapter(event);
