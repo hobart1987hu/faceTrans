@@ -68,7 +68,6 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
         EventBus.getDefault().register(this);
 
         setCenterText("接收文件");
-        setContainerBackGround(R.color.colorPrimary);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ReceiveFileListAdapter(this, mReceiveFileLists, new OnRecyclerViewClickListener.SimpleOnRecyclerViewClickListener() {

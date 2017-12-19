@@ -40,6 +40,7 @@ import org.hobart.facetrans.ui.fragment.VideoListFragment;
 import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.ToastUtils;
+import org.w3c.dom.Text;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -49,7 +50,7 @@ import butterknife.OnClick;
  * Created by huzeyin on 2017/11/24.
  */
 
-public class ChooseFileActivity extends BaseTitleBarActivity {
+public class ChooseFileActivity extends BaseActivity {
 
     @Bind(R.id.btn_selected)
     Button btn_selected;
@@ -123,8 +124,15 @@ public class ChooseFileActivity extends BaseTitleBarActivity {
 
     private void init() {
 
-        setCenterText("选择文件");
-        setContainerBackGround(R.color.colorPrimary);
+        TextView tv_title = (TextView) findViewById(R.id.tv_title);
+        tv_title.setText("选择文件");
+
+        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         findViewById(R.id.tv_fileList_back).setOnClickListener(new View.OnClickListener() {
             @Override
