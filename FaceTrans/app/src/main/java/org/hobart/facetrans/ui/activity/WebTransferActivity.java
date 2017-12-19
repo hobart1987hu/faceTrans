@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Html;
 import android.text.Spanned;
-import android.view.View;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -16,14 +15,15 @@ import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.ApCreateEvent;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
-import org.hobart.facetrans.http_server.ImageHttpInterceptor;
-import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.http_server.AndroidHttpServer;
 import org.hobart.facetrans.http_server.DownloadHttpUriInterceptor;
+import org.hobart.facetrans.http_server.ImageHttpInterceptor;
 import org.hobart.facetrans.http_server.IndexHttpUriInterceptor;
+import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.socket.SocketConstants;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.ClassifyUtils;
 import org.hobart.facetrans.util.FileUtils;
@@ -42,13 +42,12 @@ import java.util.Map;
  * Created by huzeyin on 2017/12/9.
  */
 
-public class WebTransferActivity extends BaseActivity {
+public class WebTransferActivity extends BaseTitleBarActivity {
 
     private static final String LOG_PREFIX = "WebTransferActivity->";
 
     private TextView tv_tip_1, tv_tip_2;
     private CreateWifiAPThread mCreateWifiAPThread;
-
     private AndroidHttpServer mServer;
 
     @Override
@@ -56,16 +55,9 @@ public class WebTransferActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_transfer);
         EventBus.getDefault().register(this);
-        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
-        TextView tv_title = (TextView) findViewById(R.id.tv_title);
-        tv_title.setVisibility(View.VISIBLE);
-        tv_title.setText("网页传");
+        setCenterText("网页传");
+
         tv_tip_1 = (TextView) findViewById(R.id.tv_tip_1);
         tv_tip_2 = (TextView) findViewById(R.id.tv_tip_2);
         createAp();

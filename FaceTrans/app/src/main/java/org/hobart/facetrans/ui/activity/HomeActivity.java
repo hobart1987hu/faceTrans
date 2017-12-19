@@ -203,7 +203,6 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
             case R.id.rl_storage: {
                 break;
             }
-
         }
     }
 

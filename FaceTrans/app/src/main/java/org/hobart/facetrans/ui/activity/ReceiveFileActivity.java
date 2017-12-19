@@ -28,6 +28,7 @@ import org.hobart.facetrans.socket.transfer.TransferReceiver;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.socket.transfer.thread.UnZipFTFileRunnable;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.ui.adapter.ReceiveFileListAdapter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.FileUtils;
@@ -48,7 +49,7 @@ import butterknife.ButterKnife;
  * Created by huzeyin on 2017/11/28.
  */
 
-public class ReceiveFileActivity extends BaseActivity {
+public class ReceiveFileActivity extends BaseTitleBarActivity {
 
     private Socket mSocket;
 
@@ -66,16 +67,8 @@ public class ReceiveFileActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
-        TextView tv_title = (TextView) findViewById(R.id.tv_title);
-        tv_title.setText("接收文件");
-        tv_title.setVisibility(View.VISIBLE);
-
-        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        setCenterText("接收文件");
+        setContainerBackGround(R.color.colorPrimary);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ReceiveFileListAdapter(this, mReceiveFileLists, new OnRecyclerViewClickListener.SimpleOnRecyclerViewClickListener() {

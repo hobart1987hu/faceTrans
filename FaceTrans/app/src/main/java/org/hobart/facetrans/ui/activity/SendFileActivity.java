@@ -9,8 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -28,6 +26,7 @@ import org.hobart.facetrans.socket.transfer.SocketTransferQueue;
 import org.hobart.facetrans.socket.transfer.TransferSender;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.ui.adapter.SenderFileListAdapter;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.IntentUtils;
@@ -51,7 +50,7 @@ import butterknife.ButterKnife;
  * Created by huzeyin on 2017/11/28.
  */
 
-public class SendFileActivity extends BaseActivity {
+public class SendFileActivity extends BaseTitleBarActivity {
 
     private AtomicLong mAutoCreateTransferId;
 
@@ -71,16 +70,7 @@ public class SendFileActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
-        TextView tv_title = (TextView) findViewById(R.id.tv_title);
-        tv_title.setText("发送文件");
-        tv_title.setVisibility(View.VISIBLE);
-
-        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        setCenterText("发送文件");
 
         init();
 

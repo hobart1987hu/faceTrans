@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/search_bar"
+    android:id="@+id/topbar"
     android:layout_width="match_parent"
     android:layout_height="?android:actionBarSize"
     android:background="@color/colorPrimary">
@@ -20,8 +20,9 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:gravity="center"
-        android:text="标题"
+        android:text=""
         android:textColor="@color/white"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:visibility="visible" />
 </RelativeLayout>

@@ -23,7 +23,6 @@ import android.widget.TextView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.hobart.facetrans.FTType;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
@@ -32,6 +31,7 @@ import org.hobart.facetrans.opengl.FlipViewContainer;
 import org.hobart.facetrans.opengl.OpenGlUtils;
 import org.hobart.facetrans.opengl.PerspectiveView;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.ui.dialog.ShowSelectedFileInfoDialog;
 import org.hobart.facetrans.ui.fragment.ApkListFragment;
 import org.hobart.facetrans.ui.fragment.ImageListFragment;
@@ -49,12 +49,7 @@ import butterknife.OnClick;
  * Created by huzeyin on 2017/11/24.
  */
 
-public class ChooseFileActivity extends BaseActivity {
-
-    @Bind(R.id.tv_back)
-    TextView tv_back;
-    @Bind(R.id.tv_title)
-    TextView tv_title;
+public class ChooseFileActivity extends BaseTitleBarActivity {
 
     @Bind(R.id.btn_selected)
     Button btn_selected;
@@ -108,6 +103,7 @@ public class ChooseFileActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_file);
+
         ButterKnife.bind(this);
 
         if (null != getIntent()) {
@@ -126,8 +122,9 @@ public class ChooseFileActivity extends BaseActivity {
     }
 
     private void init() {
-        tv_title.setText("选择文件");
-        tv_title.setVisibility(View.VISIBLE);
+
+        setCenterText("选择文件");
+        setContainerBackGround(R.color.colorPrimary);
 
         findViewById(R.id.tv_fileList_back).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -324,13 +321,9 @@ public class ChooseFileActivity extends BaseActivity {
         getSelectedView();
     }
 
-    @OnClick({R.id.tv_back, R.id.btn_selected, R.id.btn_next})
+    @OnClick({R.id.btn_selected, R.id.btn_next})
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.tv_back: {
-                this.finish();
-                break;
-            }
             case R.id.btn_selected: {
                 if (mShowSelectedFileInfoDialog != null) {
                     mShowSelectedFileInfoDialog.show();

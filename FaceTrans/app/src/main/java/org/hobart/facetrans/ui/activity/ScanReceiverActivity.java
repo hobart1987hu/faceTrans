@@ -24,6 +24,7 @@ import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.event.SocketStatusEvent;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.ui.widget.RadarView;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
@@ -38,7 +39,7 @@ import butterknife.ButterKnife;
  * Created by huzeyin on 2017/11/28.
  */
 
-public class ScanReceiverActivity extends BaseActivity {
+public class ScanReceiverActivity extends BaseTitleBarActivity {
 
     private static final String LOG_PREFIX = "ScanReceiverActivity-->";
 
@@ -55,12 +56,6 @@ public class ScanReceiverActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_receiver);
 
-        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
         startCountDownTimer();
@@ -196,6 +191,7 @@ public class ScanReceiverActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            EventBus.getDefault().unregister(this);
             FTFileManager.getInstance().clear();
             EventBus.getDefault().post(new FTFilesChangedEvent());
             IntentUtils.stopSocketSenderService(this);

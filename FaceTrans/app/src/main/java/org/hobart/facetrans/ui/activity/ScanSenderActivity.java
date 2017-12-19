@@ -3,7 +3,6 @@ package org.hobart.facetrans.ui.activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
-import android.view.View;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -13,6 +12,7 @@ import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.ApCreateEvent;
 import org.hobart.facetrans.event.SocketStatusEvent;
 import org.hobart.facetrans.ui.activity.base.BaseActivity;
+import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.ui.widget.RippleImageView;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
@@ -29,7 +29,7 @@ import butterknife.ButterKnife;
  * Created by huzeyin on 2017/11/28.
  */
 
-public class ScanSenderActivity extends BaseActivity {
+public class ScanSenderActivity extends BaseTitleBarActivity {
 
     private static final String LOG_PREFIX = "ScanSenderActivity->";
 
@@ -42,14 +42,6 @@ public class ScanSenderActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_sender);
-
-        findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
         createAp();
@@ -132,6 +124,9 @@ public class ScanSenderActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            //取消注册
+            EventBus.getDefault().unregister(this);
+            //关闭service
             IntentUtils.stopServerReceiverService(this);
             //关闭热点
             ApWifiHelper.getInstance().closeWifiAp();
