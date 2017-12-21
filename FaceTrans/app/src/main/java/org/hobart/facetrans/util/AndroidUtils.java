@@ -10,8 +10,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -23,6 +27,10 @@ import org.hobart.facetrans.FaceTransApplication;
  */
 
 public class AndroidUtils {
+
+    public static String getPhoneModel() {
+        return Build.MODEL;
+    }
 
     public static String getCurrentApkPath() {
 
@@ -138,5 +146,59 @@ public class AndroidUtils {
         }
     }
 
+    private static String imei = "";
+    private static String mac;
 
+    public static String getDeviceId() {
+        try {
+            if (TextUtils.isEmpty(imei)) {
+                TelephonyManager tm = (TelephonyManager) FaceTransApplication.getApp().getSystemService(Context.TELEPHONY_SERVICE);
+                imei = tm.getDeviceId();
+                if (TextUtils.isEmpty(imei) || imei.equals("0"))
+                    imei = getMacAddress().replaceAll(":", "_");
+            }
+        } catch (Exception e) {
+            imei = getMacAddress().replaceAll(":", "_");
+        }
+        return imei;
+    }
+
+
+    private static String getMacAddress() {
+        String result = "";
+        try {
+            if (!TextUtils.isEmpty(mac)) return mac;
+            WifiManager wifiManager = (WifiManager) FaceTransApplication.getFaceTransApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            result = wifiInfo.getMacAddress();
+            mac = result;
+            if (mac == null || mac.equals("")) mac = getIDFinal();
+        } catch (Exception e) {
+            if (mac == null || mac.equals("")) mac = getIDFinal();
+        }
+        return result;
+    }
+
+    private static String getIDFinal() {
+        String m_szDevIDShort = "35";
+        try {
+            m_szDevIDShort = "35" + //we make this look like a valid IMEI
+                    Build.BOARD.length() % 10 +
+                    Build.BRAND.length() % 10 +
+                    Build.CPU_ABI.length() % 10 +
+                    Build.DEVICE.length() % 10 +
+                    Build.DISPLAY.length() % 10 +
+                    Build.HOST.length() % 10 +
+                    Build.ID.length() % 10 +
+                    Build.MANUFACTURER.length() % 10 +
+                    Build.MODEL.length() % 10 +
+                    Build.PRODUCT.length() % 10 +
+                    Build.TAGS.length() % 10 +
+                    Build.TYPE.length() % 10 +
+                    Build.USER.length() % 10;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return m_szDevIDShort;
+    }
 }

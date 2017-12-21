@@ -3,6 +3,7 @@ package org.hobart.facetrans;
 import android.os.Environment;
 
 import org.hobart.facetrans.model.FTFile;
+import org.hobart.facetrans.util.AndroidUtils;
 
 import java.io.File;
 import java.util.Comparator;
@@ -93,10 +94,13 @@ public class GlobalConfig {
      * AP 密码
      */
     public static final String AP_PWD = "1234567890";
+
+    public static final String AP_SSID_PREFIX = "FT_HOTSPOT_";
+
     /**
      * AP SSID
      */
-    public static final String AP_SSID = "FT_HOTSPOT";
+    public static final String AP_SSID = AP_SSID_PREFIX + AndroidUtils.getPhoneModel();
 
     public static final String WEB_SERVER_IP = "192.168.43.1";
 

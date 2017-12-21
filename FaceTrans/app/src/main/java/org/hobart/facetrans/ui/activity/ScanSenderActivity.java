@@ -48,7 +48,6 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
     }
 
     private void createAp() {
-        // TODO: 如果有其他的热点，我们自己在创建热点是否有影响?
         WifiHelper.getInstance().closeWifi();
         if (null == mCreateWifiAPThread)
             mCreateWifiAPThread = new CreateWifiAPThread();

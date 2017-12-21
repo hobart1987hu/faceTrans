@@ -30,6 +30,7 @@ import org.hobart.facetrans.util.AndroidUtils;
 import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.NetworkUtils;
 import org.hobart.facetrans.util.ToastUtils;
+import org.hobart.facetrans.wifi.WifiHelper;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -89,7 +90,10 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
         ButterKnife.bind(this);
         new RxPermissions(this)
                 .request(Manifest.permission.READ_EXTERNAL_STORAGE
-                        , Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        , Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_WIFI_STATE)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {

@@ -28,4 +28,5 @@
         请好友在浏览器输入以下网址 \n
         http://192.168.43.1:1234
     </string>
+    <string name="connect_device">正在连接设备%1$s</string>
 </resources>
