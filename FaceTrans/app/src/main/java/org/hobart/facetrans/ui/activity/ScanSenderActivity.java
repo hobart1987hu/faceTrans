@@ -121,6 +121,21 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
     }
 
     @Override
+    protected boolean handleViewOnClick() {
+        //取消注册
+        EventBus.getDefault().unregister(this);
+        //关闭service
+        IntentUtils.stopServerReceiverService(this);
+        //关闭热点
+        ApWifiHelper.getInstance().closeWifiAp();
+        //断开与当前的热点连接
+        ApWifiHelper.getInstance().disableCurrentNetWork();
+        //重新打开Wi-Fi
+        WifiHelper.getInstance().openWifi();
+        return super.handleViewOnClick();
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             //取消注册

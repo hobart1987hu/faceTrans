@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -41,7 +40,6 @@ import org.hobart.facetrans.util.IntentUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ToastUtils;
 import org.hobart.facetrans.wifi.ApWifiHelper;
-import org.hobart.facetrans.wifi.CreateWifiAPThread;
 import org.hobart.facetrans.wifi.ScanNearbyWifiThread;
 import org.hobart.facetrans.wifi.WifiHelper;
 
@@ -162,6 +160,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
 
         @Override
         public void onFinish() {
+            if (isConnectSuccess) return;
             showResetView();
             ToastUtils.showLongToast("连接超时，请重试！");
         }
@@ -209,7 +208,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
                             String ssid = WifiHelper.getInstance().getSSID();
                             if (ssid != null && ssid.equals(mSelectedSSID)) {
                                 if (!hasConnectedWifi) {
-                                    openClientServiceAndConnectServerSocket();
+                                    openClientServiceAndConnectServer();
                                     hasConnectedWifi = true;
                                 }
                             }
@@ -220,11 +219,11 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         }
     }
 
-    private void openClientServiceAndConnectServerSocket() {
+    private void openClientServiceAndConnectServer() {
         String localIp = WifiHelper.getInstance().getLocalIPAddress();
         int lastPointIndex = localIp.lastIndexOf(".");
         String host = localIp.substring(0, lastPointIndex) + ".1";
-        LogcatUtils.d(LOG_PREFIX + "openClientServiceAndConnectServerSocket: host" + host + ":::本地地址:::" + localIp);
+        LogcatUtils.d(LOG_PREFIX + "openClientServiceAndConnectServer: host" + host + ":::本地地址:::" + localIp);
         IntentUtils.startSocketSenderService(this, host);
     }
 
@@ -310,6 +309,16 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         if (null != mConnectApCountDownTimer) mConnectApCountDownTimer.cancel();
         if (null != mScanNearbyWifiThread) mScanNearbyWifiThread.stop();
         super.onDestroy();
+    }
+
+    @Override
+    protected boolean handleViewOnClick() {
+        EventBus.getDefault().unregister(this);
+        FTFileManager.getInstance().clear();
+        EventBus.getDefault().post(new FTFilesChangedEvent());
+        IntentUtils.stopSocketSenderService(this);
+        resetNetwork();
+        return super.handleViewOnClick();
     }
 
     @Override
