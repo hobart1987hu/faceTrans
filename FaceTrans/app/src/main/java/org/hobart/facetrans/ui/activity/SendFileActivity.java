@@ -11,6 +11,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
+import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.FTFile;
@@ -85,6 +86,14 @@ public class SendFileActivity extends BaseTitleBarActivity {
         mAdapter = new SenderFileListAdapter(this, mSendFileLists);
         recycleView.setLayoutManager(new LinearLayoutManager(this));
         recycleView.setAdapter(mAdapter);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSocketDisconnect(SocketConnectEvent event) {
+        if (null == event) return;
+        if (event.status == SocketConnectEvent.DIS_CONNECTED) {
+            ToastUtils.showLongToast("已和接收端断开连接!");
+        }
     }
 
     /**

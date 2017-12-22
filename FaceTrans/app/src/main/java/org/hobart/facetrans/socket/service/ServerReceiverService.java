@@ -10,6 +10,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.event.SocketConnectEvent;
+import org.hobart.facetrans.event.SocketSyncEvent;
 import org.hobart.facetrans.socket.SocketConstants;
 import org.hobart.facetrans.socket.transfer.TransferDataQueue;
 import org.hobart.facetrans.socket.transfer.TransferReceiver;
@@ -44,6 +45,11 @@ public class ServerReceiverService extends Service {
         if (event.status == SocketConnectEvent.DIS_CONNECTED) {
             stopSelf();
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSocketSyncEvent(SocketSyncEvent event) {
+        if (null != mTransferReceiver) mTransferReceiver.syncTime();
     }
 
     @Override
@@ -111,7 +117,11 @@ public class ServerReceiverService extends Service {
                 if (null != mTransferReceiver) {
                     mTransferReceiver.stopReceiverThread();
                 }
-                TransferDataQueue.getInstance().sendDisconnect();
+                if (null != mSocket && mSocket.isConnected()) {
+                    TransferDataQueue.getInstance().sendDisconnect();
+                } else {
+                    stopSelf();
+                }
             }
         }
         return START_STICKY;

@@ -68,10 +68,16 @@ public class SocketSenderService extends Service {
                 releaseSocket();
                 newSocket();
             } else if (action.equals(SocketConstants.ACTION_STOP_CLIENT_SOCKET)) {
+
                 if (null != mTransferSender) {
                     mTransferSender.stopSenderThread();
                 }
-                TransferDataQueue.getInstance().sendDisconnect();
+
+                if (null != mSocket && mSocket.isConnected()) {
+                    TransferDataQueue.getInstance().sendDisconnect();
+                } else {
+                    stopSelf();
+                }
             }
         }
         return START_STICKY;

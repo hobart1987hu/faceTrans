@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.GlobalConfig;
+import org.hobart.facetrans.event.SocketSyncEvent;
 import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.SocketConstants;
@@ -80,6 +81,8 @@ public class ReceiveRunnable implements Runnable {
                     continue;
                 }
 
+                postSocketSyncEvent();
+
                 if (transferProtocol.type == TransferProtocol.TYPE_ACK) {
 
                     LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_ACK 信号");
@@ -145,6 +148,11 @@ public class ReceiveRunnable implements Runnable {
             e.printStackTrace();
             postIOException();
         }
+    }
+
+    private void postSocketSyncEvent() {
+        SocketSyncEvent event = new SocketSyncEvent();
+        EventBus.getDefault().post(event);
     }
 
     private void postIOException() {
@@ -221,6 +229,9 @@ public class ReceiveRunnable implements Runnable {
                 if ((totalSize + byteSize) > fileSize) {
                     int lastSize = (int) (fileSize - totalSize);
                     bytesRead = inputStream.read(buffer, 0, lastSize);
+
+                    postSocketSyncEvent();
+
                     if (bytesRead != -1) {
                         mOutputStream.write(buffer, 0, bytesRead);
                         totalSize += bytesRead;
@@ -244,8 +255,12 @@ public class ReceiveRunnable implements Runnable {
                         break;
                     }
                 } else {
+
+                    postSocketSyncEvent();
+
                     bytesRead = inputStream.read(buffer, 0, buffer.length);
                     if (bytesRead != -1) {
+
                         mOutputStream.write(buffer, 0, bytesRead);
                         totalSize += bytesRead;
 

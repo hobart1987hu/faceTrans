@@ -14,6 +14,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.R;
+import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.transfer.TransferProtocol;
@@ -23,7 +24,6 @@ import org.hobart.facetrans.ui.adapter.ReceiveFileListAdapter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.IntentUtils;
-import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ToastUtils;
 import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.WifiHelper;
@@ -86,6 +86,15 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
         recycleView.setAdapter(mAdapter);
     }
 
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSocketDisconnect(SocketConnectEvent event) {
+        if (null == event) return;
+        if (event.status == SocketConnectEvent.DIS_CONNECTED) {
+            ToastUtils.showLongToast("已和发送端断开连接!");
+        }
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketEventListener(SocketTransferEvent event) {
 
@@ -102,9 +111,6 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
             return;
         } else if (event.type == TransferProtocol.TYPE_DATA_TRANSFER) {
             final int type = event.transferData.type;
-
-            LogcatUtils.d("ReceiveFileActivity->onSocketEventListener event.transferDta value:" + event.transferData.toString());
-
             switch (type) {
                 case TransferModel.TYPE_FILE:
                 case TransferModel.TYPE_APK:
