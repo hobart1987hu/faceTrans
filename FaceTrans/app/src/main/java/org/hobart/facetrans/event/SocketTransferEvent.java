@@ -13,4 +13,5 @@ public class SocketTransferEvent extends TransferProtocol {
     public static final int SOCKET_CONNECT_SUCCESS = 1;
 
     public static final int SOCKET_CONNECT_FAILURE = 2;
+
 }

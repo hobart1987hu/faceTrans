@@ -3,6 +3,7 @@ package org.hobart.facetrans.socket.transfer.thread;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
+import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.SocketConstants;
@@ -75,6 +76,8 @@ public class SendRunnable implements Runnable {
                     continue;
                 }
 
+                LogcatUtils.d(LOG_PREFIX + " run transferProtocol 发送类型:" + transferProtocol.type);
+
                 if (transferProtocol.type == TransferProtocol.TYPE_ACK) {
 
                     LogcatUtils.d(LOG_PREFIX + " run transferProtocol 发送握手信号:" + transferProtocol.toString());
@@ -92,6 +95,8 @@ public class SendRunnable implements Runnable {
                     LogcatUtils.d(LOG_PREFIX + " run transferProtocol 发送主动断开连接信号:" + transferProtocol.toString());
 
                     sendTextData(transferProtocol, false);
+
+                    poseDisconnectEvent();
 
                 } else if (transferProtocol.type == TransferProtocol.TYPE_MISS_MATCH) {
 
@@ -134,8 +139,14 @@ public class SendRunnable implements Runnable {
                 }
             }
         } catch (IOException e) {
-            postIOException();
+//            postIOException();
         }
+    }
+
+    private void poseDisconnectEvent() {
+        SocketConnectEvent event = new SocketConnectEvent();
+        event.status = SocketConnectEvent.DIS_CONNECTED;
+        EventBus.getDefault().post(event);
     }
 
     private void postIOException() {
@@ -152,7 +163,7 @@ public class SendRunnable implements Runnable {
                 postSuccess(transferProtocol);
         } catch (IOException e) {
             e.printStackTrace();
-            postIOException();
+//            postIOException();
         }
     }
 
@@ -204,7 +215,7 @@ public class SendRunnable implements Runnable {
                 buffer = new byte[SocketConstants.TCP_BUFFER_SIZE];
                 mSendThread = new SendThread();
                 mSendThread.start();
-                while ((read = mInputStream.read(buffer, 0, buffer.length)) != -1) {
+                while (null != mSendThread && mSendThread.monitor && (read = mInputStream.read(buffer, 0, buffer.length)) != -1) {
 
                     mOutputStream.write(buffer, 0, read);
                     totalSize += read;
@@ -222,7 +233,7 @@ public class SendRunnable implements Runnable {
                 mInputStream.close();
             } catch (IOException e) {
                 postFileFinishEvent(TransferStatus.TRANSFER_FAILED);
-                postIOException();
+//                postIOException();
                 e.printStackTrace();
             } finally {
                 if (null != mSendThread)
@@ -285,6 +296,12 @@ public class SendRunnable implements Runnable {
         }
         mTransferStatus = status;
         postSendFileInfo();
+    }
+
+    public void stopSendThread() {
+        if (mSendThread != null) {
+            mSendThread.setMonitor(false);
+        }
     }
 
     public void closeStream() {

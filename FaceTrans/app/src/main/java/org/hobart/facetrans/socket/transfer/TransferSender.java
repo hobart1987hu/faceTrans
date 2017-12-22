@@ -48,6 +48,15 @@ public class TransferSender {
         }
     }
 
+    public void stopSenderThread() {
+        if (mSendThread != null) {
+            mSendThread.stopSendThread();
+        }
+        if (mReceiveThread != null) {
+            mReceiveThread.stopReceiveThread();
+        }
+    }
+
     private void releaseService() {
         if (mSendThread != null) {
             mSendThread.setIsContinue(false);

@@ -173,21 +173,14 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
 
     private void clearAll() {
         EventBus.getDefault().unregister(this);
-        if (isSocketConnectSuccess)
-            TransferDataQueue.getInstance().sendDisconnect();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //关闭service
-                IntentUtils.stopServerReceiverService(getApplicationContext());
-                //关闭热点
-                ApWifiHelper.getInstance().closeWifiAp();
-                //断开与当前的热点连接
-                ApWifiHelper.getInstance().disableCurrentNetWork();
-                //重新打开Wi-Fi
-                WifiHelper.getInstance().openWifi();
-                finish();
-            }
-        }, isSocketConnectSuccess ? 1000 : 0);
+        //关闭service
+        IntentUtils.stopServerReceiverService(getApplicationContext());
+        //关闭热点
+        ApWifiHelper.getInstance().closeWifiAp();
+        //断开与当前的热点连接
+        ApWifiHelper.getInstance().disableCurrentNetWork();
+        //重新打开Wi-Fi
+        WifiHelper.getInstance().openWifi();
+        finish();
     }
 }

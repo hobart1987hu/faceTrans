@@ -1,7 +1,6 @@
 package org.hobart.facetrans.ui.activity;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +16,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.model.TransferModel;
-import org.hobart.facetrans.socket.transfer.TransferDataQueue;
 import org.hobart.facetrans.socket.transfer.TransferProtocol;
 import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
@@ -173,15 +171,9 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
 
     private void clearAll() {
         EventBus.getDefault().unregister(ReceiveFileActivity.this);
-        TransferDataQueue.getInstance().sendDisconnect();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ApWifiHelper.getInstance().closeWifiAp();
-                ApWifiHelper.getInstance().disableCurrentNetWork();
-                WifiHelper.getInstance().openWifi();
-                IntentUtils.stopServerReceiverService(getApplicationContext());
-            }
-        }, 500);
+        ApWifiHelper.getInstance().closeWifiAp();
+        ApWifiHelper.getInstance().disableCurrentNetWork();
+        WifiHelper.getInstance().openWifi();
+        IntentUtils.stopServerReceiverService(getApplicationContext());
     }
 }

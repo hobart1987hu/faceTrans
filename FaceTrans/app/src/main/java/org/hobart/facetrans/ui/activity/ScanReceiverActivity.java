@@ -360,21 +360,14 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
 
     private void clearAll() {
         EventBus.getDefault().unregister(this);
-        if (isConnectSuccess)
-            TransferDataQueue.getInstance().sendDisconnect();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                FTFileManager.getInstance().clear();
-                EventBus.getDefault().post(new FTFilesChangedEvent());
-                IntentUtils.stopSocketSenderService(getApplicationContext());
-                ApWifiHelper.getInstance().closeWifiAp();
-                WifiHelper.getInstance().openWifi();
-                if (WifiHelper.getInstance().isWifiConnect())
-                    WifiHelper.getInstance().disableCurrentNetWork();
-                finish();
-            }
-        }, isConnectSuccess ? 1000 : 0);
+        FTFileManager.getInstance().clear();
+        EventBus.getDefault().post(new FTFilesChangedEvent());
+        IntentUtils.stopSocketSenderService(getApplicationContext());
+        ApWifiHelper.getInstance().closeWifiAp();
+        WifiHelper.getInstance().openWifi();
+        if (WifiHelper.getInstance().isWifiConnect())
+            WifiHelper.getInstance().disableCurrentNetWork();
+        finish();
     }
 
     private void starRotationAnimation() {

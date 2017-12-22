@@ -93,7 +93,7 @@ public class IntentUtils {
     public static void stopServerReceiverService(Context context) {
         Intent service = new Intent(context, ServerReceiverService.class);
         service.setAction(SocketConstants.ACTION_STOP_SERVER_SOCKET);
-        context.stopService(service);
+        context.startService(service);
     }
 
     public static void startSocketSenderService(Context context, String host) {
@@ -106,7 +106,7 @@ public class IntentUtils {
     public static void stopSocketSenderService(Context context) {
         Intent service = new Intent(context, SocketSenderService.class);
         service.setAction(SocketConstants.ACTION_STOP_CLIENT_SOCKET);
-        context.stopService(service);
+        context.startService(service);
     }
 
 }

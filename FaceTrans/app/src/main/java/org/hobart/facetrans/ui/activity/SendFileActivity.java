@@ -1,7 +1,6 @@
 package org.hobart.facetrans.ui.activity;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -174,18 +173,12 @@ public class SendFileActivity extends BaseTitleBarActivity {
     }
 
     private void clearAll() {
-        TransferDataQueue.getInstance().sendDisconnect();
         FTFileManager.getInstance().clear();
         EventBus.getDefault().post(new FTFilesChangedEvent());
         EventBus.getDefault().unregister(SendFileActivity.this);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ApWifiHelper.getInstance().disableCurrentNetWork();
-                WifiHelper.getInstance().openWifi();
-                TransferDataQueue.getInstance().clear();
-                IntentUtils.stopSocketSenderService(getApplicationContext());
-            }
-        }, 1000);
+        ApWifiHelper.getInstance().disableCurrentNetWork();
+        WifiHelper.getInstance().openWifi();
+        TransferDataQueue.getInstance().clear();
+        IntentUtils.stopSocketSenderService(getApplicationContext());
     }
 }

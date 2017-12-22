@@ -216,7 +216,7 @@ public class ReceiveRunnable implements Runnable {
             mOutputStream = new BufferedOutputStream(new FileOutputStream(new File(savePath)));
             mReceiveThread = new ReceiveThread();
             mReceiveThread.start();
-            while (isContinue) {
+            while (null != mReceiveThread && mReceiveThread.monitor) {
 
                 if ((totalSize + byteSize) > fileSize) {
                     int lastSize = (int) (fileSize - totalSize);
@@ -330,6 +330,11 @@ public class ReceiveRunnable implements Runnable {
             mReceiveThread.setMonitor(false);
         mCurrentTransferStatus = status;
         postReceiverFileInfo();
+    }
+
+    public void stopReceiveThread() {
+        if (mReceiveThread != null)
+            mReceiveThread.setMonitor(false);
     }
 
     private void reset() {

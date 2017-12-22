@@ -58,6 +58,18 @@ public class TransferReceiver {
         }
     }
 
+    public void stopReceiverThread() {
+        if (mSendThread != null) {
+            mSendThread.stopSendThread();
+        }
+        if (mReceiveThread != null) {
+            mReceiveThread.stopReceiveThread();
+        }
+    }
+
+    //内部心跳
+
+
     private void releaseThread() {
         if (mReceiveThread != null) {
             mReceiveThread.setIsContinue(false);

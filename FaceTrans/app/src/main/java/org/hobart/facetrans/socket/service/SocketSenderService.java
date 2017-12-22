@@ -7,8 +7,11 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.socket.SocketConstants;
+import org.hobart.facetrans.socket.transfer.TransferDataQueue;
 import org.hobart.facetrans.socket.transfer.TransferSender;
 import org.hobart.facetrans.util.LogcatUtils;
 
@@ -35,6 +38,20 @@ public class SocketSenderService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSocketDisconnect(SocketConnectEvent event) {
+        if (null == event) return;
+        if (event.status == SocketConnectEvent.DIS_CONNECTED) {
+            stopSelf();
+        }
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         LogcatUtils.d(LOGINFO_PREFIX + "onStartCommand: ");
@@ -51,7 +68,10 @@ public class SocketSenderService extends Service {
                 releaseSocket();
                 newSocket();
             } else if (action.equals(SocketConstants.ACTION_STOP_CLIENT_SOCKET)) {
-                releaseSocket();
+                if (null != mTransferSender) {
+                    mTransferSender.stopSenderThread();
+                }
+                TransferDataQueue.getInstance().sendDisconnect();
             }
         }
         return START_STICKY;
@@ -61,6 +81,7 @@ public class SocketSenderService extends Service {
     public void onDestroy() {
         super.onDestroy();
         LogcatUtils.d(LOGINFO_PREFIX + "onDestroy: ");
+        EventBus.getDefault().unregister(this);
         releaseSocket();
     }
 
