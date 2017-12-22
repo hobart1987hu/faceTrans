@@ -23,7 +23,6 @@ public class GlobalConfig {
     public static final String EXTEND_MP3 = ".mp3";
     public static final String EXTEND_MP4 = ".mp4";
 
-
     /**
      * Wifi连接上时 未分配默认的Ip地址
      */
@@ -33,7 +32,6 @@ public class GlobalConfig {
      * 最大尝试数
      */
     public static final int DEFAULT_TRY_TIME = 1 * 100;
-
 
     /**
      * asset 资源名称
@@ -56,24 +54,6 @@ public class GlobalConfig {
 
     public static String getTransferDirectory() {
         return Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "facetrans";
-    }
-
-    /**
-     * 存放压缩文件
-     *
-     * @return
-     */
-    public static String getTransferZipDirectory() {
-        return getTransferDirectory() + File.separator + "transZipDir" + File.separator;
-    }
-
-    /**
-     * 存放解压后的文件
-     *
-     * @return
-     */
-    public static String getTransferUnZipDirectory() {
-        return getTransferDirectory() + File.separator + "transUnSZipDir" + File.separator;
     }
 
     public static final String getApkIconDirectory() {

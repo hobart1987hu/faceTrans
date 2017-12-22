@@ -1,10 +1,16 @@
-package org.hobart.facetrans.socket.transfer;
+package org.hobart.facetrans.socket.transfer.thread;
+
+import android.text.TextUtils;
+
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.GlobalConfig;
-import org.hobart.facetrans.event.SocketEvent;
+import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.model.TransferModel;
 import org.hobart.facetrans.socket.SocketConstants;
+import org.hobart.facetrans.socket.transfer.TransferProtocol;
+import org.hobart.facetrans.socket.transfer.TransferStatus;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.LogcatUtils;
 
@@ -31,16 +37,19 @@ public class ReceiveRunnable implements Runnable {
     private BufferedOutputStream mOutputStream;
     private ReceiveThread mReceiveThread;
     private int mCurrentTransferStatus = TransferStatus.WAITING;
-    private long totalSize = 0;
-    private long fileSize = 0;
-    private int type;
-    private String savePath = null;
-    private String fileName;
-    private String id;
+
+    private TransferProtocol mCurrentTransferProtocol;
+
+    private long totalSize;
+
     private int bytesRead = 0;
+
+    private Gson mGson;
+
 
     public ReceiveRunnable(Socket socket) {
         this.mSocket = socket;
+        mGson = new Gson();
     }
 
     @Override
@@ -58,29 +67,73 @@ public class ReceiveRunnable implements Runnable {
                     continue;
                 }
 
-                type = mInputStream.readInt();
+                String protocol = mInputStream.readUTF();
 
-                LogcatUtils.d(LOG_PREFIX + "接收文件类型 " + type);
+                if (TextUtils.isEmpty(protocol)) continue;
 
-                switch (type) {
-                    case TransferModel.TYPE_APK:
-                    case TransferModel.TYPE_FILE:
-                    case TransferModel.TYPE_IMAGE:
-                    case TransferModel.TYPE_MUSIC:
-                    case TransferModel.TYPE_VIDEO:
-                        receiveFile(mInputStream);
-                        break;
-                    case TransferModel.TYPE_HEART_BEAT:
-                        receiveHearBeat(mInputStream);
-                        break;
-                    case TransferModel.TYPE_TRANSFER_DATA_LIST:
-                        receiveTransferDataList(mInputStream);
-                        break;
-                    case TransferModel.TYPE_FOLDER:
-                        //TODO:
-                        break;
-                    default:
-                        continue;
+                TransferProtocol transferProtocol = null;
+                try {
+                    transferProtocol = mGson.fromJson(protocol, TransferProtocol.class);
+                    if (null == transferProtocol) continue;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    continue;
+                }
+
+                if (transferProtocol.type == TransferProtocol.TYPE_ACK) {
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_ACK 信号");
+
+                    postReceiveProtocol(transferProtocol, TransferStatus.TRANSFER_SUCCESS);
+
+                } else if (transferProtocol.type == TransferProtocol.TYPE_CONFIRM_ACK) {
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_CONFIRM_ACK 信号");
+
+                    postReceiveProtocol(transferProtocol, TransferStatus.TRANSFER_SUCCESS);
+
+
+                } else if (transferProtocol.type == TransferProtocol.TYPE_DISCONNECT) {
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_DISCONNECT 信号");
+
+                    postReceiveProtocol(transferProtocol, TransferStatus.TRANSFER_SUCCESS);
+
+                } else if (transferProtocol.type == TransferProtocol.TYPE_MISS_MATCH) {
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_MISS_MATCH 信号");
+
+                    postReceiveProtocol(transferProtocol, TransferStatus.TRANSFER_SUCCESS);
+
+                } else if (transferProtocol.type == TransferProtocol.TYPE_DATA_TRANSFER) {
+
+                    TransferModel transferBean = transferProtocol.transferData;
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_DATA_TRANSFER 信号");
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_DATA_TRANSFER 信号 transferBean value :" + transferBean);
+
+                    switch (transferBean.type) {
+                        case TransferModel.TYPE_APK:
+                        case TransferModel.TYPE_FILE:
+                        case TransferModel.TYPE_IMAGE:
+                        case TransferModel.TYPE_MUSIC:
+                        case TransferModel.TYPE_VIDEO:
+                            receiveFile(transferProtocol, mInputStream);
+                            break;
+                        case TransferModel.TYPE_TRANSFER_DATA_LIST:
+
+                            LogcatUtils.d(LOG_PREFIX + " run receive data  接收数据列表");
+
+                            postReceiveProtocol(transferProtocol, TransferStatus.TRANSFER_SUCCESS);
+
+                            break;
+                        case TransferModel.TYPE_FOLDER:
+                            //TODO:
+                            break;
+                        default:
+                            continue;
+                    }
                 }
                 try {
                     Thread.sleep(1000);
@@ -90,49 +143,42 @@ public class ReceiveRunnable implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            postIOException();
         }
     }
 
-    /**
-     * 接收心跳
-     *
-     * @param inputStream
-     */
-    private void receiveHearBeat(DataInputStream inputStream) {
+    private void postIOException() {
+        SocketTransferEvent event = new SocketTransferEvent();
+        event.connectStatus = SocketTransferEvent.SOCKET_CONNECT_FAILURE;
+        EventBus.getDefault().post(event);
 
-        if (null == inputStream) return;
-        try {
-            String content = inputStream.readUTF();
-
-            LogcatUtils.d(LOG_PREFIX + "接收的心跳内容是： " + content);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (null != mCurrentTransferProtocol) {
+            FileUtils.deleteFile(mCurrentTransferProtocol.transferData.savePath);
+            postFileFinishEvent(TransferStatus.TRANSFER_FAILED);
         }
     }
 
-    /**
-     * 接收数据传输列表
-     *
-     * @param inputStream
-     */
-    private void receiveTransferDataList(DataInputStream inputStream) {
+    private void postReceiveProtocol(TransferProtocol transferProtocol, int status) {
+        SocketTransferEvent event = new SocketTransferEvent();
+        if (transferProtocol.type == TransferProtocol.TYPE_DATA_TRANSFER) {
+            event.transferData = transferProtocol.transferData;
+            event.transferData.mode = TransferModel.OPERATION_MODE_RECEIVER;
+            event.transferData.transferStatus = status;
+        }
+        event.type = transferProtocol.type;
+        event.ssid = transferProtocol.ssid;
+        event.ssm = transferProtocol.ssm;
+        EventBus.getDefault().post(event);
 
-        if (null == inputStream) return;
-        try {
-            String content = inputStream.readUTF();
-
-            LogcatUtils.d(LOG_PREFIX + "接收的数据传输列表是 " + content);
-
-            postReceiveText(content);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (transferProtocol.type == TransferProtocol.TYPE_DISCONNECT) {
+            if (null != mCurrentTransferProtocol) {
+                FileUtils.deleteFile(mCurrentTransferProtocol.transferData.savePath);
+                postFileFinishEvent(TransferStatus.TRANSFER_FAILED);
+            }
         }
     }
 
-
-    private void receiveFile(DataInputStream inputStream) {
+    private void receiveFile(TransferProtocol transferProtocol, DataInputStream inputStream) {
 
         if (null == inputStream) return;
 
@@ -142,22 +188,28 @@ public class ReceiveRunnable implements Runnable {
 
         try {
 
-            fileSize = inputStream.readLong();
+            long fileSize = transferProtocol.transferData.fileSize;
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件大小 " + fileSize);
 
-            fileName = inputStream.readUTF();
+            String fileName = transferProtocol.transferData.fileName;
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件名称 " + fileName);
 
-            id = inputStream.readUTF();
+            String id = transferProtocol.transferData.id;
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件编号 " + id);
 
-            savePath = GlobalConfig.getTransferDirectory() + File.separator + fileName;
+            String savePath = GlobalConfig.getTransferDirectory() + File.separator + fileName;
             if (!FileUtils.isFolderExist(savePath)) {
                 FileUtils.makeDirs(savePath);
             }
+
+            transferProtocol.transferData.savePath = savePath;
+
+            mCurrentTransferProtocol = transferProtocol;
+
+            postReceiveProtocol(transferProtocol, mCurrentTransferStatus);
 
             LogcatUtils.d(LOG_PREFIX + "接收的文件保存路径 " + savePath);
 
@@ -220,7 +272,7 @@ public class ReceiveRunnable implements Runnable {
             mOutputStream.flush();
 
         } catch (IOException e) {
-            FileUtils.deleteFile(savePath);
+            FileUtils.deleteFile(mCurrentTransferProtocol.transferData.savePath);
             postFileFinishEvent(TransferStatus.TRANSFER_FAILED);
         } finally {
             if (null != mReceiveThread)
@@ -244,7 +296,7 @@ public class ReceiveRunnable implements Runnable {
             while (monitor) {
                 try {
                     postReceiverFileInfo();
-                    sleep(1000);
+                    sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -262,20 +314,14 @@ public class ReceiveRunnable implements Runnable {
     }
 
     private void postReceiverFileInfo() {
-        int progress = getReceiveProgress(fileSize, totalSize);
-        SocketEvent event = new SocketEvent(type, mCurrentTransferStatus, SocketEvent.OPERATION_MODE_RECEIVER);
-        event.progress = progress;
-        event.fileName = fileName;
-        event.id = id;
-        event.savePath = savePath;
-        if (mCurrentTransferStatus == TransferStatus.TRANSFER_SUCCESS
-                || mCurrentTransferStatus == TransferStatus.TRANSFER_FAILED) {
-            if (mReceiveThread != null) {
-                if (mReceiveThread.monitor) {
-                    return;
-                }
-            }
-        }
+        int progress = getReceiveProgress(mCurrentTransferProtocol.transferData.fileSize, totalSize);
+        SocketTransferEvent event = new SocketTransferEvent();
+        event.type = TransferProtocol.TYPE_DATA_TRANSFER;
+        event.transferData = mCurrentTransferProtocol.transferData;
+        event.transferData.transferStatus = mCurrentTransferStatus;
+        event.transferData.progress = progress;
+        event.transferData.id = mCurrentTransferProtocol.transferData.id;
+        event.transferData.mode = TransferModel.OPERATION_MODE_RECEIVER;
         EventBus.getDefault().post(event);
     }
 
@@ -286,19 +332,10 @@ public class ReceiveRunnable implements Runnable {
         postReceiverFileInfo();
     }
 
-    private void postReceiveText(String content) {
-        SocketEvent event = new SocketEvent(type, TransferStatus.TRANSFER_SUCCESS, SocketEvent.OPERATION_MODE_RECEIVER);
-        event.content = content;
-        EventBus.getDefault().post(event);
-    }
-
     private void reset() {
-        totalSize = 0;
-        fileSize = 0;
-        savePath = null;
-        fileName = null;
-        id = null;
+        mCurrentTransferProtocol = null;
         bytesRead = 0;
+        totalSize = 0;
     }
 
     public void setIsContinue(boolean isContinue) {

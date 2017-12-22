@@ -2,14 +2,14 @@ package org.hobart.facetrans.socket.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.greenrobot.eventbus.EventBus;
-import org.hobart.facetrans.event.SocketStatusEvent;
+import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.socket.SocketConstants;
+import org.hobart.facetrans.socket.transfer.TransferSender;
 import org.hobart.facetrans.util.LogcatUtils;
 
 import java.io.IOException;
@@ -27,6 +27,12 @@ public class SocketSenderService extends Service {
     private String mHost;
     private Socket mSocket = null;
     private int retryCount = 3;
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -51,12 +57,6 @@ public class SocketSenderService extends Service {
         return START_STICKY;
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return new MyBinder();
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -64,8 +64,10 @@ public class SocketSenderService extends Service {
         releaseSocket();
     }
 
-
     void releaseSocket() {
+
+        if (null != mTransferSender) mTransferSender.release();
+
         if (mSocket != null && !mSocket.isClosed()) {
             try {
                 mSocket.close();
@@ -73,10 +75,6 @@ public class SocketSenderService extends Service {
                 e.printStackTrace();
             }
         }
-    }
-
-    public Socket getSenderSocket() {
-        return mSocket;
     }
 
     private void newSocket() {
@@ -97,14 +95,15 @@ public class SocketSenderService extends Service {
                         mSocket.setSendBufferSize(SocketConstants.TCP_BUFFER_SIZE);
                         mSocket.setReceiveBufferSize(SocketConstants.TCP_BUFFER_SIZE);
                         mSocket.connect(new InetSocketAddress(mHost, SocketConstants.SERVER_PORT), SocketConstants.SOCKET_CONNECTED_TIME_OUT);
-                        postSocketConnectedStatus(SocketStatusEvent.CONNECTED_SUCCESS);
+                        initTransferSender();
+                        postSocketConnectedStatus(SocketConnectEvent.CONNECTED_SUCCESS);
                         LogcatUtils.d(LOGINFO_PREFIX + "mSocket 发送端 创建成功");
                         retryCount = 0;
                     } catch (Exception e) {
                         retryCount--;
                         if (retryCount <= 0) {
                             LogcatUtils.d(LOGINFO_PREFIX + " mSocket 发送端 创建失败 ");
-                            postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
+                            postSocketConnectedStatus(SocketConnectEvent.CONNECTED_FAILED);
                         }
                         e.printStackTrace();
                     }
@@ -113,16 +112,15 @@ public class SocketSenderService extends Service {
         }).start();
     }
 
-    private void postSocketConnectedStatus(int status) {
-        SocketStatusEvent statusBean = new SocketStatusEvent();
-        statusBean.status = status;
-        EventBus.getDefault().post(statusBean);
+    private TransferSender mTransferSender;
+
+    private void initTransferSender() {
+        mTransferSender = new TransferSender(mSocket);
     }
 
-    public class MyBinder extends Binder {
-
-        public SocketSenderService getService() {
-            return SocketSenderService.this;
-        }
+    private void postSocketConnectedStatus(int status) {
+        SocketConnectEvent statusBean = new SocketConnectEvent();
+        statusBean.status = status;
+        EventBus.getDefault().post(statusBean);
     }
 }

@@ -1,7 +1,5 @@
 package org.hobart.facetrans.model;
 
-import android.graphics.drawable.Drawable;
-
 import org.hobart.facetrans.FTType;
 
 /**
@@ -14,13 +12,6 @@ public class TransferModel {
     public static final int OPERATION_MODE_SEND = 0;
     // 发送操作
     public static final int OPERATION_MODE_RECEIVER = 1;
-
-    public static final String CONTENT_HEART_BEAT = "$HB";
-
-    /**
-     * 发送心跳
-     */
-    public static final int TYPE_HEART_BEAT = 1;
 
     /**
      * 发送列表数据
@@ -70,10 +61,6 @@ public class TransferModel {
      */
     public int transferStatus;
     /**
-     * 问否已经传输
-     */
-    public boolean selectedTransfer;
-    /**
      * 文件大小
      */
     public String size;
@@ -102,8 +89,6 @@ public class TransferModel {
      * 传输模式，发送还是接收
      */
     public int mode;
-
-
     /**
      * 传输的数据类型
      */
@@ -132,7 +117,6 @@ public class TransferModel {
         temp.progress = this.progress;
         temp.transferStatus = this.transferStatus;
         temp.size = this.size;
-        temp.selectedTransfer = this.selectedTransfer;
         temp.savePath = this.savePath;
         return temp;
     }
@@ -143,7 +127,6 @@ public class TransferModel {
                 "id='" + id + '\'' +
                 ", progress=" + progress +
                 ", transferStatus=" + transferStatus +
-                ", selectedTransfer=" + selectedTransfer +
                 ", size='" + size + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", fileIcon='" + fileIcon + '\'' +

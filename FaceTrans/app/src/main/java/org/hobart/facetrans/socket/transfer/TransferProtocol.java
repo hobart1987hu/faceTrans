@@ -1,7 +1,13 @@
 package org.hobart.facetrans.socket.transfer;
 
+import org.hobart.facetrans.model.TransferModel;
+
 /**
  * 数据传输协议
+ * <p>
+ * 1、第一次握手、发送握手信号
+ * 2、第二次握手、接收端收到握手信号之后，进行确认，同时发送确认包给发送端
+ * 3、第三次握手、发送端收到接收端发送的确认包之后，再次像接收端发送确认信号，发送完毕之后，接送端和发送端可以正常的进行数据通信了
  * Created by huzeyin on 2017/12/21.
  */
 
@@ -13,19 +19,19 @@ public class TransferProtocol {
     public static byte TYPE_ACK = 0;
 
     /**
+     * ack 确认信号
+     */
+    public static byte TYPE_CONFIRM_ACK = 1;
+
+    /**
      * 断开连接信号
      */
-    public static byte TYPE_DISCONNECT = 1;
+    public static byte TYPE_DISCONNECT = 2;
 
     /**
-     * 确认断开连接信号
+     * 数据传输信号
      */
-    public static byte TYPE_ACK_DISCONNECT = 2;
-
-    /**
-     * 开始传输数据 信号
-     */
-    public static byte TYPE_START_TRANSFER = 3;
+    public static byte TYPE_DATA_TRANSFER = 3;
 
     /**
      * 不匹配信号
@@ -37,44 +43,33 @@ public class TransferProtocol {
      */
     public static byte TYPE_SYNC = 5;
 
-
     /**
      * 同步序列编号
      */
-    private byte ssm;
+    public byte ssm;
 
     /**
      * 协议类型
      */
-    private byte type;
-
+    public byte type;
 
     /**
      * SSID 用来匹配使用的
      */
-    private String ssid;
+    public String ssid;
 
-    public byte getSsm() {
-        return ssm;
-    }
+    /**
+     * 传输的数据包装
+     */
+    public TransferModel transferData;
 
-    public void setSsm(byte ssm) {
-        this.ssm = ssm;
-    }
-
-    public byte getType() {
-        return type;
-    }
-
-    public void setType(byte type) {
-        this.type = type;
-    }
-
-    public String getSsid() {
-        return ssid;
-    }
-
-    public void setSsid(String ssid) {
-        this.ssid = ssid;
-    }
+//    @Override
+//    public String toString() {
+//        return "TransferProtocol{" +
+//                "ssm=" + ssm +
+//                ", type=" + type +
+//                ", ssid='" + ssid + '\'' +
+//                ", transferData=" + transferData.toString() +
+//                '}';
+//    }
 }

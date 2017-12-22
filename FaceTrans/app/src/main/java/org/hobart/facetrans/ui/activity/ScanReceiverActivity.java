@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,9 +30,12 @@ import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.FTFilesChangedEvent;
 import org.hobart.facetrans.event.ScanWifiEvent;
-import org.hobart.facetrans.event.SocketStatusEvent;
+import org.hobart.facetrans.event.SocketConnectEvent;
+import org.hobart.facetrans.event.SocketTransferEvent;
 import org.hobart.facetrans.manager.FTFileManager;
 import org.hobart.facetrans.model.ScanApUser;
+import org.hobart.facetrans.socket.transfer.TransferDataQueue;
+import org.hobart.facetrans.socket.transfer.TransferProtocol;
 import org.hobart.facetrans.ui.activity.base.BaseTitleBarActivity;
 import org.hobart.facetrans.ui.adapter.ScanApWifiGalleryAdapter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
@@ -224,7 +228,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         int lastPointIndex = localIp.lastIndexOf(".");
         String host = localIp.substring(0, lastPointIndex) + ".1";
         LogcatUtils.d(LOG_PREFIX + "openClientServiceAndConnectServer: host" + host + ":::本地地址:::" + localIp);
-        IntentUtils.startSocketSenderService(this, host);
+        IntentUtils.startSocketSenderService(getApplicationContext(), host);
     }
 
     private List<ScanApUser> mScanApUsers = new ArrayList<>();
@@ -234,7 +238,6 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         if (event.status == ScanWifiEvent.SCAN_SUCCESS) {
             showScanApWifi(event.ssid);
         } else {
-            //重试
             if (mScanApUsers.size() <= 0)
                 ToastUtils.showLongToast("扫描Wi-Fi失败，正在进行重试...");
             startScanNearbyWifiThread();
@@ -268,25 +271,54 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
     private boolean isConnectSuccess = false;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onSocketStatusEvent(SocketStatusEvent bean) {
-        if (bean == null) {
+    public void onSocketConnectEvent(SocketConnectEvent event) {
+        if (event == null) {
             return;
         }
-        switch (bean.status) {
-            case SocketStatusEvent.CONNECTED_SUCCESS:
-                mConnectApCountDownTimer.cancel();
+        switch (event.status) {
+            case SocketConnectEvent.CONNECTED_SUCCESS:
                 isConnectSuccess = true;
-                starRotationAnimation();
+                mConnectApCountDownTimer.cancel();
+                TransferDataQueue.getInstance().sendAckSignal(mSelectedSSID);
                 break;
-            case SocketStatusEvent.CONNECTED_FAILED:
+            case SocketConnectEvent.CONNECTED_FAILED:
                 isConnectSuccess = false;
                 mConnectApCountDownTimer.cancel();
                 ToastUtils.showLongToast("连接失败！");
-                IntentUtils.stopSocketSenderService(this);
+                IntentUtils.stopSocketSenderService(getApplicationContext());
                 showResetView();
                 break;
             default:
                 break;
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void SocketTransferEvent(SocketTransferEvent event) {
+
+        if (null == event) return;
+
+        if (event.connectStatus == SocketTransferEvent.SOCKET_CONNECT_FAILURE) {
+            ToastUtils.showLongToast("网络异常，请重新连接!");
+            isConnectSuccess = false;
+            showResetView();
+            return;
+        }
+        if (event.type == TransferProtocol.TYPE_CONFIRM_ACK) {
+            TransferProtocol transferProtocol = new TransferProtocol();
+            transferProtocol.ssid = event.ssid;
+            transferProtocol.ssm = event.ssm;
+            transferProtocol.type = TransferProtocol.TYPE_CONFIRM_ACK;
+            TransferDataQueue.getInstance().sendAckConfirmSignal(transferProtocol);
+            starRotationAnimation();
+        } else if (event.type == TransferProtocol.TYPE_MISS_MATCH) {
+            ToastUtils.showLongToast("没有连接到\n" + mSelectedSSID + "网络，请重试！");
+            isConnectSuccess = false;
+            showResetView();
+        } else if (event.type == TransferProtocol.TYPE_DISCONNECT) {
+            //接收到断开连接的操作
+            isConnectSuccess = false;
+            clearAll();
         }
     }
 
@@ -313,32 +345,36 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
 
     @Override
     protected boolean handleViewOnClick() {
-        EventBus.getDefault().unregister(this);
-        FTFileManager.getInstance().clear();
-        EventBus.getDefault().post(new FTFilesChangedEvent());
-        IntentUtils.stopSocketSenderService(this);
-        resetNetwork();
-        return super.handleViewOnClick();
+        clearAll();
+        return true;
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            EventBus.getDefault().unregister(this);
-            FTFileManager.getInstance().clear();
-            EventBus.getDefault().post(new FTFilesChangedEvent());
-            IntentUtils.stopSocketSenderService(this);
-            resetNetwork();
-            finish();
+            clearAll();
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    private void resetNetwork() {
-        ApWifiHelper.getInstance().closeWifiAp();
-        WifiHelper.getInstance().openWifi();
-        if (WifiHelper.getInstance().isWifiConnect())
-            WifiHelper.getInstance().disableCurrentNetWork();
+    private void clearAll() {
+        EventBus.getDefault().unregister(this);
+        if (isConnectSuccess)
+            TransferDataQueue.getInstance().sendDisconnect();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                FTFileManager.getInstance().clear();
+                EventBus.getDefault().post(new FTFilesChangedEvent());
+                IntentUtils.stopSocketSenderService(getApplicationContext());
+                ApWifiHelper.getInstance().closeWifiAp();
+                WifiHelper.getInstance().openWifi();
+                if (WifiHelper.getInstance().isWifiConnect())
+                    WifiHelper.getInstance().disableCurrentNetWork();
+                finish();
+            }
+        }, isConnectSuccess ? 1000 : 0);
     }
 
     private void starRotationAnimation() {
@@ -354,7 +390,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             }
         });
         valueAnimator.setInterpolator(new LinearInterpolator());
-        valueAnimator.setDuration(1500);
+        valueAnimator.setDuration(1000);
         valueAnimator.start();
     }
 
@@ -372,7 +408,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             }
         });
         valueAnimator.setInterpolator(new AccelerateInterpolator(3.5f));
-        valueAnimator.setDuration(2000);
+        valueAnimator.setDuration(1000);
         valueAnimator.start();
     }
 }

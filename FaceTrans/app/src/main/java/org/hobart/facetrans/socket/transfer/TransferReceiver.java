@@ -1,5 +1,8 @@
 package org.hobart.facetrans.socket.transfer;
 
+import org.hobart.facetrans.socket.transfer.thread.ReceiveRunnable;
+import org.hobart.facetrans.socket.transfer.thread.SendRunnable;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;

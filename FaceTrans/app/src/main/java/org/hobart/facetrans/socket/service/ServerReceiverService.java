@@ -2,14 +2,14 @@ package org.hobart.facetrans.socket.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.greenrobot.eventbus.EventBus;
-import org.hobart.facetrans.event.SocketStatusEvent;
+import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.socket.SocketConstants;
+import org.hobart.facetrans.socket.transfer.TransferReceiver;
 import org.hobart.facetrans.util.LogcatUtils;
 
 import java.io.IOException;
@@ -32,8 +32,7 @@ public class ServerReceiverService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        LogcatUtils.d(LOG_PREFIX + "----onBind----");
-        return new MyBinder();
+        return null;
     }
 
     @Override
@@ -52,7 +51,7 @@ public class ServerReceiverService extends Service {
             monitor = true;
             acceptSenderClient();
         } catch (IOException e) {
-            postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
+            postSocketConnectedStatus(SocketConnectEvent.CONNECTED_FAILED);
             e.printStackTrace();
         }
     }
@@ -65,18 +64,24 @@ public class ServerReceiverService extends Service {
                 while (monitor) {
                     try {
                         mSocket = mSocketService.accept();
-                        //一直阻塞在这里
                         monitor = false;
-                        postSocketConnectedStatus(SocketStatusEvent.CONNECTED_SUCCESS);
+                        initTransferReceiver();
+                        postSocketConnectedStatus(SocketConnectEvent.CONNECTED_SUCCESS);
                         LogcatUtils.d(LOG_PREFIX + "--发送端连接成功--");
                     } catch (IOException e) {
-                        postSocketConnectedStatus(SocketStatusEvent.CONNECTED_FAILED);
+                        postSocketConnectedStatus(SocketConnectEvent.CONNECTED_FAILED);
                         monitor = false;
                         e.printStackTrace();
                     }
                 }
             }
         }).start();
+    }
+
+    private TransferReceiver mTransferReceiver;
+
+    private void initTransferReceiver() {
+        mTransferReceiver = new TransferReceiver(mSocket);
     }
 
     @Override
@@ -105,7 +110,12 @@ public class ServerReceiverService extends Service {
     }
 
     void releaseSocket() {
+
         monitor = false;
+
+        if (null != mTransferReceiver)
+            mTransferReceiver.release();
+
         if (mSocketService != null && !mSocketService.isClosed()) {
             try {
                 mSocketService.close();
@@ -123,19 +133,8 @@ public class ServerReceiverService extends Service {
     }
 
     private void postSocketConnectedStatus(int status) {
-        SocketStatusEvent statusBean = new SocketStatusEvent();
+        SocketConnectEvent statusBean = new SocketConnectEvent();
         statusBean.status = status;
         EventBus.getDefault().post(statusBean);
-    }
-
-    public Socket getReceiverSocket() {
-        return mSocket;
-    }
-
-    public class MyBinder extends Binder {
-
-        public ServerReceiverService getService() {
-            return ServerReceiverService.this;
-        }
     }
 }

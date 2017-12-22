@@ -4,7 +4,7 @@ package org.hobart.facetrans.event;
  * Created by huzeyin on 2017/11/7.
  */
 
-public class SocketStatusEvent {
+public class SocketConnectEvent {
     //连接成功
     public static final int CONNECTED_SUCCESS = 1;
     //连接失败

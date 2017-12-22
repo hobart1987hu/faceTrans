@@ -1,6 +1,7 @@
 package org.hobart.facetrans.util;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 
@@ -83,29 +84,29 @@ public class IntentUtils {
         activity.startActivity(intent);
     }
 
-    public static void startServerSocketService(Activity activity) {
-        Intent service = new Intent(activity, ServerReceiverService.class);
+    public static void startServerSocketService(Context  context) {
+        Intent service = new Intent(context, ServerReceiverService.class);
         service.setAction(SocketConstants.ACTION_CREATE_SERVER_SOCKET);
-        activity.startService(service);
+        context.startService(service);
     }
 
-    public static void stopServerReceiverService(Activity activity) {
-        Intent service = new Intent(activity, ServerReceiverService.class);
+    public static void stopServerReceiverService(Context context) {
+        Intent service = new Intent(context, ServerReceiverService.class);
         service.setAction(SocketConstants.ACTION_STOP_SERVER_SOCKET);
-        activity.stopService(service);
+        context.stopService(service);
     }
 
-    public static void startSocketSenderService(Activity activity, String host) {
-        Intent service = new Intent(activity, SocketSenderService.class);
+    public static void startSocketSenderService(Context context, String host) {
+        Intent service = new Intent(context, SocketSenderService.class);
         service.setAction(SocketConstants.ACTION_CREATE_CLIENT_SOCKET);
         service.putExtra("host", host);
-        activity.startService(service);
+        context.startService(service);
     }
 
-    public static void stopSocketSenderService(Activity activity) {
-        Intent service = new Intent(activity, SocketSenderService.class);
+    public static void stopSocketSenderService(Context context) {
+        Intent service = new Intent(context, SocketSenderService.class);
         service.setAction(SocketConstants.ACTION_STOP_CLIENT_SOCKET);
-        activity.stopService(service);
+        context.stopService(service);
     }
 
 }

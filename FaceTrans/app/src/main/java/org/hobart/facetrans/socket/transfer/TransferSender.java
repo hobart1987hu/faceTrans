@@ -1,5 +1,8 @@
 package org.hobart.facetrans.socket.transfer;
 
+import org.hobart.facetrans.socket.transfer.thread.ReceiveRunnable;
+import org.hobart.facetrans.socket.transfer.thread.SendRunnable;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -20,46 +23,20 @@ public class TransferSender {
 
     private ReceiveRunnable mReceiveThread;
 
-//    private HeartBeatRunnable mHeartBeatThread;
-
     public TransferSender(Socket socket) {
         mSocket = socket;
         mExecute = Executors.newCachedThreadPool();
+        startSend();
     }
 
-    public void startSend() {
+    private void startSend() {
         if (mSocket != null && mSocket.isConnected()) {
             mSendThread = new SendRunnable(mSocket);
             mReceiveThread = new ReceiveRunnable(mSocket);
-//            mHeartBeatThread = new HeartBeatRunnable();
             mExecute.execute(mReceiveThread);
             mExecute.execute(mSendThread);
-//            mExecute.execute(mHeartBeatThread);
         }
     }
-
-//
-//    private final class HeartBeatRunnable implements Runnable {
-//
-//        volatile boolean monitor = true;
-//
-//        @Override
-//        public void run() {
-//            while (monitor) {
-//                try {
-//                    SocketTransferQueue.getInstance().sendHeartMsg();
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//        public void setMonitor(boolean monitor) {
-//            this.monitor = monitor;
-//        }
-//    }
 
     private void releaseSocket() {
         if (mSocket != null && !mSocket.isClosed()) {
@@ -70,14 +47,6 @@ public class TransferSender {
             }
         }
     }
-
-
-    private void stopMonitor() {
-//        if (mHeartBeatThread != null) {
-//            mHeartBeatThread.setMonitor(false);
-//        }
-    }
-
 
     private void releaseService() {
         if (mSendThread != null) {
@@ -99,7 +68,6 @@ public class TransferSender {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                stopMonitor();
                 releaseService();
                 releaseSocket();
             }

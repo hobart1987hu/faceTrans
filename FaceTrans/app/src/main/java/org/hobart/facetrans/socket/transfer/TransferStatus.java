@@ -23,5 +23,7 @@ public interface TransferStatus {
     public static final int FAILED = 8;
     //完成
     public static final int FINISH = 9;
+    //传输失败
+    public static final int TRANSFER_FAILED_NETWORK = 10;
 
 }
