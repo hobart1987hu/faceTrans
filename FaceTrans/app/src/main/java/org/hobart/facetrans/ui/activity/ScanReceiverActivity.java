@@ -10,7 +10,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +20,7 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -50,10 +50,7 @@ import org.hobart.facetrans.wifi.WifiHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
 import butterknife.ButterKnife;
-
-import static android.view.View.GONE;
 
 /**
  * 扫描接收者
@@ -66,16 +63,16 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
 
     private static final int[] SCAN_USER_ICONS = {R.mipmap.icon_scan_user_1, R.mipmap.icon_scan_user_2, R.mipmap.icon_scan_user_3, R.mipmap.icon_scan_user_4, R.mipmap.icon_scan_user_5, R.mipmap.icon_scan_user_6};
 
-    @Bind(R.id.radarView)
-    RadarView radarView;
-    @Bind(R.id.tv_info)
-    TextView tv_info;
+    private RadarView radarView;
+    private TextView tv_info;
 
     private boolean isOpenWifi = false;
 
     private ScanNearbyWifiThread mScanNearbyWifiThread;
     private RecyclerView mRecycleView;
     private ScanApWifiGalleryAdapter mGalleryViewPagerAdapter;
+
+    private RelativeLayout rl_connect_ap;
 
     private TextView tv_connectDeviceInfo;
     private ImageView rocket;
@@ -90,9 +87,24 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         EventBus.getDefault().register(this);
         screenHeight = getWindowManager().getDefaultDisplay().getHeight();
 
+        radarView = (RadarView) findViewById(R.id.radarView);
+        tv_info = (TextView) findViewById(R.id.tv_info);
+
+        rl_connect_ap = (RelativeLayout) findViewById(R.id.rl_connect_ap);
         tv_connectDeviceInfo = (TextView) findViewById(R.id.tv_connectDeviceInfo);
         rocket = (ImageView) findViewById(R.id.rocket);
 
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, screenHeight);
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float value = (float) animation.getAnimatedValue();
+                rl_connect_ap.setTranslationY(value);
+            }
+        });
+        valueAnimator.setInterpolator(new LinearInterpolator());
+        valueAnimator.setDuration(0);
+        valueAnimator.start();
 
         mRecycleView = (RecyclerView) findViewById(R.id.recycleView);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -110,26 +122,46 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             }
         });
         mRecycleView.setAdapter(mGalleryViewPagerAdapter);
+
         startScanNearbyWifiThread();
     }
 
     private void showConnectingView(String deviceId) {
-        tv_info.setVisibility(View.GONE);
-        radarView.stopRotate();
-        radarView.setVisibility(View.GONE);
-        mRecycleView.setVisibility(GONE);
-        tv_connectDeviceInfo.setVisibility(View.VISIBLE);
-        rocket.setVisibility(View.VISIBLE);
+        rl_connect_ap.setVisibility(View.VISIBLE);
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(screenHeight, 0f);
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float value = (float) animation.getAnimatedValue();
+                rl_connect_ap.setTranslationY(value);
+                if (value == 0) {
+                    radarView.stopRotate();
+                }
+            }
+        });
+        valueAnimator.setInterpolator(new LinearInterpolator());
+        valueAnimator.setDuration(1000);
+        valueAnimator.start();
         tv_connectDeviceInfo.setText(Html.fromHtml("正在连接设备\n<font color=#ffff38>" + deviceId + "</font>"));
     }
 
     private void showResetView() {
-        tv_info.setVisibility(View.VISIBLE);
-        radarView.startRotate();
-        radarView.setVisibility(View.VISIBLE);
-        mRecycleView.setVisibility(View.VISIBLE);
-        tv_connectDeviceInfo.setVisibility(GONE);
-        rocket.setVisibility(GONE);
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0f, screenHeight);
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float value = (float) animation.getAnimatedValue();
+                rl_connect_ap.setTranslationY(value);
+                if (value == screenHeight) {
+                    radarView.startRotate();
+                    rl_connect_ap.setVisibility(View.GONE);
+                    tv_info.setText("正在寻找周围的接收者");
+                }
+            }
+        });
+        valueAnimator.setInterpolator(new LinearInterpolator());
+        valueAnimator.setDuration(1000);
+        valueAnimator.start();
     }
 
     private void startScanNearbyWifiThread() {
@@ -141,8 +173,8 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //开启倒计时
                 isConnectSuccess = false;
+                hasConnectedWifi = false;
                 mConnectApCountDownTimer.start();
                 if (!WifiHelper.getInstance().isWifiEnable()) {
                     isOpenWifi = true;
@@ -166,7 +198,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         public void onFinish() {
             if (isConnectSuccess) return;
             showResetView();
-            ToastUtils.showLongToast("连接超时，请重试！");
+            ToastUtils.showLongToast("连接Wi-Fi热点超时，请重新连接！");
         }
     };
 
@@ -279,10 +311,12 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             case SocketConnectEvent.CONNECTED_SUCCESS:
                 isConnectSuccess = true;
                 mConnectApCountDownTimer.cancel();
+                tv_connectDeviceInfo.setText("正在与Wi-Fi热点进行信号确认");
                 TransferDataQueue.getInstance().sendAckSignal(mSelectedSSID);
                 break;
             case SocketConnectEvent.CONNECTED_FAILED:
                 isConnectSuccess = false;
+                mSelectedSSID = null;
                 mConnectApCountDownTimer.cancel();
                 ToastUtils.showLongToast("连接失败！");
                 IntentUtils.stopSocketSenderService(getApplicationContext());
@@ -301,6 +335,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
         if (event.connectStatus == SocketTransferEvent.SOCKET_CONNECT_FAILURE) {
             ToastUtils.showLongToast("网络异常，请重新连接!");
             isConnectSuccess = false;
+            mSelectedSSID = null;
             showResetView();
             return;
         }
@@ -310,14 +345,18 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             transferProtocol.ssm = event.ssm;
             transferProtocol.type = TransferProtocol.TYPE_CONFIRM_ACK;
             TransferDataQueue.getInstance().sendAckConfirmSignal(transferProtocol);
+
+            tv_connectDeviceInfo.setText("Wi-Fi热点信号确认成功，开始进行数据传递！");
+
             starRotationAnimation();
         } else if (event.type == TransferProtocol.TYPE_MISS_MATCH) {
             ToastUtils.showLongToast("没有连接到\n" + mSelectedSSID + "网络，请重试！");
             isConnectSuccess = false;
+            mSelectedSSID = null;
             showResetView();
         } else if (event.type == TransferProtocol.TYPE_DISCONNECT) {
-            //接收到断开连接的操作
             isConnectSuccess = false;
+            mSelectedSSID = null;
             clearAll();
         }
     }
@@ -359,6 +398,9 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
     }
 
     private void clearAll() {
+        isConnectSuccess = false;
+        mSelectedSSID = null;
+        hasConnectedWifi = false;
         EventBus.getDefault().unregister(this);
         FTFileManager.getInstance().clear();
         EventBus.getDefault().post(new FTFilesChangedEvent());
@@ -377,7 +419,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
                 rocket.setRotation(value);
-                if (value >= 360) {
+                if (value >= 360 && isConnectSuccess) {
                     startAccelerateRocketAnimation();
                 }
             }
@@ -394,7 +436,7 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
                 rocket.setTranslationY(value);
-                if (value == (-screenHeight)) {
+                if (value == (-screenHeight) && isConnectSuccess) {
                     IntentUtils.intentToSendFileActivity(ScanReceiverActivity.this);
                     finish();
                 }

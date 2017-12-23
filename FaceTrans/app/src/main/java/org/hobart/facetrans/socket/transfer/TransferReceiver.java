@@ -58,6 +58,7 @@ public class TransferReceiver {
         public ServerInnerSyncThread() {
             lastSyncTime = System.currentTimeMillis();
         }
+
         @Override
         public void run() {
             super.run();
@@ -70,7 +71,7 @@ public class TransferReceiver {
                     }
                 }
             };
-            mTimer.schedule(timerTask, 5 * 1000, 3 * 1000);
+            mTimer.schedule(timerTask, 10 * 1000, 3 * 1000);
         }
 
         public void updateSyncTime(long time) {

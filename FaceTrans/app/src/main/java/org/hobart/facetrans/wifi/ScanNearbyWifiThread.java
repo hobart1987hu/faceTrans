@@ -9,6 +9,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.hobart.facetrans.FaceTransApplication;
 import org.hobart.facetrans.GlobalConfig;
 import org.hobart.facetrans.event.ScanWifiEvent;
+import org.hobart.facetrans.util.LogcatUtils;
 
 import java.util.List;
 
@@ -27,19 +28,20 @@ public class ScanNearbyWifiThread implements Runnable {
         countDownTimer.start();
     }
 
-
-    private CountDownTimer countDownTimer = new CountDownTimer(15 * 1000, 1 * 1000) {
+    private CountDownTimer countDownTimer = new CountDownTimer(10 * 1000, 1 * 1000) {
         @Override
         public void onTick(long millisUntilFinished) {
 
             wifiManager.startScan();
 
-            //每隔一秒钟，去扫描一下
             List<ScanResult> results = wifiManager.getScanResults();
             if (null == results || results.size() <= 0) {
                 return;
             }
             for (ScanResult result : results) {
+
+                LogcatUtils.d("ScanNearbyWifiThread  ScanResult ssid:" + result.SSID);
+
                 if (result.SSID.contains(GlobalConfig.AP_SSID_PREFIX)) {
                     //创建的Wi-Fi热点
                     postScanResult(result.SSID, ScanWifiEvent.SCAN_SUCCESS);
