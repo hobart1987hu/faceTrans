@@ -4,6 +4,19 @@ apply plugin: 'com.android.application'
 //facetrans
 
 android {
+
+    signingConfigs {
+
+        debug {}
+
+        release {
+            keyAlias 'facetrans'
+            keyPassword 'facetrans'
+            storeFile file('../face_trans.jks')
+            storePassword 'facetrans'
+        }
+    }
+
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
     defaultConfig {
@@ -13,9 +26,22 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
-        release {
+
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"//是否输出LOG信息
             minifyEnabled false
+            zipAlignEnabled true
+            shrinkResources false
+            signingConfig signingConfigs.debug
+        }
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"//是否输出LOG信息
+            zipAlignEnabled true
+            shrinkResources true
+            minifyEnabled true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

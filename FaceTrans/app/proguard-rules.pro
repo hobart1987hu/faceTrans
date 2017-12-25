@@ -25,21 +25,25 @@
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,LocalVariable*Table,*Annotation*,Synthetic,EnclosingMethod
 
-
+-keep public class * extends android.app.Fragment
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
 -keep public class * extends android.app.Service
 -keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.preference.Preference
 -keep public class * extends android.content.ContentProvider
--keep public class com.android.vending.licensing.ILicensingService
--keepattributes Annotation
--keepattributes JavascriptInterface
--keep class android.webkit.JavascriptInterface {*;}
--keepattributes Exceptions, Signature, InnerClasses
-
+-keep public class * extends android.support.v4.**
+-keep public class * extends android.support.annotation.**
+-keep public class * extends android.support.v7.**
+-keep public class * extends android.opengl.**
+-keep public class * extends javax.microedition.khronos.**
 
 -keepclasseswithmembernames class * {
     native <methods>;
+}
+
+-keepclassmembers class **.R$* {
+	public static <fields>;
 }
 
 -keepclasseswithmembernames class * {
@@ -57,11 +61,6 @@
 
 -keep class * implements android.os.Parcelable {
   public static final android.os.Parcelable$Creator *;
-}
-
--keepclassmembers class * {
-    @org.codehaus.jackson.annotate.* <fields>;
-    @org.codehaus.jackson.annotate.* <init>(...);
 }
 
 -keepnames class * implements java.io.Serializable
@@ -84,14 +83,6 @@
 -keepclassmembers class * extends de.greenrobot.event.util.ThrowableFailureEvent {
     <init>(java.lang.Throwable);
 }
-
-# keep debug info
--renamesourcefileattribute SourceFile
--keepattributes SourceFile,LineNumberTable
-
-# httpClient
--dontwarn org.apache.http.**
--keep class org.apache.http.** { *; }
 
 # webview
 -keepclassmembers class * extends android.webkit.WebChromeClient{
@@ -133,6 +124,7 @@
 -keep class rx.schedulers.Schedulers {
     public static ** test();
 }
+
 # eventbus
 -keepattributes *Annotation*
 -keepclassmembers class ** {
@@ -145,10 +137,53 @@
     <init>(Java.lang.Throwable);
 }
 
+#okhttp
 -keepattributes Signature
 -keepattributes *Annotation*
 -keep class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
 
+#butterknife
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+
+#rxjava rxandroid
+-dontwarn sun.misc.**
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+   long producerIndex;
+   long consumerIndex;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+#gson
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
+-keep class org.hobart.facetrans.socket.transfer.TransferProtocol
+
+
+#okhttp
+-dontwarn com.squareup.okhttp3.**
+-keep class com.squareup.okhttp3.** { *;}
+-dontwarn okio.**
+
+
+##glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
 

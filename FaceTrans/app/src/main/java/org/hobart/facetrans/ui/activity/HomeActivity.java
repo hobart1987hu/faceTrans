@@ -204,9 +204,10 @@ public class HomeActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             }
             case R.id.rl_file:
-            case R.id.rl_storage: {
+            case R.id.rl_storage:
+            case R.id.rl_device:
+                ToastUtils.showLongToast("正在开发中...");
                 break;
-            }
         }
     }
 
