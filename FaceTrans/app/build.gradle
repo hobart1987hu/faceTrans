@@ -14,6 +14,8 @@ android {
             keyPassword 'facetrans'
             storeFile file('../face_trans.jks')
             storePassword 'facetrans'
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
 
