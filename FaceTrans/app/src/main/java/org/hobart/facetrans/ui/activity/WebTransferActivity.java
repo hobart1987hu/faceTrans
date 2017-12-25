@@ -137,6 +137,7 @@ public class WebTransferActivity extends BaseTitleBarActivity {
 
         final String host = GlobalConfig.WEB_SERVER_IP;
 
+
         String normalColor = "#ff000000";
         String highlightColor = "#1467CD";
         String ssid = GlobalConfig.AP_SSID;
@@ -144,7 +145,9 @@ public class WebTransferActivity extends BaseTitleBarActivity {
         String[] tip1StringArray = tip1.split("\\n");
         Spanned tip1Spanned = Html.fromHtml("<font color='" + normalColor + "'>" + tip1StringArray[0].trim() + "</font><br>"
                 + "<font color='" + normalColor + "'>" + tip1StringArray[1].trim() + "</font><br>"
-                + "<font color='" + highlightColor + "'>" + tip1StringArray[2].trim() + "</font>");
+                + "<font color='" + highlightColor + "'>" + tip1StringArray[2].trim() + "</font><br>"
+                + "<font color='" + normalColor + "'>" + tip1StringArray[3].trim() + "</font><br>"
+                + "<font color='" + highlightColor + "'>" + tip1StringArray[4].trim() + "</font>");
         tv_tip_1.setText(tip1Spanned);
 
         String tip2 = getResources().getString(R.string.tip_web_transfer_second_tip);

@@ -5,4 +5,11 @@ package org.hobart.facetrans.event;
  */
 
 public class SocketSyncEvent {
+
+    public static final int SYNCING = 1;
+
+    public static final int FINISH = 2;
+
+    public int flag = SYNCING;
+
 }

@@ -81,7 +81,7 @@ public class ReceiveRunnable implements Runnable {
                     continue;
                 }
 
-                postSocketSyncEvent();
+                postSocketSyncEvent(SocketSyncEvent.SYNCING);
 
                 if (transferProtocol.type == TransferProtocol.TYPE_ACK) {
 
@@ -137,6 +137,11 @@ public class ReceiveRunnable implements Runnable {
                         default:
                             continue;
                     }
+                } else if (transferProtocol.type == TransferProtocol.TYPE_TYPE_DATA_TRANSFER_FINISH) {
+
+                    LogcatUtils.d(LOG_PREFIX + " run receive data  接收 TYPE_TYPE_DATA_TRANSFER_FINISH 信号");
+
+                    postSocketSyncEvent(SocketSyncEvent.FINISH);
                 }
                 try {
                     Thread.sleep(1000);
@@ -150,8 +155,9 @@ public class ReceiveRunnable implements Runnable {
         }
     }
 
-    private void postSocketSyncEvent() {
+    private void postSocketSyncEvent(int flag) {
         SocketSyncEvent event = new SocketSyncEvent();
+        event.flag = flag;
         EventBus.getDefault().post(event);
     }
 
@@ -159,8 +165,10 @@ public class ReceiveRunnable implements Runnable {
         SocketTransferEvent event = new SocketTransferEvent();
         event.connectStatus = SocketTransferEvent.SOCKET_CONNECT_FAILURE;
         EventBus.getDefault().post(event);
-
         if (null != mCurrentTransferProtocol) {
+            if (mCurrentTransferStatus == TransferStatus.TRANSFER_SUCCESS || mCurrentTransferStatus == TransferStatus.FINISH) {
+                return;
+            }
             FileUtils.deleteFile(mCurrentTransferProtocol.transferData.savePath);
             postFileFinishEvent(TransferStatus.TRANSFER_FAILED);
         }
@@ -230,7 +238,7 @@ public class ReceiveRunnable implements Runnable {
                     int lastSize = (int) (fileSize - totalSize);
                     bytesRead = inputStream.read(buffer, 0, lastSize);
 
-                    postSocketSyncEvent();
+                    postSocketSyncEvent(SocketSyncEvent.SYNCING);
 
                     if (bytesRead != -1) {
                         mOutputStream.write(buffer, 0, bytesRead);
@@ -256,7 +264,7 @@ public class ReceiveRunnable implements Runnable {
                     }
                 } else {
 
-                    postSocketSyncEvent();
+                    postSocketSyncEvent(SocketSyncEvent.SYNCING);
 
                     bytesRead = inputStream.read(buffer, 0, buffer.length);
                     if (bytesRead != -1) {

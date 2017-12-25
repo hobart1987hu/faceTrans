@@ -144,6 +144,19 @@ public class TransferDataQueue {
         put(transferProtocol);
     }
 
+    /**
+     * 发送数据完成
+     */
+    public void sendTransferDataFinish() {
+
+        TransferProtocol transferProtocol = new TransferProtocol();
+
+        transferProtocol.type = TransferProtocol.TYPE_TYPE_DATA_TRANSFER_FINISH;
+
+        put(transferProtocol);
+    }
+
+
     public void put(TransferProtocol protocol) {
         try {
             mTransferQueue.put(protocol);

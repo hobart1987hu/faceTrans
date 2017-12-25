@@ -575,79 +575,101 @@ public class FileUtils {
     }
 
     public static void install(String apkFilePath) {
-        Context context = FaceTransApplication.getFaceTransApplicationContext();
-        File file = new File(apkFilePath);
-        if (!file.exists()) {
-            return;
-        }
         try {
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+            File file = new File(apkFilePath);
+
+            final boolean isExists  = file.exists();
+
+            if (!isExists) {
+                return;
+            }
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+                    intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+                } else {
+                    intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                context.startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+                ToastUtils.showLongToast("无法安装apk");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void playMusic(String musicPath) {
+
+        try {
+            File file = new File(musicPath);
+            if (!file.exists()) {
+                return;
+            }
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
             Intent intent = new Intent(Intent.ACTION_VIEW);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
-                intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+                intent.setDataAndType(contentUri, "audio/*");
             } else {
-                intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+                intent.setDataAndType(Uri.fromFile(file), "audio/*");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
             context.startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
-            ToastUtils.showLongToast("无法安装apk");
         }
-    }
-
-    public static void playMusic(String musicPath) {
-        File file = new File(musicPath);
-        if (!file.exists()) {
-            return;
-        }
-        Context context = FaceTransApplication.getFaceTransApplicationContext();
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
-            intent.setDataAndType(contentUri, "audio/*");
-        } else {
-            intent.setDataAndType(Uri.fromFile(file), "audio/*");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        context.startActivity(intent);
     }
 
     public static void playVideo(String videoPath) {
-        File file = new File(videoPath);
-        if (!file.exists()) {
-            return;
+
+        try {
+            File file = new File(videoPath);
+            if (!file.exists()) {
+                return;
+            }
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+                intent.setDataAndType(contentUri, "video/*");
+            } else {
+                intent.setDataAndType(Uri.fromFile(file), "video/*");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        Context context = FaceTransApplication.getFaceTransApplicationContext();
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
-            intent.setDataAndType(contentUri, "video/*");
-        } else {
-            intent.setDataAndType(Uri.fromFile(file), "video/*");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        context.startActivity(intent);
     }
 
     public static void showImage(String imagePath) {
-        File file = new File(imagePath);
-        if (!file.exists()) {
-            return;
+
+        try {
+            File file = new File(imagePath);
+            if (!file.exists()) {
+                return;
+            }
+            Context context = FaceTransApplication.getFaceTransApplicationContext();
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+                intent.setDataAndType(contentUri, "image/*");
+            } else {
+                intent.setDataAndType(Uri.fromFile(file), "image/*");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        Context context = FaceTransApplication.getFaceTransApplicationContext();
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", file);
-            intent.setDataAndType(contentUri, "image/*");
-        } else {
-            intent.setDataAndType(Uri.fromFile(file), "image/*");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        context.startActivity(intent);
     }
 }

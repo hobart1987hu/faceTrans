@@ -1,6 +1,7 @@
 package org.hobart.facetrans;
 
 import android.os.Environment;
+import android.text.TextUtils;
 
 import org.hobart.facetrans.model.FTFile;
 import org.hobart.facetrans.util.AndroidUtils;
@@ -80,7 +81,7 @@ public class GlobalConfig {
     /**
      * AP SSID
      */
-    public static final String AP_SSID = AP_SSID_PREFIX + AndroidUtils.getPhoneModel();
+    public static final String AP_SSID = AP_SSID_PREFIX + (TextUtils.isEmpty(AndroidUtils.getPhoneModel()) ? AndroidUtils.getDeviceId() : AndroidUtils.getPhoneModel());
 
     public static final String WEB_SERVER_IP = "192.168.43.1";
 

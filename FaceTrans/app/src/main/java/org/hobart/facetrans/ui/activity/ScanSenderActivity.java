@@ -1,7 +1,6 @@
 package org.hobart.facetrans.ui.activity;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 
@@ -24,9 +23,6 @@ import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.CreateWifiAPThread;
 import org.hobart.facetrans.wifi.WifiHelper;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
 /**
  * 扫描发送者
  * Created by huzeyin on 2017/11/28.
@@ -36,8 +32,7 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
 
     private static final String LOG_PREFIX = "ScanSenderActivity->";
 
-    @Bind(R.id.rippleImageView)
-    RippleImageView rippleImageView;
+    private RippleImageView rippleImageView;
 
     private CreateWifiAPThread mCreateWifiAPThread;
 
@@ -45,12 +40,13 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_sender);
-        ButterKnife.bind(this);
+        rippleImageView = (RippleImageView) findViewById(R.id.rippleImageView);
         EventBus.getDefault().register(this);
         createAp();
     }
 
     private void createAp() {
+        connectedSuccess = false;
         WifiHelper.getInstance().closeWifi();
         if (null == mCreateWifiAPThread)
             mCreateWifiAPThread = new CreateWifiAPThread();
@@ -75,8 +71,8 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
                 break;
             case ApCreateEvent.FAILED:
                 LogcatUtils.d(LOG_PREFIX + "onWifiAPCreateCallBack onFailed: 热点创建失败");
-                ToastUtils.showLongToast("Wi-Fi热点创建失败！");
-                finish();
+                ToastUtils.showLongToast("Wi-Fi热点创建失败,开始重试！");
+                createAp();
                 break;
             case ApCreateEvent.TRY_AGAIN:
                 createAp();
@@ -86,8 +82,6 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
         }
     }
 
-    private boolean isSocketConnectSuccess = false;
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketStatusEvent(SocketConnectEvent bean) {
         if (bean == null) {
@@ -95,10 +89,8 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
         }
         switch (bean.status) {
             case SocketConnectEvent.CONNECTED_SUCCESS:
-                isSocketConnectSuccess = true;
                 break;
             case SocketConnectEvent.CONNECTED_FAILED:
-                isSocketConnectSuccess = false;
                 ToastUtils.showLongToast("网络连接失败！");
                 IntentUtils.stopServerReceiverService(getApplicationContext());
                 finish();
@@ -131,8 +123,6 @@ public class ScanSenderActivity extends BaseTitleBarActivity {
             IntentUtils.intentToReceiveFileActivity(this);
             finish();
         } else if (event.type == TransferProtocol.TYPE_DISCONNECT) {
-            //接收到断开连接的操作
-            isSocketConnectSuccess = false;
             clearAll();
         }
     }

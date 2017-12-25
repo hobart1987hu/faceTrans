@@ -1,14 +1,20 @@
 package org.hobart.facetrans.socket.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.hobart.facetrans.R;
 import org.hobart.facetrans.event.SocketConnectEvent;
 import org.hobart.facetrans.event.SocketSyncEvent;
 import org.hobart.facetrans.socket.SocketConstants;
@@ -43,20 +49,59 @@ public class ServerReceiverService extends Service {
     public void onSocketDisconnect(SocketConnectEvent event) {
         if (null == event) return;
         if (event.status == SocketConnectEvent.DIS_CONNECTED) {
-            stopSelf();
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(1), 500);
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketSyncEvent(SocketSyncEvent event) {
-        if (null != mTransferReceiver) mTransferReceiver.syncTime();
+        if (null == event) return;
+        if (event.flag == SocketSyncEvent.SYNCING) {
+            if (null != mTransferReceiver) mTransferReceiver.syncTime();
+        } else if (event.flag == SocketSyncEvent.FINISH) {
+            if (null != mTransferReceiver) mTransferReceiver.closeSync();
+        }
     }
+
+    private synchronized void closeConnect() {
+        if (null != mSocket && mSocket.isConnected()) {
+            TransferDataQueue.getInstance().sendDisconnect();
+        } else {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(1), 500);
+        }
+    }
+
+    private NotificationManager notificationManager;
+    private static final int NOTIFICATION_ID = 1;
+    private Handler mHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         EventBus.getDefault().register(this);
         LogcatUtils.d(LOG_PREFIX + "----onCreate----");
+
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder myBuilder = new Notification.Builder(getApplicationContext());
+        myBuilder.setContentTitle("众传服务")
+                .setContentText("众传传输服务已开启")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(false);
+        if (Build.VERSION.SDK_INT >= 21) {
+            myBuilder.setVisibility(Notification.VISIBILITY_PRIVATE);
+        }
+        Notification myNotification = myBuilder.build();
+        myNotification.flags |= Notification.FLAG_NO_CLEAR;
+        notificationManager.notify(NOTIFICATION_ID, myNotification);
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == 1)
+                    stopSelf();
+            }
+        };
     }
 
     private void createReceiverSocket() {
@@ -114,14 +159,7 @@ public class ServerReceiverService extends Service {
             if (action.equals(SocketConstants.ACTION_CREATE_SERVER_SOCKET)) {
                 createReceiverSocket();
             } else if (action.equals(SocketConstants.ACTION_STOP_SERVER_SOCKET)) {
-                if (null != mTransferReceiver) {
-                    mTransferReceiver.stopReceiverThread();
-                }
-                if (null != mSocket && mSocket.isConnected()) {
-                    TransferDataQueue.getInstance().sendDisconnect();
-                } else {
-                    stopSelf();
-                }
+                closeConnect();
             }
         }
         return START_STICKY;
@@ -131,6 +169,7 @@ public class ServerReceiverService extends Service {
     public void onDestroy() {
         super.onDestroy();
         LogcatUtils.d(LOG_PREFIX + "----onDestroy----");
+        notificationManager.cancel(NOTIFICATION_ID);
         EventBus.getDefault().unregister(this);
         releaseSocket();
     }

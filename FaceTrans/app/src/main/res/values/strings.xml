@@ -20,7 +20,9 @@
     <string name="tip_web_transfer_first_tip">
         第1步 \n
         请好友连入我的热点 \n
-        \"{hotspot}\"
+        \"{hotspot}\"    \n
+        密码是            \n
+        1234567890
     </string>
 
     <string name="tip_web_transfer_second_tip">

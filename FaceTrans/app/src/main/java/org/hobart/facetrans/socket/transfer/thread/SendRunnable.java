@@ -130,6 +130,12 @@ public class SendRunnable implements Runnable {
                         default:
                             continue;
                     }
+                } else if (transferProtocol.type == TransferProtocol.TYPE_TYPE_DATA_TRANSFER_FINISH) {
+
+                    LogcatUtils.d(LOG_PREFIX + " run transferProtocol 开始发送数据完成");
+                    
+                    sendTextData(transferProtocol, false);
+
                 }
                 try {
                     Thread.sleep(1000);
@@ -142,7 +148,6 @@ public class SendRunnable implements Runnable {
 //            postIOException();
         }
     }
-
 
 
     private void poseDisconnectEvent() {

@@ -267,6 +267,9 @@ public class ScanReceiverActivity extends BaseTitleBarActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onScanWifiCallback(ScanWifiEvent event) {
+
+        if (null == event) return;
+
         if (event.status == ScanWifiEvent.SCAN_SUCCESS) {
             showScanApWifi(event.ssid);
         } else {

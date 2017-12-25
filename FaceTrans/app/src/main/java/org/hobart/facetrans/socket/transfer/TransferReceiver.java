@@ -51,6 +51,11 @@ public class TransferReceiver {
             mServerInnerSyncThread.updateSyncTime(System.currentTimeMillis());
     }
 
+    public void closeSync() {
+        if (null != mServerInnerSyncThread)
+            mServerInnerSyncThread.stopSyncTime();
+    }
+
     final class ServerInnerSyncThread extends Thread {
         volatile long lastSyncTime;
         private Timer mTimer;

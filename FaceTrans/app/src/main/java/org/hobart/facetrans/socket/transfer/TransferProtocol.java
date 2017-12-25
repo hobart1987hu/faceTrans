@@ -42,7 +42,10 @@ public class TransferProtocol {
      * 同步信号 保留字段
      */
     public static byte TYPE_SYNC = 5;
-
+    /**
+     * 数据传输完成信号
+     */
+    public static byte TYPE_TYPE_DATA_TRANSFER_FINISH = 6;
     /**
      * 同步序列编号
      */

@@ -24,6 +24,7 @@ import org.hobart.facetrans.ui.adapter.ReceiveFileListAdapter;
 import org.hobart.facetrans.ui.listener.OnRecyclerViewClickListener;
 import org.hobart.facetrans.util.FileUtils;
 import org.hobart.facetrans.util.IntentUtils;
+import org.hobart.facetrans.util.LogcatUtils;
 import org.hobart.facetrans.util.ToastUtils;
 import org.hobart.facetrans.wifi.ApWifiHelper;
 import org.hobart.facetrans.wifi.WifiHelper;
@@ -31,9 +32,6 @@ import org.hobart.facetrans.wifi.WifiHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import butterknife.Bind;
-import butterknife.ButterKnife;
 
 /**
  * 接收文件界面
@@ -46,14 +44,15 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
 
     private ReceiveFileListAdapter mAdapter;
 
-    @Bind(R.id.recycleView)
-    RecyclerView recycleView;
+    private RecyclerView recycleView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_file);
-        ButterKnife.bind(this);
+
+        recycleView = (RecyclerView) findViewById(R.id.recycleView);
+
         EventBus.getDefault().register(this);
 
         setCenterText("接收文件");
@@ -64,7 +63,8 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
             public void onItemClick(View container, View view, int position) {
                 synchronized (mReceiveFileLists) {
                     TransferModel model = mReceiveFileLists.get(position);
-                    if (model.transferStatus == TransferStatus.FINISH) {
+                    if (model.transferStatus == TransferStatus.FINISH
+                            || model.transferStatus == TransferStatus.TRANSFER_SUCCESS) {
                         switch (model.type) {
                             case TransferModel.TYPE_APK:
                                 FileUtils.install(model.savePath);
@@ -109,7 +109,9 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
         if (event.type == TransferProtocol.TYPE_DISCONNECT) {
             ToastUtils.showLongToast("已和发送端断开连接!");
             return;
-        } else if (event.type == TransferProtocol.TYPE_DATA_TRANSFER) {
+        }
+
+        if (event.type == TransferProtocol.TYPE_DATA_TRANSFER) {
             final int type = event.transferData.type;
             switch (type) {
                 case TransferModel.TYPE_FILE:
@@ -146,7 +148,10 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
             for (int i = 0; i < size; i++) {
                 TransferModel model = mReceiveFileLists.get(i);
                 if (TextUtils.equals(model.id, event.transferData.id)) {
-                    model.transferStatus = status;
+                    if (model.transferStatus != TransferStatus.TRANSFER_SUCCESS &&
+                            model.transferStatus != TransferStatus.FINISH) {
+                        model.transferStatus = status;
+                    }
                     model.progress = event.transferData.progress;
                     model.savePath = model.fileIcon = event.transferData.savePath;
                     position = i;
@@ -161,8 +166,7 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
     }
 
     private void setAdapterData(String json) {
-        Gson gson = new Gson();
-        List<TransferModel> retList = gson.fromJson(json,
+        List<TransferModel> retList = new Gson().fromJson(json,
                 new TypeToken<List<TransferModel>>() {
                 }.getType());
         mReceiveFileLists.addAll(retList);
@@ -176,6 +180,9 @@ public class ReceiveFileActivity extends BaseTitleBarActivity {
     }
 
     private void clearAll() {
+
+        LogcatUtils.d("ReceiveFileActivity clear all---");
+
         EventBus.getDefault().unregister(ReceiveFileActivity.this);
         ApWifiHelper.getInstance().closeWifiAp();
         ApWifiHelper.getInstance().disableCurrentNetWork();

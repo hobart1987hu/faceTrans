@@ -29,6 +29,5 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/dp_12"
         android:text="@string/tip_web_transfer_second_tip" />
-
 </LinearLayout>
 

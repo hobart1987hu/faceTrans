@@ -112,8 +112,11 @@ public class SendFileActivity extends BaseTitleBarActivity {
         }
         if (event.type == TransferProtocol.TYPE_DISCONNECT) {
             ToastUtils.showLongToast("已和接收端断开连接!");
+
             return;
-        } else if (event.type == TransferProtocol.TYPE_DATA_TRANSFER) {
+        }
+
+        if (event.type == TransferProtocol.TYPE_DATA_TRANSFER) {
             final int type = event.transferData.type;
             switch (type) {
                 case TransferModel.TYPE_FILE:
@@ -148,6 +151,7 @@ public class SendFileActivity extends BaseTitleBarActivity {
 
         if (mSendPointer >= size) {
             ToastUtils.showLongToast("恭喜你，所有文件全部传输完成!");
+            TransferDataQueue.getInstance().sendTransferDataFinish();
             return;
         }
         TransferModel transferModel = mSendFileLists.get(mSendPointer);
