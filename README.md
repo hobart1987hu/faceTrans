@@ -5,15 +5,15 @@
 
 下面是app传递数据的部分效果图，有兴趣的朋友可以自己下载工程，编译运行
 
- ![image]((https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG2.png)
+ ![image](https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG2.png)
 
- ![image]((https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG3.jpep)
+ ![image](https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG3.jpep)
 
- ![image]((https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG4.jpeg)
+ ![image](https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG4.jpeg)
 
- ![image]((https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG5.jpeg)
+ ![image](https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG5.jpeg)
 
- ![image]((https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG6.png)
+ ![image](https://github.com/hobart1987hu/faceTrans/tree/master/FaceTrans/screenshots/WechatIMG6.png)
 
 下面是apk，欢迎下载，目前是1.0版本，后续会继续更新功能
 
